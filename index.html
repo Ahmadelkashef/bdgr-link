@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BDGR</title>
+<meta name="description" content="شوف المومنت ده على BDGR — Watch this moment on BDGR">
+<meta name="theme-color" content="#0B0B0F">
+
+<!-- معاينة اللينك في واتساب وغيره (من غير المحتوى نفسه) -->
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="BDGR">
+<meta property="og:title" content="🔥 Watch this moment on BDGR">
+<meta property="og:description" content="شوف المومنت ده على BDGR — Unranked. Unafraid.">
+<meta property="og:image" content="https://ahmadelkashef.github.io/bdgr-link/preview.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="https://ahmadelkashef.github.io/bdgr-link/preview.jpg">
+
+<style>
+  :root { --bg:#0B0B0F; --green:#00FF87; --text:#fff; --muted:rgba(255,255,255,.65); }
+  * { box-sizing:border-box; }
+  html,body { margin:0; height:100%; background:var(--bg); color:var(--text);
+    font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
+  body { display:flex; align-items:center; justify-content:center; padding:24px 16px;
+    background: radial-gradient(ellipse at 50% 35%, rgba(0,255,135,.16), transparent 60%), var(--bg); }
+  main { width:100%; max-width:380px; text-align:center; }
+  img.logo { width:200px; max-width:70%; margin-bottom:28px; }
+  h1 { font-size:22px; margin:0 0 8px; font-weight:800; }
+  p  { color:var(--muted); margin:0 0 28px; line-height:1.6; font-size:15px; }
+  .btn { display:block; width:100%; padding:16px; border-radius:14px; font-size:17px;
+    font-weight:800; text-decoration:none; margin-bottom:12px; border:0; cursor:pointer; }
+  .primary { background:var(--green); color:#0B0B0F; }
+  .secondary { background:transparent; color:var(--text); border:1px solid rgba(255,255,255,.25); }
+  .hidden { display:none; }
+  small { display:block; color:rgba(255,255,255,.4); margin-top:18px; font-size:12px; }
+</style>
+</head>
+<body>
+<main>
+  <img class="logo" src="logo.png" alt="BDGR">
+  <h1 id="title">المومنت ده موجود على BDGR</h1>
+  <p id="sub">المحتوى بيتشاف جوه التطبيق بس. افتحه في BDGR، أو نزّل التطبيق لو مش عندك.</p>
+
+  <a id="open" class="btn primary" href="#">افتح في BDGR</a>
+  <a id="get"  class="btn secondary" href="#">نزّل التطبيق</a>
+  <small id="soon" class="hidden">التطبيق هيبقى على Google Play قريب.</small>
+</main>
+
+<script>
+(function () {
+  var PKG  = 'com.bdgr.app';
+  var PLAY = 'https://play.google.com/store/apps/details?id=' + PKG;
+
+  var params = new URLSearchParams(location.search);
+  var id = (params.get('m') || '').toLowerCase();
+  var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id);
+
+  var ua = navigator.userAgent || '';
+  var isAndroid = /android/i.test(ua);
+
+  var appLink = valid ? (PKG + '://moment/' + id) : (PKG + '://');
+  // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : '');
+  var intentLink = 'intent://' + (valid ? 'moment/' + id : '') +
+    '#Intent;scheme=' + PKG + ';package=' + PKG +
+    ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
+
+  var openBtn = document.getElementById('open');
+  var getBtn  = document.getElementById('get');
+  openBtn.href = isAndroid ? intentLink : appLink;
+  getBtn.href  = PLAY;
+  getBtn.addEventListener('click', function () {
+    document.getElementById('soon').classList.remove('hidden');
+  });
+
+  // أول ما الصفحة تفتح: نحاول نفتح التطبيق على طول
+  if (!params.get('nf')) {
+    if (isAndroid) { location.href = intentLink; }
+    else { setTimeout(function () { location.href = appLink; }, 150); }
+  }
+})();
+</script>
+</body>
+</html>
