@@ -118,6 +118,23 @@
   .rows .n b{color:var(--text);font-size:13px}
   .hint{color:var(--muted);font-size:12px;margin:6px 2px 0}
 
+  /* awards */
+  .aw-head{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:6px}
+  .aw-sel{flex:1;min-width:200px;padding:11px 12px;border-radius:12px;border:1px solid var(--line);background:var(--card);color:var(--text);font-family:inherit;font-size:14px;font-weight:700}
+  .aw-sum{color:var(--muted);font-size:12.5px;margin:8px 2px 0}
+  .winner{display:flex;gap:12px;align-items:center;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:8px}
+  .winner.missing{border-color:rgba(255,179,0,.45)}
+  .winner .medal{font-size:28px;width:34px;text-align:center;flex:none}
+  .winner .ph{width:64px;height:64px;border-radius:12px;background:var(--card2);flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:22px}
+  .winner .ph img{width:100%;height:100%;object-fit:cover}
+  .winner .info{flex:1;min-width:0}
+  .winner .info b{display:block;font-size:14.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .winner .info small{display:block;color:var(--muted);font-size:12px}
+  .winner .st{font-size:11.5px;font-weight:800;margin-top:3px}
+  .winner .st.ok{color:var(--green)} .winner .st.no{color:var(--gold)}
+  .winner .btn{padding:9px 12px;font-size:13px;flex:none}
+  .winner .btn.up{background:var(--gold);border-color:var(--gold);color:#0B0B0F}
+
   /* sheets */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:flex-end;z-index:50}
   .sheet{background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:90vh;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
@@ -187,6 +204,7 @@
     <button data-t="overview" class="on"><span>🏠</span>نظرة عامة</button>
     <button data-t="summary"><span>🧠</span><div>الملخص<i class="badge hidden" id="riskBadge"></i></div></button>
     <button data-t="details"><span>🔎</span>التفاصيل</button>
+    <button data-t="awards" class="hidden" id="awardsTabBtn"><span>🏆</span><div>الجوايز<i class="badge hidden" id="awBadge"></i></div></button>
   </nav>
 
   <!-- ═══ نظرة عامة ═══ -->
@@ -238,6 +256,17 @@
       <p class="hint" id="dHint"></p>
     </div>
     <div class="card"><h3>التسجيل كل يوم (آخر 30 يوم)</h3><div class="chart"><canvas id="cDetail"></canvas></div></div>
+  </section>
+  <!-- ═══ الجوايز (صور الكسبانين) ═══ -->
+  <section id="t-awards" class="hidden">
+    <div class="aw-head">
+      <div class="seg" id="awTypeSeg"><button data-x="LOCAL" class="on">🇪🇬 محلي</button><button data-x="WORLD">🌍 عالمي</button></div>
+      <select id="awPeriod" class="aw-sel"></select>
+    </div>
+    <p class="aw-sum" id="awSum"></p>
+    <div id="awList"></div>
+    <p class="hint">بيظهر هنا بس اللي كسبوا جايزة. اللي مالوش صورة: "رفع صورة". اللي عنده: "تعديل" بس.</p>
+    <input type="file" id="awFile" accept="image/jpeg,image/png,image/webp" class="hidden">
   </section>
 </main>
 
@@ -343,6 +372,7 @@ async function boot() {
   $('who').innerHTML = (me.role === 'SUPER_ADMIN' ? '⭐ سوبر أدمن' : 'أدمن') + ' · <bdi dir="ltr">' + me.email + '</bdi>';
   $('adminsBtn').classList.toggle('hidden', me.role !== 'SUPER_ADMIN');
   show('app');
+  if (me.permissions.includes('fantasy')) { $('awardsTabBtn').classList.remove('hidden'); refreshAwardBadge(); }
   if (!me.permissions.includes('dashboard')) { $('t-overview').innerHTML = '<p class="hint">مفيش صلاحية "الداشبورد" للحساب ده.</p>'; return; }
   loadAll();
 }
@@ -352,9 +382,10 @@ sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_IN' && !me) boot(); });
 function go(t) {
   tab = t;
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  ['overview','summary','details'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
+  ['overview','summary','details','awards'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
   window.scrollTo({ top: 0 });
   if (t === 'details') loadDetails();
+  if (t === 'awards') loadAwardPeriods();
 }
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.t));
 document.querySelectorAll('#modeSeg button').forEach(b => {
@@ -500,6 +531,81 @@ async function loadDetails() {
   const s = r.daily || [];
   draw('detail', 'cDetail', 'bar', s.map(x => dl(x.d)), s.map(x => x.new));
 }
+
+/* ─── الجوايز: صور الكسبانين ─── */
+let awType = 'LOCAL', awPeriods = [], awSeason = null, awTarget = null;
+const MONTH_AR = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const monthAr = k => { const [y, m] = (k || '').split('-'); return m ? MONTH_AR[+m - 1] + ' ' + y : k; };
+const MEDAL = { 1: '🥇', 2: '🥈', 3: '🥉' };
+document.querySelectorAll('#awTypeSeg button').forEach(b => b.onclick = () => {
+  awType = b.dataset.x; document.querySelectorAll('#awTypeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadAwardPeriods(); });
+$('awPeriod').onchange = () => loadWinners();
+
+async function refreshAwardBadge() {
+  let missing = 0;
+  for (const tp of ['LOCAL', 'WORLD']) {
+    const { data } = await sb.rpc('mgmt_award_periods', { p_type: tp });
+    (data?.periods || []).forEach(p => { missing += Math.max(0, (p.prizes || 0) - (p.photos || 0)); });
+  }
+  $('awBadge').textContent = missing || ''; $('awBadge').classList.toggle('hidden', !missing);
+}
+async function loadAwardPeriods() {
+  $('awList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const keep = $('awPeriod').value;
+  const { data, error } = await sb.rpc('mgmt_award_periods', { p_type: awType });
+  if (error) { $('awList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  awPeriods = data.periods || []; awSeason = data.season;
+  const groups = [['week', 'الأسابيع'], ['month', 'الشهور'], ['season', 'الموسم']];
+  const lbl = p => (p.period === 'week' ? `${p.label} · ${monthAr(p.month)}` : p.period === 'month' ? 'شهر ' + monthAr(p.key) : p.label)
+                 + (p.photos < p.prizes ? `  ⚠️ ناقص ${p.prizes - p.photos}` : '  ✅');
+  $('awPeriod').innerHTML = groups.map(([g, ar]) => {
+    const list = awPeriods.filter(p => p.period === g)
+      .sort((a, b) => g === 'week' ? (+b.key) - (+a.key) : (b.key > a.key ? 1 : -1));
+    return list.length ? `<optgroup label="${ar}">${list.map(p => `<option value="${p.period}|${p.key}">${lbl(p)}</option>`).join('')}</optgroup>` : '';
+  }).join('') || '<option value="">مفيش فترات خلصت لسه</option>';
+  // أول فترة ناقصها صور، وإلا آخر أسبوع
+  const firstMissing = awPeriods.filter(p => p.photos < p.prizes).sort((a, b) => (b.sort > a.sort ? 1 : -1))[0];
+  if (keep && [...$('awPeriod').options].some(o => o.value === keep)) $('awPeriod').value = keep;
+  else if (firstMissing) $('awPeriod').value = firstMissing.period + '|' + firstMissing.key;
+  const missing = awPeriods.reduce((a, p) => a + Math.max(0, p.prizes - p.photos), 0);
+  $('awSum').textContent = missing ? `ناقص ${missing} صورة في ${awType === 'LOCAL' ? 'المحلي' : 'العالمي'}.` : 'كل الكسبانين ليهم صور ✅';
+  loadWinners();
+}
+async function loadWinners() {
+  const v = $('awPeriod').value; if (!v) { $('awList').innerHTML = ''; return; }
+  const [period, key] = v.split('|');
+  $('awList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_award_winners', { p_type: awType, p_period: period, p_key: key });
+  if (error) { $('awList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  const ws = data.winners || [];
+  $('awList').innerHTML = ws.length ? ws.map(w => `
+    <div class="winner ${w.photo_url ? '' : 'missing'}">
+      <div class="medal">${MEDAL[w.rank] || '#' + w.rank}</div>
+      <div class="ph">${w.photo_url ? `<img src="${w.photo_url}?v=${encodeURIComponent(w.updated_at || '')}" alt="">` : '📷'}</div>
+      <div class="info">
+        <b>${w.name || '—'}</b>
+        <small><bdi dir="ltr">@${w.username || ''}</bdi> · ${fmt(w.points)} نقطة · ${w.prize || ''}${w.is_mock ? ' · وهمي' : ''}</small>
+        <div class="st ${w.photo_url ? 'ok' : 'no'}">${w.photo_url ? '✅ عنده صورة' : '⚠️ مالوش صورة'}</div>
+      </div>
+      <button class="btn ${w.photo_url ? '' : 'up'}" onclick='pickAwardPhoto(${JSON.stringify({ period, key, rank: w.rank, user_id: w.user_id, username: w.username || "user" })})'>
+        ${w.photo_url ? 'تعديل' : 'رفع صورة'}</button>
+    </div>`).join('') : '<p class="hint">مفيش كسبانين في الفترة دي.</p>';
+}
+function pickAwardPhoto(target) { awTarget = target; $('awFile').value = ''; $('awFile').click(); }
+$('awFile').onchange = async () => {
+  const f = $('awFile').files[0]; if (!f || !awTarget) return;
+  if (f.size > 6 * 1024 * 1024) return alert('الصورة أكبر من 6 ميجا.');
+  const ext = (f.type.split('/')[1] || 'jpg').replace('jpeg', 'jpg');
+  const safeUser = (awTarget.username || 'user').replace(/[^A-Za-z0-9_.-]/g, '');
+  const keyPart = awTarget.period === 'week' ? 'R' + String(awTarget.key).padStart(2, '0') : awTarget.key;
+  const path = `${awSeason || 'season'}/${awType}/${awTarget.period}/${keyPart}/${awTarget.rank}-${safeUser}-${Date.now()}.${ext}`;
+  $('awSum').textContent = 'بنرفع الصورة…';
+  const up = await sb.storage.from('fantasy-highlights').upload(path, f, { contentType: f.type, upsert: true, cacheControl: '3600' });
+  if (up.error) { $('awSum').textContent = 'فشل الرفع: ' + up.error.message; return; }
+  const { error } = await sb.rpc('mgmt_save_highlight', { p_type: awType, p_period: awTarget.period, p_key: String(awTarget.key), p_user_id: awTarget.user_id, p_photo_path: path });
+  if (error) { $('awSum').textContent = 'اترفعت بس ما اتربطتش: ' + errText(error); return; }
+  awTarget = null; await loadAwardPeriods(); refreshAwardBadge();
+};
 
 /* ─── الأدمنز ─── */
 let role = 'ADMIN';
