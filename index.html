@@ -4,14 +4,14 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>BDGR</title>
-<meta name="description" content="شوف المومنت ده على BDGR — Watch this moment on BDGR">
+<meta name="description" content="BDGR — مومنتس وفانتازي · Moments & Fantasy">
 <meta name="theme-color" content="#0B0B0F">
 
 <!-- معاينة اللينك في واتساب وغيره (من غير المحتوى نفسه) -->
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="BDGR">
-<meta property="og:title" content="🔥 Watch this moment on BDGR">
-<meta property="og:description" content="شوف المومنت ده على BDGR — Unranked. Unafraid.">
+<meta property="og:title" content="BDGR — Unranked. Unafraid.">
+<meta property="og:description" content="افتحها في BDGR · Open it on BDGR">
 <meta property="og:image" content="https://ahmadelkashef.github.io/bdgr-link/preview.jpg">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
@@ -56,14 +56,23 @@
   var params = new URLSearchParams(location.search);
   var id = (params.get('m') || '').toLowerCase();
   var valid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(id);
+  // دعوة ليج: ?l=CODE
+  var code = (params.get('l') || '').toUpperCase();
+  var isLeague = !valid && /^[A-Z0-9]{4,12}$/.test(code);
+  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : '');
+  if (isLeague) {
+    document.getElementById('title').textContent = 'اتعزمت على ليج في BDGR فانتازي 🏆';
+    document.getElementById('sub').innerHTML = 'افتح التطبيق وهتدخل الليج على طول.<br>الكود: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + code + '</b>';
+    document.getElementById('open').textContent = 'ادخل الليج في BDGR';
+  }
 
   var ua = navigator.userAgent || '';
   var isAndroid = /android/i.test(ua);
 
-  var appLink = valid ? (PKG + '://moment/' + id) : (PKG + '://');
+  var appLink = PKG + '://' + path;
   // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
-  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : '');
-  var intentLink = 'intent://' + (valid ? 'moment/' + id : '') +
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : ''));
+  var intentLink = 'intent://' + path +
     '#Intent;scheme=' + PKG + ';package=' + PKG +
     ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
 
