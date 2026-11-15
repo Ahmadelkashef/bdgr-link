@@ -97,16 +97,11 @@
   <div class="box">
     <img src="logo.png" alt="BDGR">
     <h1>Management Dashboard</h1>
-    <p id="loginHint">اكتب إيميلك، وهيوصلك لينك أو كود للدخول.</p>
-    <div id="stepEmail">
-      <input id="email" class="in" type="email" placeholder="name@gmail.com" dir="ltr" autocomplete="email">
-      <button id="sendBtn" class="btn primary">ابعتلي كود الدخول</button>
-    </div>
-    <div id="stepCode" class="hidden">
-      <input id="code" class="in" inputmode="numeric" placeholder="الكود اللي وصلك" dir="ltr" maxlength="10">
-      <button id="verifyBtn" class="btn primary">دخول</button>
-      <button id="backBtn" class="btn" style="margin-top:8px;width:100%">غيّر الإيميل</button>
-    </div>
+    <p id="loginHint">للإدارة بس. ادخل بحساب Google اللي واخد صلاحية.</p>
+    <button id="googleBtn" class="btn primary" style="background:#fff;border-color:#fff;color:#1f1f1f">
+      <svg width="20" height="20" viewBox="0 0 24 24"><path fill="#EA4335" d="M12 5c1.6 0 3 .6 4.1 1.6l3.1-3.1C17.3 1.8 14.8 1 12 1 7.5 1 3.7 3.6 1.9 7.4l3.7 2.9C6.5 7.3 9 5 12 5z"/><path fill="#4285F4" d="M23.5 12.3c0-.8-.1-1.6-.2-2.3H12v4.5h6.5c-.3 1.5-1.1 2.8-2.4 3.7l3.7 2.9c2.2-2 3.7-5 3.7-8.8z"/><path fill="#FBBC05" d="M5.6 14.7c-.2-.7-.4-1.5-.4-2.7s.2-2 .4-2.7L1.9 6.4C.7 8.8 0 10.4 0 12s.7 3.2 1.9 5.6l3.7-2.9z"/><path fill="#34A853" d="M12 23c3.2 0 6-1.1 8-3l-3.7-2.9c-1.1-.7-2.5-1.2-4.3-1.2-3 0-5.5-2.3-6.4-5.3L1.9 15.6C3.7 19.4 7.5 23 12 23z"/></svg>
+      الدخول بـ Google
+    </button>
     <div id="loginMsg" class="msg"></div>
   </div>
 </section>
@@ -117,7 +112,7 @@
     <img src="logo.png" alt="BDGR">
     <h1>مفيش صلاحية</h1>
     <p id="deniedEmail"></p>
-    <button class="btn primary" onclick="logout()">خروج</button>
+    <button class="btn primary" onclick="logout()">دخول بحساب تاني</button>
   </div>
 </section>
 
@@ -220,29 +215,18 @@ function errText(e) {
   return m;
 }
 
-/* ─── الدخول ─── */
-$('sendBtn').onclick = async () => {
-  const email = $('email').value.trim().toLowerCase();
-  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return setMsg($('loginMsg'), 'اكتب إيميل صحيح.', 'err');
-  $('sendBtn').disabled = true; setMsg($('loginMsg'), 'بنبعت…');
-  const { error } = await sb.auth.signInWithOtp({ email, options: { emailRedirectTo: location.origin + location.pathname } });
-  $('sendBtn').disabled = false;
-  if (error) return setMsg($('loginMsg'), errText(error), 'err');
-  $('stepEmail').classList.add('hidden'); $('stepCode').classList.remove('hidden');
-  setMsg($('loginMsg'), 'بص على الإيميل: دوس اللينك، أو اكتب الكود هنا.', 'ok');
+/* ─── الدخول بـ Google (الجلسة بتتحفظ، فالمرة الجاية بيدخل على طول) ─── */
+$('googleBtn').onclick = async () => {
+  $('googleBtn').disabled = true; setMsg($('loginMsg'), 'بنفتح Google…');
+  const { error } = await sb.auth.signInWithOAuth({ provider: 'google',
+    options: { redirectTo: location.origin + location.pathname, queryParams: { prompt: 'select_account' } } });
+  if (error) { $('googleBtn').disabled = false; setMsg($('loginMsg'), errText(error), 'err'); }
 };
-$('verifyBtn').onclick = async () => {
-  const email = $('email').value.trim().toLowerCase(), token = $('code').value.trim();
-  if (!token) return;
-  $('verifyBtn').disabled = true;
-  const { error } = await sb.auth.verifyOtp({ email, token, type: 'email' });
-  $('verifyBtn').disabled = false;
-  if (error) return setMsg($('loginMsg'), errText(error), 'err');
-  boot();
-};
-$('backBtn').onclick = () => { $('stepCode').classList.add('hidden'); $('stepEmail').classList.remove('hidden'); setMsg($('loginMsg'), ''); };
-$('email').addEventListener('keydown', e => { if (e.key === 'Enter') $('sendBtn').click(); });
-$('code').addEventListener('keydown', e => { if (e.key === 'Enter') $('verifyBtn').click(); });
+(function authError() {
+  const h = new URLSearchParams(location.hash.slice(1)), q = new URLSearchParams(location.search);
+  const e = h.get('error_description') || q.get('error_description');
+  if (e) setMsg($('loginMsg'), 'فشل الدخول: ' + e, 'err');
+})();
 async function logout() { await sb.auth.signOut(); location.reload(); }
 
 /* ─── التشغيل ─── */
@@ -250,7 +234,11 @@ async function boot() {
   const { data: { session } } = await sb.auth.getSession();
   if (!session) return show('login');
   const { data, error } = await sb.rpc('mgmt_me');
-  if (error || !data) { $('deniedEmail').textContent = (session.user.email || '') + ' مش واخد صلاحية للداشبورد.'; return show('denied'); }
+  if (error || !data) {
+    $('deniedEmail').innerHTML = '<bdi dir="ltr">' + (session.user.email || '') + '</bdi><br>الحساب ده مش واخد صلاحية. اطلب من السوبر أدمن يضيفه.';
+    return show('denied');
+  }
+  if (location.hash.includes('access_token')) history.replaceState(null, '', location.pathname);
   me = data;
   $('who').innerHTML = (me.role === 'SUPER_ADMIN' ? '⭐ سوبر أدمن' : 'أدمن') + ' · <bdi dir="ltr">' + me.email + '</bdi>';
   $('adminsBtn').classList.toggle('hidden', me.role !== 'SUPER_ADMIN');
