@@ -773,7 +773,7 @@ $('awFile').onchange = async () => {
   const keyPart = awTarget.period === 'week' ? 'R' + String(awTarget.key).padStart(2, '0') : awTarget.key;
   const path = `${awSeason || 'season'}/${awType}/${awTarget.period}/${keyPart}/${awTarget.rank}-${safeUser}-${Date.now()}.${ext}`;
   $('awSum').textContent = 'بنرفع الصورة…';
-  const up = await sb.storage.from('fantasy-highlights').upload(path, f, { contentType: f.type, upsert: true, cacheControl: '3600' });
+  const up = await sb.storage.from('fantasy-highlights').upload(path, f, { contentType: f.type, upsert: false, cacheControl: '3600' });
   if (up.error) { $('awSum').textContent = 'فشل الرفع: ' + up.error.message; return; }
   const { error } = await sb.rpc('mgmt_save_highlight', { p_type: awType, p_period: awTarget.period, p_key: String(awTarget.key), p_user_id: awTarget.user_id, p_photo_path: path });
   if (error) { $('awSum').textContent = 'اترفعت بس ما اتربطتش: ' + errText(error); return; }
