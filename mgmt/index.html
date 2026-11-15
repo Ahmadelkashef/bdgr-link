@@ -39,7 +39,7 @@
   .in:focus{outline:none;border-color:var(--green)}
 
   /* shell */
-  .app{max-width:1100px;margin:0 auto;padding:0 14px 90px}
+  .app{max-width:760px;margin:0 auto;padding:0 14px 40px}
   .top{position:sticky;top:0;z-index:20;background:rgba(11,11,15,.92);backdrop-filter:blur(10px);margin:0 -14px;padding:10px 14px 8px}
   .bar{display:flex;align-items:center;gap:8px}
   .bar img{height:26px}
@@ -49,18 +49,70 @@
   .seg{display:flex;background:var(--card);border:1px solid var(--line);border-radius:11px;padding:3px;flex:none}
   .seg button{border:0;background:transparent;color:var(--muted);padding:5px 9px;border-radius:8px;font-weight:800;font-size:12px;cursor:pointer}
   .seg button.on{background:var(--green);color:#0B0B0F}
-  .tabs{position:fixed;bottom:0;left:0;right:0;z-index:30;display:flex;justify-content:center;gap:6px;
-    padding:8px 10px calc(8px + env(safe-area-inset-bottom));background:rgba(20,20,26,.96);backdrop-filter:blur(10px);border-top:1px solid var(--line)}
-  .tabs button{flex:1;max-width:200px;border:0;background:transparent;color:var(--muted);padding:6px 4px;border-radius:12px;font-weight:800;font-size:12.5px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:1px}
-  .tabs button span{font-size:18px;line-height:1.2}
-  .tabs button.on{color:var(--green);background:rgba(0,255,135,.08)}
+  /* العالمين: الأرقام / الكنترول */
+  .space{display:flex;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:3px;flex:1;max-width:320px;margin-inline:auto}
+  .space button{flex:1;border:0;background:transparent;color:var(--muted);padding:8px 6px;border-radius:11px;font-weight:900;font-size:13px;cursor:pointer;white-space:nowrap}
+  .space button.on{background:var(--text);color:#0B0B0F}
+  body.ctl .space button.on{background:var(--gold)}
+  .prods{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;margin-top:10px}
+  .prods::-webkit-scrollbar{display:none}
+  .prod{flex:none;border:1px solid var(--line);background:transparent;color:var(--text);padding:7px 12px;border-radius:999px;font-weight:800;font-size:12.5px;cursor:pointer}
+  .prod.on{border-color:var(--green);color:var(--green);background:rgba(0,255,135,.07)}
+  body.ctl .prod.on{border-color:var(--gold);color:var(--gold);background:rgba(255,179,0,.07)}
+  .prod.soon{opacity:.45;cursor:default}
+  .prod.soon small{font-size:10px;margin-inline-start:4px;color:var(--muted)}
+  .subs{display:flex;gap:4px;margin-top:8px;border-bottom:1px solid var(--line);overflow-x:auto;scrollbar-width:none}
+  .subs::-webkit-scrollbar{display:none}
+  .subs button{border:0;background:transparent;color:var(--muted);padding:8px 10px 9px;font-weight:800;font-size:13px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;display:flex;align-items:center;gap:4px;white-space:nowrap;flex:none}
+  .subs button.on{color:var(--text);border-bottom-color:var(--green)}
+  body.ctl .subs button.on{border-bottom-color:var(--gold)}
+  .ctl-note{display:none;font-size:11.5px;color:var(--gold);font-weight:800;margin-top:8px}
+  body.ctl .ctl-note{display:block}
+  /* النتايج */
+  .rs-head{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:14px;margin-top:10px}
+  .rs-head b{font-size:16px} .rs-head small{display:block;color:var(--muted);font-size:12.5px;margin-top:4px;line-height:1.6}
+  .prog{height:6px;background:var(--card2);border-radius:6px;overflow:hidden;margin-top:10px} .prog i{display:block;height:100%;background:var(--gold);border-radius:6px}
+  .mt{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:8px;cursor:pointer}
+  .mt.done{border-color:rgba(0,255,135,.3)} .mt.locked{cursor:default;opacity:.7}
+  .mt .tm{flex:1;min-width:0;display:flex;align-items:center;gap:8px;font-weight:800;font-size:13.5px}
+  .mt .tm.away{flex-direction:row-reverse;text-align:left}
+  .mt .tm span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .lg{width:30px;height:30px;border-radius:50%;background:var(--card2);flex:none;object-fit:contain;padding:3px}
+  .mt .sc{flex:none;min-width:64px;text-align:center}
+  .mt .sc b{font-size:20px;letter-spacing:2px;display:block}
+  .mt .sc small{color:var(--muted);font-size:11px}
+  .mt .sc .todo{color:var(--gold);font-weight:900;font-size:12px}
+  .finish{width:100%;margin-top:14px;padding:14px;font-size:15px}
+  .btn.gold{background:var(--gold);border-color:var(--gold);color:#0B0B0F}
+  .scorebox{display:flex;align-items:center;gap:10px;margin:14px 0 6px}
+  .scorebox .t{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;font-weight:800;font-size:13px;text-align:center}
+  .scorebox .t .lg{width:44px;height:44px}
+  .scorebox .big{font-size:34px;font-weight:900;letter-spacing:4px}
+  .evs{display:flex;flex-direction:column;gap:6px;margin-top:10px}
+  .ev{display:flex;align-items:center;gap:8px;background:var(--card2);border-radius:12px;padding:9px 10px;font-size:13px}
+  .ev .who{flex:1;min-width:0} .ev .who small{display:block;color:var(--muted);font-size:11.5px}
+  .ev .side{font-size:10.5px;font-weight:900;color:var(--muted);border:1px solid var(--line);border-radius:999px;padding:1px 7px}
+  .ev button{border:0;background:transparent;color:var(--red);font-size:16px;cursor:pointer}
+  .addrow{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:12px}
+  .addrow .btn{padding:10px 4px;font-size:12.5px}
+  .evform{background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:10px}
+  .evform select{width:100%;padding:11px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--text);font-family:inherit;font-size:14px;margin-top:6px}
+  .evform .seg{margin-top:4px}
+  .evform label.ck{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  /* أرقام الفانتازي */
+  .fk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .fk div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
+  .fk b{display:block;font-size:20px} .fk small{color:var(--muted);font-size:11.5px}
+  .rlist .rr{display:flex;align-items:center;gap:10px;padding:10px 4px;border-top:1px solid var(--line);font-size:13px}
+  .rlist .rr:first-child{border-top:0}
+  .rlist .rr b{width:62px;flex:none} .rlist .rr span{flex:1;color:var(--muted)} .rlist .rr em{font-style:normal;font-weight:800}
   .badge{display:inline-block;min-width:16px;padding:0 5px;border-radius:9px;background:var(--red);color:#fff;font-size:10px;line-height:16px;margin-inline-start:3px}
 
   /* overview */
   .kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:6px}
   .kpi{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px 12px}
   .kpi .l{color:var(--muted);font-size:12px;font-weight:700}
-  .kpi .v{font-size:26px;font-weight:900;line-height:1.25}
+  .kpi .v{font-size:22px;font-weight:900;line-height:1.3}
   .kpi .s{font-size:11.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .kpi.hero{background:linear-gradient(135deg,#0F2A1D,var(--card));border-color:rgba(0,255,135,.35)}
   .up{color:var(--green)} .down{color:var(--red)}
@@ -141,8 +193,8 @@
   .rd-month{color:var(--muted);font-size:12px;font-weight:800;margin:14px 2px 6px;letter-spacing:.4px}
   .rd{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
   .rd.up{border-style:dashed}
-  .rd .top{display:flex;align-items:center;gap:8px}
-  .rd .top b{font-size:15px;flex:1}
+  .rd .rhead{display:flex;align-items:center;gap:8px}
+  .rd .rhead b{font-size:15px;flex:1}
   .chip-st{font-size:11.5px;font-weight:900;padding:3px 9px;border-radius:999px}
   .st-upcoming{background:rgba(90,169,255,.15);color:var(--blue)} .st-open{background:rgba(0,255,135,.14);color:var(--green)}
   .st-live{background:rgba(255,92,92,.15);color:var(--red)} .st-finished{background:#26262f;color:var(--muted)} .st-draft{background:#26262f;color:var(--muted)}
@@ -182,12 +234,9 @@
   .perms input{margin-top:5px;accent-color:var(--green);width:16px;height:16px}
   .perms small{display:block;color:var(--muted);font-size:12px}
 
-  @media (min-width:821px){ .tabs{top:0;bottom:auto;position:sticky;background:transparent;border:0;justify-content:flex-start;padding:0 0 4px;backdrop-filter:none}
-    .tabs button{flex-direction:row;gap:6px;font-size:13.5px;padding:8px 14px;max-width:none;flex:none} .tabs button span{font-size:15px}
-    .app{padding-bottom:30px} .chart{height:230px} }
+  @media (min-width:821px){ .app{padding-bottom:30px} .chart{height:230px} }
   @media (max-width:820px){ .kpis{grid-template-columns:1fr 1fr} .stats4{grid-template-columns:1fr 1fr} }
-  @media (max-width:520px){ .bar .title{display:none} .bar{justify-content:space-between} .bar .seg{margin-inline-start:auto} }
-  @media (max-width:380px){ .kpi .v{font-size:22px} .seg button{padding:5px 7px} }
+  @media (max-width:380px){ .kpi .v{font-size:20px} .seg button{padding:5px 7px} .space button{font-size:12px} }
 </style>
 </head>
 <body>
@@ -217,23 +266,14 @@
 <main id="app" class="app hidden">
   <div class="top">
     <div class="bar">
-      <img src="logo.png" alt="BDGR">
-      <div class="title">Management<small id="who"></small></div>
-      <div class="seg" id="modeSeg">
-        <button data-m="real">حقيقي</button><button data-m="mock">وهمي</button><button data-m="all">الكل</button>
-      </div>
-      <button class="icon-btn hidden" id="adminsBtn" title="الأدمنز">👥</button>
+      <img src="logo.png" alt="BDGR" title="" id="logoImg">
+      <div class="space" id="spaceSeg"><button data-s="num" class="on">📊 الأرقام</button><button data-s="ctl" id="ctlBtn" class="hidden">🎛️ أدمن كنترول</button></div>
       <button class="icon-btn" onclick="logout()" title="خروج">⎋</button>
     </div>
+    <div class="prods" id="prods"></div>
+    <div class="subs" id="subs"></div>
+    <div class="ctl-note">🎛️ انت في الكنترول: أي حاجة هنا بتتغير عند اليوزرز على طول.</div>
   </div>
-
-  <nav class="tabs" id="tabs">
-    <button data-t="overview" class="on"><span>🏠</span>نظرة عامة</button>
-    <button data-t="summary"><span>🧠</span><div>الملخص<i class="badge hidden" id="riskBadge"></i></div></button>
-    <button data-t="details"><span>🔎</span>التفاصيل</button>
-    <button data-t="rounds" class="hidden" id="roundsTabBtn"><span>🗓️</span>الجولات</button>
-    <button data-t="awards" class="hidden" id="awardsTabBtn"><span>🏆</span><div>الجوايز<i class="badge hidden" id="awBadge"></i></div></button>
-  </nav>
 
   <!-- ═══ نظرة عامة ═══ -->
   <section id="t-overview">
@@ -253,7 +293,7 @@
       <h3>التسجيل <div class="seg" id="chartSeg"><button data-c="daily" class="on">كل يوم</button><button data-c="total">الإجمالي</button></div></h3>
       <div class="chart"><canvas id="cMain"></canvas></div>
     </div>
-    <div class="card" id="healthCard" onclick="go('summary')">
+    <div class="card" id="healthCard" onclick="go('summary')" style="cursor:pointer">
       <div class="health" id="healthBox"></div>
       <div class="mini" id="healthMini"></div>
     </div>
@@ -285,6 +325,42 @@
     </div>
     <div class="card"><h3>التسجيل كل يوم (آخر 30 يوم)</h3><div class="chart"><canvas id="cDetail"></canvas></div></div>
   </section>
+  <!-- ═══ أرقام الفانتازي (عرض بس) ═══ -->
+  <section id="t-fnum" class="hidden">
+    <div class="aw-head" style="justify-content:space-between">
+      <div class="seg" id="fnTypeSeg"><button data-x="LOCAL" class="on">🇪🇬 محلي</button><button data-x="WORLD">🌍 عالمي</button></div>
+    </div>
+    <div class="fk"><div><b class="num" id="fnPlayers">—</b><small>لعبوا الموسم ده</small></div>
+      <div><b class="num" id="fnNow">—</b><small id="fnNowS">تشكيلات الجولة</small></div>
+      <div><b class="num" id="fnLeagues">—</b><small>ليجز</small></div></div>
+    <div class="card"><h3>المشاركين كل جولة</h3><div class="chart"><canvas id="cFn"></canvas></div>
+      <p class="hint">🟩 جداد أول مرة · ⬜ رجعوا من الجولة اللي قبلها · ▫️ الباقي</p></div>
+    <div class="card"><h3>الجولات</h3><div class="rlist" id="fnRows"></div></div>
+  </section>
+
+  <!-- ═══ النتايج (كنترول) ═══ -->
+  <section id="t-results" class="hidden">
+    <div class="aw-head"><div class="seg" id="rsTypeSeg"><button data-x="LOCAL" class="on">🇪🇬 محلي</button><button data-x="WORLD">🌍 عالمي</button></div></div>
+    <div id="rsBody"><p class="hint">بنحمّل…</p></div>
+  </section>
+
+  <!-- ═══ الأدمنز (كنترول، سوبر أدمن بس) ═══ -->
+  <section id="t-admins" class="hidden">
+    <p class="hint">السوبر أدمن يقدر يعمل كل حاجة ويضيف أدمنز. الأدمن بياخد الأقسام اللي تختارها له بس.</p>
+    <div id="adminsList"></div>
+    <div class="card form" style="border-top:1px solid var(--line)">
+      <b>إضافة / تعديل أدمن</b>
+      <input id="aEmail" class="in" type="email" placeholder="email@gmail.com" dir="ltr" style="margin-top:10px">
+      <div class="roles">
+        <div class="opt" data-r="SUPER_ADMIN"><b>⭐ سوبر أدمن</b><small>كل حاجة + إدارة الأدمنز</small></div>
+        <div class="opt on" data-r="ADMIN"><b>🛠️ أدمن</b><small>الأقسام اللي تختارها بس</small></div>
+      </div>
+      <div class="perms" id="permsBox"></div>
+      <button id="saveAdminBtn" class="btn primary">حفظ</button>
+      <div id="adminMsg" class="msg"></div>
+    </div>
+  </section>
+
   <!-- ═══ الجولات: تجهيز الجاي + إنهاء الحالية ═══ -->
   <section id="t-rounds" class="hidden">
     <div class="aw-head">
@@ -343,23 +419,20 @@
   </div>
 </div>
 
-<!-- الأدمنز -->
-<div id="adminsSheet" class="overlay hidden">
+<!-- نتيجة ماتش -->
+<div id="matchSheet" class="overlay hidden">
   <div class="sheet">
-    <div class="sheet-head"><h2>الأدمنز والصلاحيات</h2><button class="icon-btn" onclick="closeSheet('adminsSheet')">✕</button></div>
-    <p class="hint">السوبر أدمن يقدر يعمل كل حاجة ويضيف أدمنز. الأدمن بياخد الأقسام اللي تختارها له بس.</p>
-    <div id="adminsList"></div>
-    <div class="form">
-      <b>إضافة / تعديل أدمن</b>
-      <input id="aEmail" class="in" type="email" placeholder="email@gmail.com" dir="ltr" style="margin-top:10px">
-      <div class="roles">
-        <div class="opt" data-r="SUPER_ADMIN"><b>⭐ سوبر أدمن</b><small>كل حاجة + إدارة الأدمنز</small></div>
-        <div class="opt on" data-r="ADMIN"><b>🛠️ أدمن</b><small>الأقسام اللي تختارها بس</small></div>
-      </div>
-      <div class="perms" id="permsBox"></div>
-      <button id="saveAdminBtn" class="btn primary">حفظ</button>
-      <div id="adminMsg" class="msg"></div>
+    <div class="sheet-head"><h2 id="msTitle">النتيجة</h2><button class="icon-btn" onclick="closeSheet('matchSheet')">✕</button></div>
+    <div class="scorebox" id="msScore"></div>
+    <p class="hint" style="text-align:center;margin:0">النتيجة بتتحسب لوحدها من الجوانات. ماتش 0-0؟ احفظ على طول.</p>
+    <div class="evs" id="msEvents"></div>
+    <div class="addrow">
+      <button class="btn" onclick="evForm('goal')">⚽ جون</button><button class="btn" onclick="evForm('yellow')">🟨 أصفر</button>
+      <button class="btn" onclick="evForm('red')">🟥 أحمر</button><button class="btn" onclick="evForm('pen')">🥅 جزاء</button>
     </div>
+    <div id="msForm"></div>
+    <button class="btn primary" id="msSave" style="margin-top:14px">حفظ النتيجة</button>
+    <div class="msg" id="msMsg"></div>
   </div>
 </div>
 
@@ -429,35 +502,74 @@ async function boot() {
   }
   if (location.hash.includes('access_token')) history.replaceState(null, '', location.pathname);
   me = data;
-  $('who').innerHTML = (me.role === 'SUPER_ADMIN' ? '⭐ سوبر أدمن' : 'أدمن') + ' · <bdi dir="ltr">' + me.email + '</bdi>';
-  $('adminsBtn').classList.toggle('hidden', me.role !== 'SUPER_ADMIN');
+  $('logoImg').title = me.email;
   show('app');
-  if (me.permissions.includes('fantasy')) { $('awardsTabBtn').classList.remove('hidden'); $('roundsTabBtn').classList.remove('hidden'); refreshAwardBadge(); }
-  if (!me.permissions.includes('dashboard')) { $('t-overview').innerHTML = '<p class="hint">مفيش صلاحية "الداشبورد" للحساب ده.</p>'; return; }
-  loadAll();
+  $('ctlBtn').classList.toggle('hidden', !canCtl());
+  if (me.permissions.includes('fantasy')) refreshAwardBadge();
+  if (!navItems('num').length) space = 'ctl';
+  if (space === 'ctl' && !canCtl()) space = 'num';
+  setSpace(space, true);
+  if (me.permissions.includes('dashboard')) loadAll();
 }
 sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_IN' && !me) boot(); });
 
-/* ─── التنقل ─── */
+/* ─── التنقل: عالمين (الأرقام / الكنترول) ← منتج ← صفحة ─── */
+const NAV = {
+  num: [
+    { k: 'users', ar: '👥 اليوزرز', ok: () => has('dashboard'), subs: [['overview', 'نظرة عامة'], ['summary', 'الملخص'], ['details', 'التفاصيل']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
+    { k: 'comp', ar: '🏆 المسابقات', soon: true }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
+  ctl: [
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['awards', 'صور الكسبانين']] },
+    { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','awards','admins'];
+let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
+const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
+const canCtl = () => navItems('ctl').length > 0;
+const navItems = sp => NAV[sp].filter(p => p.soon || p.ok());
+function setSpace(sp, first) {
+  space = sp; store.set('mgmt_space', sp);
+  document.body.classList.toggle('ctl', sp === 'ctl');
+  document.querySelectorAll('#spaceSeg button').forEach(b => b.classList.toggle('on', b.dataset.s === sp));
+  const items = navItems(sp).filter(p => !p.soon);
+  const saved = store.get('mgmt_prod_' + sp, '');
+  setProd((items.find(p => p.k === saved) || items[0])?.k, first);
+}
+function setProd(k, first) {
+  prod = k; store.set('mgmt_prod_' + space, k);
+  const p = NAV[space].find(x => x.k === k);
+  const saved = store.get('mgmt_tab_' + space + '_' + k, '');
+  renderNav();
+  go(p ? ((p.subs.find(x => x[0] === saved) || p.subs[0])[0]) : 'overview', first);
+}
+function renderNav() {
+  $('prods').innerHTML = navItems(space).map(p => p.soon
+    ? `<span class="prod soon">${p.ar}<small>قريب</small></span>`
+    : `<button class="prod ${p.k === prod ? 'on' : ''}" onclick="setProd('${p.k}')">${p.ar}</button>`).join('');
+  const p = NAV[space].find(x => x.k === prod);
+  const badge = k => k === 'summary' && riskCount ? `<i class="badge">${riskCount}</i>` : k === 'awards' && awMissing ? `<i class="badge">${awMissing}</i>` : '';
+  const modeSeg = space === 'num' ? `<div class="seg" id="modeSeg" style="margin-inline-start:auto;align-self:center">
+      ${[['real','حقيقي'],['mock','وهمي'],['all','الكل']].map(([m, a]) => `<button data-m="${m}" class="${m === mode ? 'on' : ''}" onclick="setMode('${m}')">${a}</button>`).join('')}</div>` : '';
+  $('subs').innerHTML = (p ? p.subs.map(([k, a]) => `<button class="${k === tab ? 'on' : ''}" onclick="go('${k}')">${a}${badge(k)}</button>`).join('') : '') + modeSeg;
+}
+function setMode(m) { mode = m; store.set('mgmt_mode', m); renderNav(); loadAll(); if (tab === 'fnum') loadFn(); }
+document.querySelectorAll('#spaceSeg button').forEach(b => b.onclick = () => setSpace(b.dataset.s));
 function go(t) {
-  tab = t;
-  document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  ['overview','summary','details','awards','rounds'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
+  tab = t; store.set('mgmt_tab_' + space + '_' + prod, t);
+  SECTIONS.forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
+  renderNav();
   window.scrollTo({ top: 0 });
   if (t === 'details') loadDetails();
   if (t === 'awards') loadAwardPeriods();
   if (t === 'rounds') loadRounds();
+  if (t === 'results') loadResults();
+  if (t === 'fnum') loadFn();
+  if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
-document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.t));
-document.querySelectorAll('#modeSeg button').forEach(b => {
-  b.classList.toggle('on', b.dataset.m === mode);
-  b.onclick = () => { mode = b.dataset.m; store.set('mgmt_mode', mode);
-    document.querySelectorAll('#modeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadAll(); };
-});
 document.querySelectorAll('#chartSeg button').forEach(b => b.onclick = () => {
   mainChart = b.dataset.c; document.querySelectorAll('#chartSeg button').forEach(x => x.classList.toggle('on', x === b)); drawMain(); });
 
-function loadAll() { loadOverview(); loadInsights(); if (tab === 'details') loadDetails(); }
+function loadAll() { if (!has('dashboard')) return; loadOverview(); loadInsights(); if (tab === 'details') loadDetails(); }
 
 /* ─── رسومات ─── */
 Chart.defaults.color = '#8C8C99'; Chart.defaults.font.family = 'Cairo'; Chart.defaults.borderColor = '#26262F';
@@ -508,7 +620,7 @@ async function loadInsights() {
   $('healthBox').innerHTML = healthHtml(h) + '<div class="go">الملخص ←</div>';
   const top = [...items.filter(i => i.kind === 'risk'), ...items.filter(i => i.kind === 'good')].slice(0, 3);
   $('healthMini').innerHTML = top.map(i => `<div><span>${ICON[i.kind]}</span><span>${i.title}</span></div>`).join('');
-  $('riskBadge').textContent = h.risks || ''; $('riskBadge').classList.toggle('hidden', !h.risks);
+  riskCount = h.risks || 0; renderNav();
   $('t-summary').querySelector('.bighealth').className = 'bighealth lvl-' + h.level;
   $('sumHealth').innerHTML = healthHtml(h);
   $('sumCounts').innerHTML = `<div><b class="down">${h.risks ?? 0}</b>مخاطر</div><div><b class="up">${h.goods ?? 0}</b>كويس</div><div><b style="color:var(--blue)">${h.recs ?? 0}</b>توصيات</div>`;
@@ -608,7 +720,7 @@ async function refreshAwardBadge() {
     const { data } = await sb.rpc('mgmt_award_periods', { p_type: tp });
     (data?.periods || []).forEach(p => { missing += Math.max(0, (p.prizes || 0) - (p.photos || 0)); });
   }
-  $('awBadge').textContent = missing || ''; $('awBadge').classList.toggle('hidden', !missing);
+  awMissing = missing; renderNav();
 }
 async function loadAwardPeriods() {
   $('awList').innerHTML = '<p class="hint">بنحمّل…</p>';
@@ -701,15 +813,12 @@ async function loadRounds() {
     const acts = [];
     if (r.state === 'upcoming') {
       acts.push(`<button class="btn" onclick="editRound('${r.event_id}')">✏️ تعديل</button>`);
-      if (!cur && ups[0] && ups[0].event_id === r.event_id) acts.push(`<button class="btn go" onclick="openNext()">🟢 افتحها دلوقتي</button>`);
+      if (!rs.some(x => x.state === 'open') && ups[0] && ups[0].event_id === r.event_id) acts.push(`<button class="btn go" onclick="openNext()">🟢 افتحها دلوقتي</button>`);
       acts.push(`<button class="btn warn" onclick="deleteRound('${r.event_id}', ${r.round_no})">🗑 مسح</button>`);
     }
-    if (r.state === 'live') {
-      if (!r.has_stats && me.role === 'SUPER_ADMIN') acts.push(`<button class="btn" onclick="simResults('${r.event_id}')">🎲 نتايج تجريبية</button>`);
-      acts.push(`<button class="btn go" onclick="finishRound('${r.event_id}', ${r.round_no}, ${r.has_stats})">🏁 إنهاء واحسب النقط</button>`);
-    }
+    if (r.state === 'live') acts.push(`<button class="btn gold" onclick="go('results')">📝 النتايج والإنهاء</button>`);
     html += `<div class="rd ${r.state === 'upcoming' ? 'up' : ''}">
-      <div class="top"><b>الجولة ${r.round_no}</b><span class="chip-st st-${r.state}">${ST_AR[r.state] || r.state}</span></div>
+      <div class="rhead"><b>الجولة ${r.round_no}</b><span class="chip-st st-${r.state}">${ST_AR[r.state] || r.state}</span></div>
       <div class="meta">بتتفتح ${fmtDT(r.opens_at)} · التشكيل بيتقفل ${fmtDT(r.deadline)}<br>
         البادجت ${r.budget}M · ${r.squads} تشكيلة${r.prizes?.length ? ' · 🏆 ' + r.prizes.join(' / ') : ''}${r.state === 'live' ? (r.has_stats ? ' · ✅ النتايج متسجلة' : ' · ⚠️ النتايج لسه') : ''}</div>
       <div class="ms">${(r.matches || []).map(m => `<span>⚽ ${m.home_name} × ${m.away_name} — ${fmtDT(m.at)}</span>`).join('')}</div>
@@ -815,9 +924,158 @@ $('rfSave').onclick = async () => {
   setTimeout(() => { closeSheet('roundSheet'); loadRounds(); }, 600);
 };
 
+/* ─── أرقام الفانتازي (عرض بس) ─── */
+let fnType = 'LOCAL';
+document.querySelectorAll('#fnTypeSeg button').forEach(b => b.onclick = () => {
+  fnType = b.dataset.x; document.querySelectorAll('#fnTypeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadFn(); });
+async function loadFn() {
+  $('fnRows').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_fantasy_numbers', { p_type: fnType, p_mode: mode });
+  if (error) { $('fnRows').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  const rs = data.rounds || [], last = rs[rs.length - 1];
+  $('fnPlayers').textContent = fmt(data.players); $('fnLeagues').textContent = fmt(data.leagues);
+  $('fnNow').textContent = last ? fmt(last.squads) : '—';
+  $('fnNowS').textContent = last ? `تشكيلات الجولة ${last.round_no}` : 'تشكيلات الجولة';
+  if (charts.fn) charts.fn.destroy();
+  charts.fn = new Chart($('cFn'), { type: 'bar', data: { labels: rs.map(r => 'ج' + r.round_no), datasets: [
+      { data: rs.map(r => r.new_players), backgroundColor: '#00FF87', borderRadius: 4, maxBarThickness: 26, stack: 's' },
+      { data: rs.map(r => r.back_players), backgroundColor: '#8C8C99', borderRadius: 4, maxBarThickness: 26, stack: 's' },
+      { data: rs.map(r => Math.max(0, r.squads - r.new_players - r.back_players)), backgroundColor: '#3a3a46', borderRadius: 4, maxBarThickness: 26, stack: 's' } ] },
+    options: { maintainAspectRatio: false, plugins: { legend: { display: false } },
+      scales: { x: { stacked: true, grid: { display: false } }, y: { stacked: true, beginAtZero: true, ticks: { maxTicksLimit: 5 } } } } });
+  const st = { open: '🟢 مفتوحة', live: '🔴 شغالة', finished: '🏁' };
+  $('fnRows').innerHTML = rs.length ? [...rs].reverse().map(r => `<div class="rr"><b>الجولة ${r.round_no}</b>
+      <span>${st[r.st] || ''} · ${fmt(r.squads)} تشكيلة${r.avg_pts != null ? ` · متوسط ${r.avg_pts}` : ''}</span>
+      <em class="num">${r.top_pts != null ? '🏆 ' + r.top_pts : ''}</em></div>`).join('') : '<p class="hint">مفيش جولات لسه.</p>';
+}
+
+/* ─── النتايج (كنترول) ─── */
+let rsType = 'LOCAL', rsData = null, ms = null;
+document.querySelectorAll('#rsTypeSeg button').forEach(b => b.onclick = () => {
+  rsType = b.dataset.x; document.querySelectorAll('#rsTypeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadResults(); });
+const RS_ERR = { goals_mismatch: 'الجوانات مش مطابقة للنتيجة.', player_not_in_match: 'فيه لاعب مش من الفريقين.', round_finished: 'الجولة خلصت خلاص — مينفعش تتعدل.',
+  deadline_not_passed: 'التشكيلات لسه مفتوحة — النتايج بعد الديدلاين.', bad_score: 'النتيجة مش منطقية.' };
+const rsErr = e => { const m = (e && e.message) || ''; const k = Object.keys(RS_ERR).find(k => m.includes(k)); return k ? RS_ERR[k] : rdErr(e); };
+const logo = t => t.logo ? `<img class="lg" src="${t.logo}" alt="" onerror="this.style.visibility='hidden'">` : '<span class="lg"></span>';
+async function loadResults() {
+  $('rsBody').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_results_overview', { p_type: rsType });
+  if (error) { $('rsBody').innerHTML = `<p class="hint">${rsErr(error)}</p>`; return; }
+  rsData = data; const r = data.round;
+  if (!r) { $('rsBody').innerHTML = '<div class="rs-head"><b>مفيش جولة شغالة دلوقتي</b><small>أول ما الديدلاين بتاع الجولة الجاية يعدّي، ماتشاتها هتظهر هنا تدخل نتايجها.</small></div>'; return; }
+  const ms_ = data.matches || [], done = ms_.filter(m => m.entered).length, live = r.state === 'live';
+  let h = `<div class="rs-head"><b>الجولة ${r.round_no} · ${live ? '🔴 شغالة' : '🟢 لسه مفتوحة للتشكيل'}</b>
+    <small>${fmt(r.squads)} تشكيلة · ${live ? `اتسجل ${done} من ${ms_.length} ماتش` : 'النتايج بتتدخل بعد الديدلاين ' + fmtDT(r.deadline)}</small>
+    ${live ? `<div class="prog"><i style="width:${ms_.length ? done / ms_.length * 100 : 0}%"></i></div>` : ''}</div>`;
+  h += ms_.map(m => `<div class="mt ${m.entered ? 'done' : ''} ${live ? '' : 'locked'}" ${live ? `onclick="openMatch('${m.match_id}')"` : ''}>
+      <div class="tm">${logo(m.home)}<span>${m.home.name_ar || m.home.name}</span></div>
+      <div class="sc">${m.entered ? `<b class="num">${m.home_score ?? '?'} - ${m.away_score ?? '?'}</b><small>✅ اتسجلت</small>` : `<div class="todo">${live ? '+ النتيجة' : '—'}</div><small>${fmtDT(m.at)}</small>`}</div>
+      <div class="tm away">${logo(m.away)}<span>${m.away.name_ar || m.away.name}</span></div></div>`).join('');
+  if (live) {
+    const all = done === ms_.length && ms_.length > 0;
+    h += `<button class="btn gold finish" ${all ? '' : 'disabled'} onclick="finishFromResults()">🏁 إنهاء الجولة واحسب النقط</button>
+      <p class="hint" style="text-align:center">${all ? 'كل الماتشات اتسجلت. لما تنهيها النقط بتتحسب والترتيب بيطلع للناس.' : `فاضل ${ms_.length - done} ماتش. الزرار بيشتغل لما كله يتسجل.`}</p>`;
+    if (!done && me.role === 'SUPER_ADMIN') h += `<p class="hint" style="text-align:center"><a href="#" style="color:var(--muted)" onclick="event.preventDefault();simResults('${r.event_id}').then(loadResults)">🎲 نتايج تجريبية (للتجربة بس)</a></p>`;
+  }
+  $('rsBody').innerHTML = h;
+}
+async function finishFromResults() {
+  const r = rsData.round;
+  if (!confirm(`تنهي الجولة ${r.round_no}؟ النقط هتتحسب والترتيب هيظهر للناس، ومش هتقدر تعدّل النتايج بعدها.`)) return;
+  const { data, error } = await sb.rpc('mgmt_round_finish', { p_event_id: r.event_id });
+  if (error) return alert(rsErr(error));
+  alert(data && data.opened ? 'خلصت ✅ والجولة الجاية اتفتحت.' : 'خلصت ✅');
+  loadResults(); refreshAwardBadge();
+}
+async function openMatch(id) {
+  const m = rsData.matches.find(x => x.match_id === id);
+  ms = { m, players: [], ev: { goals: [], yellows: [], reds: [], pens: [] } };
+  $('msTitle').textContent = `${m.home.name_ar || m.home.name} × ${m.away.name_ar || m.away.name}`;
+  $('msForm').innerHTML = ''; setMsg($('msMsg'), 'بنحمّل…'); renderMs();
+  $('matchSheet').classList.remove('hidden');
+  const { data, error } = await sb.rpc('mgmt_match_sheet', { p_match_id: id });
+  if (error) return setMsg($('msMsg'), rsErr(error), 'err');
+  ms.players = data.players || [];
+  const r = data.result || {};
+  ms.ev = { goals: r.goals || [], yellows: r.yellows || [], reds: r.reds || [], pens: r.pens || [] };
+  setMsg($('msMsg'), ''); renderMs();
+}
+const pl = id => ms.players.find(p => p.id === id);
+const pName = id => { const p = pl(id); return p ? (p.name_ar || p.name) : '—'; };
+const goalSide = g => { const p = pl(g.player_id); if (!p) return null; return g.own_goal ? (p.side === 'home' ? 'away' : 'home') : p.side; };
+function renderMs() {
+  const m = ms.m, e = ms.ev;
+  const h = e.goals.filter(g => goalSide(g) === 'home').length, a = e.goals.filter(g => goalSide(g) === 'away').length;
+  $('msScore').innerHTML = `<div class="t">${logo(m.home)}${m.home.name_ar || m.home.name}</div><div class="big num">${h} - ${a}</div><div class="t">${logo(m.away)}${m.away.name_ar || m.away.name}</div>`;
+  const sideTag = id => { const p = pl(id); return p ? `<span class="side">${p.side === 'home' ? (m.home.name_ar || m.home.name) : (m.away.name_ar || m.away.name)}</span>` : ''; };
+  const rows = [
+    ...e.goals.map((g, i) => ['goals', i, '⚽', pName(g.player_id) + (g.own_goal ? ' (في نفسه)' : ''), g.assister_id ? 'أسيست: ' + pName(g.assister_id) : '', g.player_id]),
+    ...e.yellows.map((x, i) => ['yellows', i, '🟨', pName(x.player_id), '', x.player_id]),
+    ...e.reds.map((x, i) => ['reds', i, '🟥', pName(x.player_id), '', x.player_id]),
+    ...e.pens.map((x, i) => ['pens', i, '🥅', pName(x.player_id), x.type === 'saved' ? 'الحارس صدّ جزاء' : 'ضيّع جزاء', x.player_id]) ];
+  $('msEvents').innerHTML = rows.length ? rows.map(([k, i, ic, n, sub, id]) => `<div class="ev"><span>${ic}</span><div class="who">${n}${sub ? `<small>${sub}</small>` : ''}</div>${sideTag(id)}
+      <button onclick="ms.ev.${k}.splice(${i},1);renderMs()">✕</button></div>`).join('') : '<p class="hint" style="text-align:center">مفيش أحداث لسه.</p>';
+}
+function opts(filter, empty) {
+  const g = side => ms.players.filter(p => p.side === side && filter(p)).map(p => `<option value="${p.id}">${p.name_ar || p.name} · ${p.pos}</option>`).join('');
+  return `<option value="">${empty}</option><optgroup label="${ms.m.home.name_ar || ms.m.home.name}">${g('home')}</optgroup><optgroup label="${ms.m.away.name_ar || ms.m.away.name}">${g('away')}</optgroup>`;
+}
+function evForm(kind) {
+  const f = $('msForm');
+  if (kind === 'goal') {
+    f.innerHTML = `<div class="evform"><b>⚽ جون</b>
+      <select id="efP">${opts(() => true, 'مين جاب الجون؟')}</select>
+      <label class="ck"><input type="checkbox" id="efOg"> جون في نفسه (اختار اللاعب اللي جابه في فريقه)</label>
+      <select id="efA">${opts(() => true, 'الأسيست (اختياري)')}</select>
+      <button class="btn go" style="width:100%;margin-top:10px" onclick="addGoal()">إضافة</button></div>`;
+    $('efOg').onchange = () => { $('efA').disabled = $('efOg').checked; if ($('efOg').checked) $('efA').value = ''; };
+  } else if (kind === 'pen') {
+    f.innerHTML = `<div class="evform"><b>🥅 ضربة جزاء</b>
+      <div class="seg" id="efT"><button data-v="miss" class="on">ضاعت</button><button data-v="saved">الحارس صدّها</button></div>
+      <select id="efP">${opts(() => true, 'اللي ضيّعها')}</select>
+      <p class="hint">الجون من الجزاء بيتسجل كـ"جون" عادي.</p>
+      <button class="btn go" style="width:100%;margin-top:6px" onclick="addPen()">إضافة</button></div>`;
+    f.querySelectorAll('#efT button').forEach(b => b.onclick = () => {
+      f.querySelectorAll('#efT button').forEach(x => x.classList.toggle('on', x === b));
+      $('efP').innerHTML = b.dataset.v === 'saved' ? opts(p => p.pos === 'GK', 'الحارس اللي صدّها') : opts(() => true, 'اللي ضيّعها'); });
+  } else {
+    f.innerHTML = `<div class="evform"><b>${kind === 'yellow' ? '🟨 كارت أصفر' : '🟥 كارت أحمر'}</b>
+      <select id="efP">${opts(() => true, 'مين؟')}</select>
+      <button class="btn go" style="width:100%;margin-top:10px" onclick="addCard('${kind}')">إضافة</button></div>`;
+  }
+  f.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+function addGoal() {
+  const p = $('efP').value, og = $('efOg').checked, a = $('efA').value;
+  if (!p) return setMsg($('msMsg'), 'اختار اللي جاب الجون.', 'err');
+  if (a && (a === p || pl(a).side !== pl(p).side)) return setMsg($('msMsg'), 'الأسيست لازم من نفس فريق اللي جاب الجون.', 'err');
+  ms.ev.goals.push({ player_id: p, own_goal: og, assister_id: og ? null : (a || null) });
+  $('msForm').innerHTML = ''; setMsg($('msMsg'), ''); renderMs();
+}
+function addCard(kind) {
+  const p = $('efP').value; if (!p) return setMsg($('msMsg'), 'اختار اللاعب.', 'err');
+  if (kind === 'red' && ms.ev.reds.some(x => x.player_id === p)) return setMsg($('msMsg'), 'اللاعب ده واخد أحمر بالفعل.', 'err');
+  ms.ev[kind === 'yellow' ? 'yellows' : 'reds'].push({ player_id: p });
+  $('msForm').innerHTML = ''; setMsg($('msMsg'), ''); renderMs();
+}
+function addPen() {
+  const p = $('efP').value; if (!p) return setMsg($('msMsg'), 'اختار اللاعب.', 'err');
+  const t = $('msForm').querySelector('#efT button.on').dataset.v;
+  ms.ev.pens.push({ player_id: p, type: t });
+  $('msForm').innerHTML = ''; setMsg($('msMsg'), ''); renderMs();
+}
+$('msSave').onclick = async () => {
+  const e = ms.ev, h = e.goals.filter(g => goalSide(g) === 'home').length, a = e.goals.filter(g => goalSide(g) === 'away').length;
+  $('msSave').disabled = true; setMsg($('msMsg'), 'بنحفظ…');
+  const { error } = await sb.rpc('mgmt_match_save', { p_match_id: ms.m.match_id, p_home: h, p_away: a, p_events: e });
+  $('msSave').disabled = false;
+  if (error) return setMsg($('msMsg'), rsErr(error), 'err');
+  setMsg($('msMsg'), `اتحفظت ✅ ${h} - ${a}`, 'ok');
+  setTimeout(() => { closeSheet('matchSheet'); loadResults(); }, 500);
+};
+
 /* ─── الأدمنز ─── */
 let role = 'ADMIN';
-$('adminsBtn').onclick = () => { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); };
 document.querySelectorAll('.opt').forEach(o => o.onclick = () => setRole(o.dataset.r));
 function setRole(r) { role = r; document.querySelectorAll('.opt').forEach(o => o.classList.toggle('on', o.dataset.r === r)); $('permsBox').classList.toggle('hidden', r === 'SUPER_ADMIN'); }
 function renderPerms(sel = []) {
@@ -825,7 +1083,6 @@ function renderPerms(sel = []) {
     <span><b>${c.ar}</b><small>${c.desc_ar}</small></span></label>`).join('');
 }
 async function openAdmins() {
-  $('adminsSheet').classList.remove('hidden');
   const { data, error } = await sb.rpc('mgmt_admins_list');
   if (error) { $('adminsList').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
   const catAr = Object.fromEntries(me.catalog.map(c => [c.key, c.ar]));
