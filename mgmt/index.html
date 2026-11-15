@@ -135,6 +135,33 @@
   .winner .btn{padding:9px 12px;font-size:13px;flex:none}
   .winner .btn.up{background:var(--gold);border-color:var(--gold);color:#0B0B0F}
 
+  /* rounds */
+  .rd-now{background:linear-gradient(135deg,#0F2A1D,var(--card));border:1px solid rgba(0,255,135,.35);border-radius:14px;padding:12px;margin-top:6px;font-size:13.5px;line-height:1.7}
+  .rd-now b{font-size:15px}
+  .rd-month{color:var(--muted);font-size:12px;font-weight:800;margin:14px 2px 6px;letter-spacing:.4px}
+  .rd{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:8px}
+  .rd.up{border-style:dashed}
+  .rd .top{display:flex;align-items:center;gap:8px}
+  .rd .top b{font-size:15px;flex:1}
+  .chip-st{font-size:11.5px;font-weight:900;padding:3px 9px;border-radius:999px}
+  .st-upcoming{background:rgba(90,169,255,.15);color:var(--blue)} .st-open{background:rgba(0,255,135,.14);color:var(--green)}
+  .st-live{background:rgba(255,92,92,.15);color:var(--red)} .st-finished{background:#26262f;color:var(--muted)} .st-draft{background:#26262f;color:var(--muted)}
+  .rd .meta{color:var(--muted);font-size:12px;margin-top:6px;line-height:1.6}
+  .rd .ms{font-size:12.5px;margin-top:6px;display:flex;flex-direction:column;gap:2px}
+  .rd .acts{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+  .rd .acts .btn{padding:8px 12px;font-size:12.5px}
+  .btn.go{background:var(--green);border-color:var(--green);color:#0B0B0F}
+  .btn.warn{border-color:rgba(255,92,92,.5);color:var(--red)}
+  .mrow{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:var(--card2);border-radius:12px;padding:8px;margin-bottom:6px;position:relative}
+  .mrow select,.mrow input{width:100%;padding:9px;border-radius:9px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-family:inherit;font-size:13px}
+  .mrow .full{grid-column:1/-1;display:flex;gap:6px}
+  .mrow .x{position:absolute;top:-8px;left:-8px;width:24px;height:24px;border-radius:50%;border:1px solid var(--line);background:var(--card);color:var(--red);cursor:pointer}
+  .fl{display:block;color:var(--muted);font-size:12px;font-weight:800;margin:12px 0 6px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px}
+  .poolbox{display:flex;flex-wrap:wrap;gap:6px}
+  .poolbox label{display:flex;align-items:center;gap:6px;background:var(--card2);border:1px solid var(--line);border-radius:999px;padding:6px 10px;font-size:12.5px;cursor:pointer}
+  .poolbox input{accent-color:var(--green)}
+
   /* sheets */
   .overlay{position:fixed;inset:0;background:rgba(0,0,0,.6);display:flex;justify-content:center;align-items:flex-end;z-index:50}
   .sheet{background:var(--card);border:1px solid var(--line);border-radius:20px 20px 0 0;width:100%;max-width:640px;max-height:90vh;overflow:auto;padding:16px 16px calc(16px + env(safe-area-inset-bottom))}
@@ -204,6 +231,7 @@
     <button data-t="overview" class="on"><span>🏠</span>نظرة عامة</button>
     <button data-t="summary"><span>🧠</span><div>الملخص<i class="badge hidden" id="riskBadge"></i></div></button>
     <button data-t="details"><span>🔎</span>التفاصيل</button>
+    <button data-t="rounds" class="hidden" id="roundsTabBtn"><span>🗓️</span>الجولات</button>
     <button data-t="awards" class="hidden" id="awardsTabBtn"><span>🏆</span><div>الجوايز<i class="badge hidden" id="awBadge"></i></div></button>
   </nav>
 
@@ -257,6 +285,16 @@
     </div>
     <div class="card"><h3>التسجيل كل يوم (آخر 30 يوم)</h3><div class="chart"><canvas id="cDetail"></canvas></div></div>
   </section>
+  <!-- ═══ الجولات: تجهيز الجاي + إنهاء الحالية ═══ -->
+  <section id="t-rounds" class="hidden">
+    <div class="aw-head">
+      <div class="seg" id="rdTypeSeg"><button data-x="LOCAL" class="on">🇪🇬 محلي</button><button data-x="WORLD">🌍 عالمي</button></div>
+      <button class="btn go" id="rdNewBtn" style="margin-inline-start:auto">➕ جولة جديدة</button>
+    </div>
+    <div class="rd-now" id="rdNow">…</div>
+    <div id="rdList"></div>
+  </section>
+
   <!-- ═══ الجوايز (صور الكسبانين) ═══ -->
   <section id="t-awards" class="hidden">
     <div class="aw-head">
@@ -280,6 +318,28 @@
     <p class="hint" id="isNote"></p>
     <button class="btn primary hidden" id="isGo">شوفها في التفاصيل ←</button>
     <button class="btn hidden" id="isRef" style="width:100%;margin-top:8px"></button>
+  </div>
+</div>
+
+<!-- جولة جديدة / تعديل -->
+<div id="roundSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="rfTitle">جولة جديدة</h2><button class="icon-btn" onclick="closeSheet('roundSheet')">✕</button></div>
+    <p class="hint" id="rfHint"></p>
+    <label class="fl">بتتفتح للناس (عادة الجمعة 12 الضهر)</label>
+    <input type="datetime-local" id="rfOpens" class="in">
+    <label class="fl">الماتشات</label>
+    <div id="rfMatches"></div>
+    <button class="btn" id="rfAddMatch" style="width:100%">+ ماتش</button>
+    <p class="hint" id="rfDeadline"></p>
+    <label class="fl">الفرق اللي اليوزر يختار لاعيبته منها</label>
+    <div class="poolbox" id="rfPool"></div>
+    <label class="fl">البادجت (مليون)</label>
+    <input type="number" id="rfBudget" class="in" min="1" step="0.5">
+    <label class="fl">جوايز الجولة (الأول / التاني / التالت)</label>
+    <div class="grid3"><input class="in" id="rfP1" placeholder="1000 جنيه"><input class="in" id="rfP2" placeholder="500 جنيه"><input class="in" id="rfP3" placeholder="250 جنيه"></div>
+    <button class="btn primary" id="rfSave" style="margin-top:14px">حفظ كجولة جاية</button>
+    <div class="msg" id="rfMsg"></div>
   </div>
 </div>
 
@@ -372,7 +432,7 @@ async function boot() {
   $('who').innerHTML = (me.role === 'SUPER_ADMIN' ? '⭐ سوبر أدمن' : 'أدمن') + ' · <bdi dir="ltr">' + me.email + '</bdi>';
   $('adminsBtn').classList.toggle('hidden', me.role !== 'SUPER_ADMIN');
   show('app');
-  if (me.permissions.includes('fantasy')) { $('awardsTabBtn').classList.remove('hidden'); refreshAwardBadge(); }
+  if (me.permissions.includes('fantasy')) { $('awardsTabBtn').classList.remove('hidden'); $('roundsTabBtn').classList.remove('hidden'); refreshAwardBadge(); }
   if (!me.permissions.includes('dashboard')) { $('t-overview').innerHTML = '<p class="hint">مفيش صلاحية "الداشبورد" للحساب ده.</p>'; return; }
   loadAll();
 }
@@ -382,10 +442,11 @@ sb.auth.onAuthStateChange(ev => { if (ev === 'SIGNED_IN' && !me) boot(); });
 function go(t) {
   tab = t;
   document.querySelectorAll('#tabs button').forEach(b => b.classList.toggle('on', b.dataset.t === t));
-  ['overview','summary','details','awards'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
+  ['overview','summary','details','awards','rounds'].forEach(x => $('t-' + x).classList.toggle('hidden', x !== t));
   window.scrollTo({ top: 0 });
   if (t === 'details') loadDetails();
   if (t === 'awards') loadAwardPeriods();
+  if (t === 'rounds') loadRounds();
 }
 document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => go(b.dataset.t));
 document.querySelectorAll('#modeSeg button').forEach(b => {
@@ -605,6 +666,153 @@ $('awFile').onchange = async () => {
   const { error } = await sb.rpc('mgmt_save_highlight', { p_type: awType, p_period: awTarget.period, p_key: String(awTarget.key), p_user_id: awTarget.user_id, p_photo_path: path });
   if (error) { $('awSum').textContent = 'اترفعت بس ما اتربطتش: ' + errText(error); return; }
   awTarget = null; await loadAwardPeriods(); refreshAwardBadge();
+};
+
+/* ─── الجولات ─── */
+let rdType = 'LOCAL', rdData = null, rdTeams = null, rfEditing = null;
+const ST_AR = { upcoming: '🗓️ جاية', open: '🟢 مفتوحة', live: '🔴 شغالة', finished: '🏁 خلصت', draft: '✏️ مسودة', cancelled: '✖ ملغية' };
+const fmtDT = s => s ? new Date(s).toLocaleString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '—';
+const toLocalInput = d => { const x = new Date(d); x.setMinutes(x.getMinutes() - x.getTimezoneOffset()); return x.toISOString().slice(0, 16); };
+document.querySelectorAll('#rdTypeSeg button').forEach(b => b.onclick = () => {
+  rdType = b.dataset.x; document.querySelectorAll('#rdTypeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadRounds(); });
+
+const RD_ERR = { round_still_running: 'فيه جولة لسه شغالة — أنهيها الأول.', no_upcoming_round: 'مفيش جولة جاية متجهزة.',
+  deadline_not_passed: 'التشكيلات لسه مفتوحة — استنى لحد الديدلاين.', results_exist: 'النتايج موجودة بالفعل.',
+  match_in_past: 'فيه ماتش ميعاده فات.', deadline_before_open: 'معاد قفل التشكيل (3 ساعات قبل أول ماتش) لازم يبقى بعد ما الجولة تتفتح.',
+  bad_match: 'كل ماتش لازم فيه فريقين مختلفين وميعاد.', pool_required: 'اختار فريق واحد على الأقل اليوزر يختار منه.',
+  round_already_has_type: 'الجولة دي فيها النوع ده بالفعل.', only_upcoming_can_be_edited: 'التعديل للجولات الجاية بس.', budget_required: 'اكتب البادجت.' };
+const rdErr = e => { const m = (e && e.message) || ''; const k = Object.keys(RD_ERR).find(k => m.includes(k)); return k ? RD_ERR[k] : errText(e); };
+
+async function loadRounds() {
+  $('rdList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_rounds_overview', { p_type: rdType });
+  if (error) { $('rdList').innerHTML = `<p class="hint">${rdErr(error)}</p>`; return; }
+  rdData = data; const rs = data.rounds || [];
+  const cur = rs.find(r => r.state === 'open' || r.state === 'live');
+  const ups = rs.filter(r => r.state === 'upcoming').sort((a, b) => a.round_no - b.round_no);
+  const now = new Date();
+  $('rdNow').innerHTML = `📅 <b>${MONTH_AR[now.getMonth()]} ${now.getFullYear()}</b><br>`
+    + (cur ? `الجولة ${cur.round_no} ${ST_AR[cur.state]} · ${cur.state === 'open' ? 'التشكيل بيتقفل ' + fmtDT(cur.deadline) : 'النتايج ' + fmtDT(cur.results_at)}` : 'مفيش جولة شغالة دلوقتي.')
+    + `<br>${ups.length ? `جاهز بعدها: ${ups.length} جولة (أقربها الجولة ${ups[0].round_no} · بتتفتح ${fmtDT(ups[0].opens_at)})` : '⚠️ مفيش جولات جاية متجهزة — جهّز الجاية.'}`;
+  let lastMonth = null, html = '';
+  const order = [...rs].sort((a, b) => b.round_no - a.round_no);
+  for (const r of order) {
+    if (r.month !== lastMonth) { html += `<div class="rd-month">${monthAr(r.month)}</div>`; lastMonth = r.month; }
+    const acts = [];
+    if (r.state === 'upcoming') {
+      acts.push(`<button class="btn" onclick="editRound('${r.event_id}')">✏️ تعديل</button>`);
+      if (!cur && ups[0] && ups[0].event_id === r.event_id) acts.push(`<button class="btn go" onclick="openNext()">🟢 افتحها دلوقتي</button>`);
+      acts.push(`<button class="btn warn" onclick="deleteRound('${r.event_id}', ${r.round_no})">🗑 مسح</button>`);
+    }
+    if (r.state === 'live') {
+      if (!r.has_stats && me.role === 'SUPER_ADMIN') acts.push(`<button class="btn" onclick="simResults('${r.event_id}')">🎲 نتايج تجريبية</button>`);
+      acts.push(`<button class="btn go" onclick="finishRound('${r.event_id}', ${r.round_no}, ${r.has_stats})">🏁 إنهاء واحسب النقط</button>`);
+    }
+    html += `<div class="rd ${r.state === 'upcoming' ? 'up' : ''}">
+      <div class="top"><b>الجولة ${r.round_no}</b><span class="chip-st st-${r.state}">${ST_AR[r.state] || r.state}</span></div>
+      <div class="meta">بتتفتح ${fmtDT(r.opens_at)} · التشكيل بيتقفل ${fmtDT(r.deadline)}<br>
+        البادجت ${r.budget}M · ${r.squads} تشكيلة${r.prizes?.length ? ' · 🏆 ' + r.prizes.join(' / ') : ''}${r.state === 'live' ? (r.has_stats ? ' · ✅ النتايج متسجلة' : ' · ⚠️ النتايج لسه') : ''}</div>
+      <div class="ms">${(r.matches || []).map(m => `<span>⚽ ${m.home_name} × ${m.away_name} — ${fmtDT(m.at)}</span>`).join('')}</div>
+      ${acts.length ? `<div class="acts">${acts.join('')}</div>` : ''}
+    </div>`;
+  }
+  $('rdList').innerHTML = html || '<p class="hint">مفيش جولات لسه.</p>';
+}
+async function openNext() {
+  if (!confirm('تفتح الجولة الجاية للناس دلوقتي؟')) return;
+  const { error } = await sb.rpc('mgmt_round_open_next', { p_type: rdType });
+  if (error) return alert(rdErr(error)); loadRounds();
+}
+async function finishRound(id, no, hasStats) {
+  if (!hasStats && !confirm('⚠️ نتايج الماتشات لسه ما اتسجلتش — كل الناس هتاخد صفر. تكمل؟')) return;
+  if (!confirm(`تنهي الجولة ${no}؟ النقط هتتحسب، والجولة الجاية هتتفتح لوحدها.`)) return;
+  const { data, error } = await sb.rpc('mgmt_round_finish', { p_event_id: id });
+  if (error) return alert(rdErr(error));
+  alert(data && data.opened ? 'خلصت ✅ والجولة الجاية اتفتحت.' : 'خلصت ✅ (مفيش جولة جاية متجهزة).');
+  loadRounds(); refreshAwardBadge();
+}
+async function simResults(id) {
+  if (!confirm('تحط نتايج عشوائية للماتشات؟ (للتجربة بس)')) return;
+  const { error } = await sb.rpc('mgmt_sim_results', { p_event_id: id });
+  if (error) return alert(rdErr(error)); loadRounds();
+}
+async function deleteRound(id, no) {
+  if (!confirm(`تمسح الجولة ${no} الجاية؟`)) return;
+  const { error } = await sb.rpc('mgmt_round_delete', { p_event_id: id });
+  if (error) return alert(rdErr(error)); loadRounds();
+}
+
+// ─── فورم الجولة ───
+async function ensureTeams() {
+  if (rdTeams) return;
+  const { data, error } = await sb.rpc('mgmt_teams');
+  if (error) throw error; rdTeams = data || [];
+}
+function teamOptions(sel) {
+  const byC = {}; rdTeams.forEach(t => (byC[t.country || '—'] ??= []).push(t));
+  const first = rdType === 'LOCAL' ? ['Egypt'] : ['England', 'Spain', 'France', 'Germany'];
+  const cs = [...first.filter(c => byC[c]), ...Object.keys(byC).filter(c => !first.includes(c)).sort()];
+  return '<option value="">اختار</option>' + cs.map(c => `<optgroup label="${c}">${byC[c].map(t =>
+    `<option value="${t.id}" ${t.id === sel ? 'selected' : ''}>${t.name}${t.players ? ' (' + t.players + ')' : ''}</option>`).join('')}</optgroup>`).join('');
+}
+function addMatchRow(m = {}) {
+  const d = document.createElement('div'); d.className = 'mrow';
+  d.innerHTML = `<button class="x" title="شيل">×</button>
+    <select class="h">${teamOptions(m.home)}</select><select class="a">${teamOptions(m.away)}</select>
+    <div class="full"><input type="datetime-local" class="at" value="${m.at ? toLocalInput(m.at) : ''}"></div>`;
+  d.querySelector('.x').onclick = () => { d.remove(); refreshForm(); };
+  d.querySelectorAll('select,input').forEach(x => x.onchange = refreshForm);
+  $('rfMatches').appendChild(d);
+}
+let poolState = {};
+function refreshForm() {
+  const rows = [...document.querySelectorAll('#rfMatches .mrow')];
+  const times = rows.map(r => r.querySelector('.at').value).filter(Boolean).map(v => new Date(v));
+  if (times.length) {
+    const first = new Date(Math.min(...times)); const dl = new Date(first.getTime() - 3 * 3600 * 1000);
+    $('rfDeadline').textContent = `⏰ التشكيل هيتقفل ${fmtDT(dl)} (3 ساعات قبل أول ماتش).`;
+  } else $('rfDeadline').textContent = '';
+  const ids = new Set(rows.flatMap(r => [r.querySelector('.h').value, r.querySelector('.a').value]).filter(Boolean));
+  const teams = rdTeams.filter(t => ids.has(t.id));
+  teams.forEach(t => { if (!(t.id in poolState)) poolState[t.id] = t.players > 0; });
+  $('rfPool').innerHTML = teams.length ? teams.map(t => `<label><input type="checkbox" data-id="${t.id}" ${poolState[t.id] ? 'checked' : ''}>${t.name}${t.players ? '' : ' (مفيش لاعيبة)'}</label>`).join('')
+    : '<span class="hint">اختار الماتشات الأول.</span>';
+  $('rfPool').querySelectorAll('input').forEach(i => i.onchange = () => { poolState[i.dataset.id] = i.checked; });
+}
+async function openRoundForm(r) {
+  try { await ensureTeams(); } catch (e) { return alert(rdErr(e)); }
+  rfEditing = r || null; poolState = {};
+  $('rfTitle').textContent = r ? `تعديل الجولة ${r.round_no}` : `الجولة ${rdData.next_round_no} الجديدة · ${rdType === 'LOCAL' ? 'محلي' : 'عالمي'}`;
+  $('rfHint').textContent = 'بتتحفظ "جاية": الناس يشوفوها معاينة ومكتوب إنها قابلة للتعديل، ومحدش يقدر يسجل فيها لحد ما تتفتح.';
+  $('rfOpens').value = toLocalInput(r ? r.opens_at : (rdData.next_friday || new Date()));
+  $('rfBudget').value = r ? r.budget : (rdData.last_budget || (rdType === 'LOCAL' ? 9 : 420));
+  const pz = r?.prizes || [];
+  ['rfP1','rfP2','rfP3'].forEach((id, i) => $(id).value = pz[i] || '');
+  $('rfMatches').innerHTML = '';
+  (r?.matches?.length ? r.matches : [{}]).forEach(m => addMatchRow(m));
+  if (r) (r.pool || []).forEach(id => poolState[id] = true);
+  refreshForm(); setMsg($('rfMsg'), '');
+  $('roundSheet').classList.remove('hidden');
+}
+function editRound(id) { openRoundForm((rdData.rounds || []).find(r => r.event_id === id)); }
+$('rdNewBtn').onclick = () => openRoundForm(null);
+$('rfAddMatch').onclick = () => addMatchRow();
+$('rfSave').onclick = async () => {
+  const matches = [...document.querySelectorAll('#rfMatches .mrow')].map(r => ({
+    home: r.querySelector('.h').value, away: r.querySelector('.a').value,
+    at: r.querySelector('.at').value ? new Date(r.querySelector('.at').value).toISOString() : null }));
+  if (!matches.length || matches.some(m => !m.home || !m.away || !m.at)) return setMsg($('rfMsg'), 'كمّل بيانات كل ماتش (الفريقين والميعاد).', 'err');
+  const pool = Object.entries(poolState).filter(([, v]) => v).map(([k]) => k);
+  const prizes = ['rfP1','rfP2','rfP3'].map(id => $(id).value.trim());
+  $('rfSave').disabled = true; setMsg($('rfMsg'), 'بنحفظ…');
+  const { data, error } = await sb.rpc('mgmt_round_save', {
+    p_type: rdType, p_opens_at: new Date($('rfOpens').value).toISOString(), p_matches: matches, p_pool: pool,
+    p_budget: Number($('rfBudget').value), p_prizes: prizes.some(Boolean) ? prizes : null,
+    p_round_no: null, p_event_id: rfEditing ? rfEditing.event_id : null });
+  $('rfSave').disabled = false;
+  if (error) return setMsg($('rfMsg'), rdErr(error), 'err');
+  setMsg($('rfMsg'), `اتحفظت ✅ الجولة ${data.round_no}`, 'ok');
+  setTimeout(() => { closeSheet('roundSheet'); loadRounds(); }, 600);
 };
 
 /* ─── الأدمنز ─── */
