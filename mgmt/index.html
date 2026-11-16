@@ -115,6 +115,7 @@
   .plist .pp button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:9px;padding:5px 10px;font-weight:900;font-family:inherit;cursor:pointer;min-width:56px}
   .plist .pp button.ov{border-color:var(--gold);color:var(--gold)}
   .plist .pp.done{background:rgba(0,255,135,.05);border-radius:10px}
+  .plist .pp .ok{color:var(--green);font-weight:900;font-size:16px;margin-inline-start:6px}
   .plist .pp.fresh{background:rgba(255,179,0,.10);border-radius:10px;box-shadow:inset 3px 0 0 var(--gold)}
   .plist .pp .when{display:inline-block;font-size:10.5px;font-weight:800;color:var(--green);margin-inline-start:6px}
   .plist .pp.fresh .when{color:var(--gold)}
@@ -393,6 +394,21 @@
     <div id="rsBody"><p class="hint">بنحمّل…</p></div>
   </section>
 
+  <!-- ═══ الأسعار (كنترول): تعديل أسعار لاعيبة جولة جاية ═══ -->
+  <section id="t-prices" class="hidden">
+    <div class="aw-head">
+      <div class="seg" id="prTypeSeg"><button data-x="LOCAL" class="on">🇪🇬 محلي</button><button data-x="WORLD">🌍 عالمي</button></div>
+      <select id="prRound" class="aw-sel"></select>
+    </div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <select id="prClub" class="aw-sel" style="min-width:0;flex:1"></select>
+      <select id="prPos" class="aw-sel" style="min-width:0;flex:1">
+        <option value="">كل المراكز</option><option value="GK">حراس</option><option value="DEF">دفاع</option><option value="MID">وسط</option><option value="FWD">هجوم</option></select>
+    </div>
+    <p class="aw-sum" id="prSum"></p>
+    <div class="card plist" id="prList" style="padding:4px 8px"></div>
+  </section>
+
   <!-- ═══ الأدمنز (كنترول، سوبر أدمن بس) ═══ -->
   <section id="t-admins" class="hidden">
     <p class="hint">السوبر أدمن يقدر يعمل كل حاجة ويضيف أدمنز. الأدمن بياخد الأقسام اللي تختارها له بس.</p>
@@ -591,9 +607,9 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
     { k: 'comp', ar: '🏆 المسابقات', soon: true }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
-    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['awards', 'صور الكسبانين']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','awards','admins'];
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -635,6 +651,7 @@ function go(t) {
   if (t === 'rounds') loadRounds();
   if (t === 'results') loadResults();
   if (t === 'fnum') loadFn();
+  if (t === 'prices') loadPricesTab();
   if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
 document.querySelectorAll('#chartSeg button').forEach(b => b.onclick = () => {
@@ -1042,29 +1059,7 @@ function renderPricing() {
     h += `<div class="tierrow"><b style="width:46px">${POS_AR[pos]}</b>${['elite','premium','mid','budget'].filter(k => t[k]).map(k =>
       `<span>${TIER[k]} ${t[k].n} · ${t[k].min === t[k].max ? t[k].min : t[k].min + '–' + t[k].max}</span>`).join('')}</div>`;
   }
-  // فلاتر القايمة: النادي · المركز · الترتيب
-  const clubs = [...new Set((d.players || []).map(p => p.team))].sort();
-  const sel = (id, opts, cur, on) => `<select class="aw-sel" style="min-width:0;flex:1;padding:9px" onchange="${on}">${opts.map(([v, a]) =>
-      `<option value="${v}" ${v === cur ? 'selected' : ''}>${a}</option>`).join('')}</select>`;
-  const P = (ps.fPos || ''), C = (ps.fClub || ''), S = (ps.sort || 'price_desc');
-  let list = (d.players || []).filter(p => (!P || p.pos === P) && (!C || p.team === C));
-  const pv = p => ps.over[p.id] ?? Number(p.auto);
-  list = [...list].sort({ price_desc: (a, b) => pv(b) - pv(a), price_asc: (a, b) => pv(a) - pv(b),
-    mv_desc: (a, b) => b.mv - a.mv, name: (a, b) => (a.name_ar || a.name).localeCompare(b.name_ar || b.name) }[S]);
-  const cards = (d.players || []).filter(p => p.card || p.card_fixed).length;
-  h += `<label class="fl">اللاعيبة (${list.length}) · 📋 اتعملهم كارت ${cards} من ${(d.players || []).length} · دوس على أي لاعب يفتح كارته</label>
-    <div style="display:flex;gap:6px;margin-bottom:6px">
-      ${sel('c', [['', 'كل الأندية'], ...clubs.map(c => [c, c])], C, "ps.fClub=this.value;renderPricing()")}
-      ${sel('p', [['', 'كل المراكز'], ['GK', 'حراس'], ['DEF', 'دفاع'], ['MID', 'وسط'], ['FWD', 'هجوم']], P, "ps.fPos=this.value;renderPricing()")}
-      ${sel('s', [['price_desc', 'السعر ↓'], ['price_asc', 'السعر ↑'], ['mv_desc', 'القيمة السوقية ↓'], ['name', 'الاسم']], S, "ps.sort=this.value;renderPricing()")}
-    </div>
-    <div class="plist">` + list.map(p => {
-      const pr = ps.over[p.id] ?? Number(p.auto);
-      const edited = p.card || p.card_fixed || ps.over[p.id] != null;
-      const fresh = p.card_at && (Date.now() - new Date(p.card_at).getTime()) < 30 * 60 * 1000;
-      return `<div class="pp ${fresh ? 'fresh' : edited ? 'done' : ''}" style="cursor:pointer" onclick="openCard('${p.id}')"><span class="tg">${TIER[p.tier]}</span>
-        <div class="nm">${edited ? '✏️ ' : ''}${p.name_ar || p.name}${p.card_at ? `<span class="when">${ago(p.card_at)}</span>` : ''}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
-        <button class="${ps.over[p.id] != null ? 'ov' : ''}">${pr}</button></div>`; }).join('') + `</div>`;
+  h += `<p class="hint" style="margin-top:12px">✏️ تعديل أسعار اللاعيبة نفسهم من تابة <b>الأسعار</b>.</p>`;
   $('psBody').innerHTML = h;
 }
 /* ── مختبر الميزانية: بيبني تشكيلات حقيقية من لاعيبة الجولة ── */
@@ -1137,7 +1132,48 @@ function budgetLab() {
     + `<div class="lab"><h4>💎 أغلى تشكيلة ممكنة (الحلم) <span style="color:var(--red);font-size:12px">${dreamC > B ? 'مستحيلة ✔' : 'ممكنة ⚠️'}</span></h4>${pitch(dream)}</div>`;
 }
 
-// "اتعدل من 3 دقايق"
+/* ─── تابة الأسعار ─── */
+let pt = { type: 'LOCAL', ev: null, data: null, rounds: [] };
+document.querySelectorAll('#prTypeSeg button').forEach(b => b.onclick = () => {
+  pt.type = b.dataset.x; document.querySelectorAll('#prTypeSeg button').forEach(x => x.classList.toggle('on', x === b)); loadPricesTab(); });
+$('prRound').onchange = () => { pt.ev = $('prRound').value; loadPriceList(); };
+$('prClub').onchange = () => renderPriceList();
+$('prPos').onchange = () => renderPriceList();
+async function loadPricesTab() {
+  $('prList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_rounds_overview', { p_type: pt.type });
+  if (error) { $('prList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  pt.rounds = (data.rounds || []).filter(r => r.state === 'upcoming').sort((a, b) => a.round_no - b.round_no);
+  if (!pt.rounds.length) { $('prRound').innerHTML = '<option value="">مفيش جولات جاية</option>'; $('prList').innerHTML = '<p class="hint">جهّز جولة جاية من تابة الجولات الأول.</p>'; $('prSum').textContent = ''; return; }
+  if (!pt.rounds.some(r => r.event_id === pt.ev)) pt.ev = pt.rounds[0].event_id;
+  $('prRound').innerHTML = pt.rounds.map(r => `<option value="${r.event_id}" ${r.event_id === pt.ev ? 'selected' : ''}>الجولة ${r.round_no} · بتتفتح ${fmtDT(r.opens_at)}</option>`).join('');
+  loadPriceList();
+}
+async function loadPriceList() {
+  $('prList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_price_players', { p_event_id: pt.ev });
+  if (error) { $('prList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  pt.data = data;
+  const clubs = [...new Set((data.players || []).map(p => p.team))].sort();
+  const keep = $('prClub').value;
+  $('prClub').innerHTML = '<option value="">كل الأندية</option>' + clubs.map(c => `<option ${c === keep ? 'selected' : ''}>${c}</option>`).join('');
+  renderPriceList();
+}
+function renderPriceList() {
+  const C = $('prClub').value, P = $('prPos').value, all = pt.data.players || [];
+  const list = all.filter(p => (!C || p.team === C) && (!P || p.pos === P));   // الترتيب ثابت من السيرفر
+  const done = all.filter(p => p.card || p.round_override).length;
+  $('prSum').textContent = `${list.length} لاعب · اتعدل منهم ${done} من ${all.length}` + (pt.data.squads ? ' · ⚠️ فيه تشكيلات محفوظة، مينفعش تتغير' : '');
+  $('prList').innerHTML = list.map(p => {
+    const recent = p.edited_at && (Date.now() - new Date(p.edited_at).getTime()) < 10 * 60 * 1000;
+    return `<div class="pp" style="cursor:pointer" onclick="openCard('${p.id}', 'tab')"><span class="tg">${TIER[p.tier]}</span>
+      <div class="nm">${p.name_ar || p.name}${recent ? '<span class="ok">✓</span>' : ''}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
+      <button class="${p.round_override ? 'ov' : ''}">${Number(p.price)}</button></div>`; }).join('') || '<p class="hint">مفيش لاعيبة بالفلتر ده.</p>';
+}
+// ✓ يختفي لوحده بعد 10 دقايق
+setInterval(() => { if (tab === 'prices' && pt.data) renderPriceList(); }, 60000);
+
+// "اتعدل من 3 دقايق\"
 function ago(t) {
   const s = Math.max(0, (Date.now() - new Date(t).getTime()) / 1000);
   if (s < 60) return 'اتعدل دلوقتي';
@@ -1160,14 +1196,17 @@ const POSQ = { GK: ['starter', 'team_def', 'pen_saver', 'cards'], DEF: ['starter
   MID: ['starter', 'goals', 'assists', 'pens', 'defensive', 'cards'], FWD: ['starter', 'goals', 'assists', 'pens', 'misses', 'cards'] };
 const GOAL_PTS = { GK: 10, DEF: 6, MID: 5, FWD: 4 };
 let pc = null, pcTimer = null;
-async function openCard(pid) {
-  const p = (ps.data.players || []).find(x => x.id === pid); if (!p) return;
-  pc = { p, ans: {}, card: null, fixed: '', delta: '', note: '', round: ps.over[pid] ?? '' };
+async function openCard(pid, from) {
+  const fromTab = from === 'tab';
+  const src = fromTab ? (pt.data.players || []) : (ps.data.players || []);
+  const p = src.find(x => x.id === pid); if (!p) return;
+  pc = { p, ev: fromTab ? pt.ev : ps.id, fromTab, ans: {}, card: null, fixed: '', delta: '', note: '',
+         round: fromTab ? (p.round_override ? Number(p.price) : '') : (ps.over[pid] ?? '') };
   $('pcTitle').textContent = p.name_ar || p.name;
   $('pcSub').textContent = `${p.team} · ${({ GK: 'حارس', DEF: 'مدافع', MID: 'وسط', FWD: 'مهاجم' })[p.pos]} · القيمة السوقية ${p.mv}M€`;
   $('pcBody').innerHTML = '<p class="hint">بنحمّل…</p>'; setMsg($('pcMsg'), '');
   $('cardSheet').classList.remove('hidden');
-  const { data, error } = await sb.rpc('mgmt_player_card', { p_event_id: ps.id, p_player_id: pid });
+  const { data, error } = await sb.rpc('mgmt_player_card', { p_event_id: pc.ev, p_player_id: pid });
   if (error) { $('pcBody').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
   pc.card = data; pc.ans = { ...(data.saved?.answers || {}) };
   pc.fixed = data.saved?.fixed_price ?? ''; pc.delta = data.saved?.price_delta ?? ''; pc.note = data.saved?.note ?? '';
@@ -1178,7 +1217,7 @@ function setAns(k, v) { if (pc.ans[k] === v) delete pc.ans[k]; else pc.ans[k] = 
 function previewCard() {
   clearTimeout(pcTimer);
   pcTimer = setTimeout(async () => {
-    const { data } = await sb.rpc('mgmt_player_card', { p_event_id: ps.id, p_player_id: pc.p.id, p_answers: pc.ans });
+    const { data } = await sb.rpc('mgmt_player_card', { p_event_id: pc.ev, p_player_id: pc.p.id, p_answers: pc.ans });
     if (data) { pc.card = { ...pc.card, ...data, saved: pc.card.saved }; renderCard(); }
   }, 250);
 }
@@ -1240,11 +1279,22 @@ $('pcSave').onclick = async () => {
     p_fixed: num(pc.fixed), p_delta: num(pc.delta), p_note: pc.note || null });
   $('pcSave').disabled = false;
   if (error) return setMsg($('pcMsg'), errText(error), 'err');
-  const r = num(pc.round); if (r == null) delete ps.over[pc.p.id]; else ps.over[pc.p.id] = Math.round(r * 2) / 2;
-  setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
-  // نحدّث القايمة والميزانيات بالأسعار الجديدة
-  const { data } = await sb.rpc('mgmt_price_preview', { p_event_id: ps.id });
-  if (data) { ps.data = data; renderPricing(); }
+  const r = num(pc.round);
+  if (pc.fromTab) {
+    // سعر الجولة دي بس: بيتحفظ على طول
+    const cur = pc.p.round_override ? Number(pc.p.price) : null;
+    if (r !== cur) {
+      const { error: e2 } = await sb.rpc('mgmt_price_set_round', { p_event_id: pc.ev, p_player_id: pc.p.id, p_price: r });
+      if (e2) return setMsg($('pcMsg'), /squads_exist/.test(e2.message) ? 'فيه ناس حفظت تشكيلات في الجولة دي — مينفعش تتغير.' : errText(e2), 'err');
+    }
+    setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
+    await loadPriceList();
+  } else {
+    if (r == null) delete ps.over[pc.p.id]; else ps.over[pc.p.id] = Math.round(r * 2) / 2;
+    setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
+    const { data } = await sb.rpc('mgmt_price_preview', { p_event_id: ps.id });
+    if (data) { ps.data = data; renderPricing(); }
+  }
   setTimeout(() => closeSheet('cardSheet'), 500);
 };
 
