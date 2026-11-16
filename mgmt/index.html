@@ -99,6 +99,21 @@
   .evform select{width:100%;padding:11px;border-radius:11px;border:1px solid var(--line);background:var(--card);color:var(--text);font-family:inherit;font-size:14px;margin-top:6px}
   .evform .seg{margin-top:4px}
   .evform label.ck{display:flex;gap:8px;align-items:center;font-size:13px;margin-top:10px}
+  /* الأسعار والميزانية */
+  .bopts{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+  .bopt{border:1px solid var(--line);border-radius:14px;padding:10px 6px;text-align:center;cursor:pointer;background:var(--bg);position:relative}
+  .bopt.on{border-color:var(--gold);background:rgba(255,179,0,.08)}
+  .bopt b{display:block;font-size:20px} .bopt small{color:var(--muted);font-size:11px;display:block;line-height:1.4}
+  .bopt .rec{position:absolute;top:-9px;left:50%;transform:translateX(-50%);background:var(--gold);color:#0B0B0F;font-size:10px;font-weight:900;padding:1px 8px;border-radius:999px;white-space:nowrap}
+  .tierrow{display:flex;gap:6px;flex-wrap:wrap;font-size:12px;margin:4px 0}
+  .tierrow span{background:var(--card2);border-radius:8px;padding:3px 8px}
+  .plist .pp{display:flex;align-items:center;gap:8px;padding:8px 4px;border-top:1px solid var(--line);font-size:13px}
+  .plist .pp:first-child{border-top:0}
+  .plist .pp .nm{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plist .pp .nm small{display:block;color:var(--muted);font-size:11px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .plist .pp .tg{font-size:11px;color:var(--muted);width:24px;text-align:center}
+  .plist .pp button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:9px;padding:5px 10px;font-weight:900;font-family:inherit;cursor:pointer;min-width:56px}
+  .plist .pp button.ov{border-color:var(--gold);color:var(--gold)}
   /* أرقام الفانتازي */
   .fk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
   .fk div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
@@ -416,6 +431,17 @@
     <div class="grid3"><input class="in" id="rfP1" placeholder="1000 جنيه"><input class="in" id="rfP2" placeholder="500 جنيه"><input class="in" id="rfP3" placeholder="250 جنيه"></div>
     <button class="btn primary" id="rfSave" style="margin-top:14px">حفظ كجولة جاية</button>
     <div class="msg" id="rfMsg"></div>
+  </div>
+</div>
+
+<!-- الأسعار والميزانية -->
+<div id="priceSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="psTitle">الأسعار والميزانية</h2><button class="icon-btn" onclick="closeSheet('priceSheet')">✕</button></div>
+    <p class="hint">الأسعار بتتحسب لوحدها من القيمة السوقية: 4 مستويات جوه كل مركز (💎 نجوم · ⭐ كويسين · 🔸 متوسطين · ▫️ رخاص). دوس على أي سعر تعدّله.</p>
+    <div id="psBody"><p class="hint">بنحسب…</p></div>
+    <button class="btn primary" id="psApply" style="margin-top:14px">اعتمد الأسعار والميزانية</button>
+    <div class="msg" id="psMsg"></div>
   </div>
 </div>
 
@@ -813,6 +839,7 @@ async function loadRounds() {
     const acts = [];
     if (r.state === 'upcoming') {
       acts.push(`<button class="btn" onclick="editRound('${r.event_id}')">✏️ تعديل</button>`);
+      acts.push(`<button class="btn gold" onclick="openPricing('${r.event_id}', ${r.round_no})">💰 الأسعار والميزانية</button>`);
       if (!rs.some(x => x.state === 'open') && ups[0] && ups[0].event_id === r.event_id) acts.push(`<button class="btn go" onclick="openNext()">🟢 افتحها دلوقتي</button>`);
       acts.push(`<button class="btn warn" onclick="deleteRound('${r.event_id}', ${r.round_no})">🗑 مسح</button>`);
     }
@@ -922,6 +949,73 @@ $('rfSave').onclick = async () => {
   if (error) return setMsg($('rfMsg'), rdErr(error), 'err');
   setMsg($('rfMsg'), `اتحفظت ✅ الجولة ${data.round_no}`, 'ok');
   setTimeout(() => { closeSheet('roundSheet'); loadRounds(); }, 600);
+};
+
+/* ─── الأسعار والميزانية (كنترول) ─── */
+let ps = null;
+const TIER = { elite: '💎', premium: '⭐', mid: '🔸', budget: '▫️' };
+const POS_AR = { GK: 'حراس', DEF: 'دفاع', MID: 'وسط', FWD: 'هجوم' };
+async function openPricing(id, no) {
+  ps = { id, no, data: null, budget: null, maxTeam: null, over: {} };
+  $('psTitle').textContent = `الأسعار والميزانية · الجولة ${no} · ${rdType === 'LOCAL' ? 'محلي' : 'عالمي'}`;
+  $('psBody').innerHTML = '<p class="hint">بنحسب…</p>'; setMsg($('psMsg'), '');
+  $('priceSheet').classList.remove('hidden');
+  const { data, error } = await sb.rpc('mgmt_price_preview', { p_event_id: id });
+  if (error) { $('psBody').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  ps.data = data; const b = data.budget;
+  ps.budget = data.applied ? Number(data.current_budget) : Number(b.recommended);
+  ps.maxTeam = data.applied && data.current_max_per_team ? data.current_max_per_team : b.max_per_team;
+  (data.players || []).forEach(p => { if (p.override) ps.over[p.id] = Number(p.price); });
+  renderPricing();
+}
+function renderPricing() {
+  const d = ps.data, b = d.budget, rec = Number(b.recommended);
+  const opt = (k, ar, sub) => { const v = Number(b[k]); return `<div class="bopt ${ps.budget === v ? 'on' : ''}" onclick="ps.budget=${v};renderPricing()">
+      ${v === Number(b.balanced) && rdType === 'WORLD' || (rdType === 'LOCAL' && k === 'hard') ? '' : ''}<b class="num">${v}</b><small>${ar}</small><small>${sub}</small></div>`; };
+  let h = `<label class="fl">الميزانية</label>
+    <div class="bopts">
+      ${opt('hard', '😤 صعبة', 'نجم واحد بالعافية')}
+      ${opt('balanced', '⚖️ متوازنة', 'نجم + 2 كويسين')}
+      ${opt('easy', '😌 سهلة', '2 نجوم + 2 كويسين')}
+    </div>
+    <div class="bopt ${ps.budget === rec ? 'on' : ''}" style="margin-top:12px" onclick="ps.budget=${rec};renderPricing()">
+      <span class="rec">✨ المقترحة</span><b class="num">${rec}</b><small>${rdType === 'LOCAL' ? 'بين الصعبة والمتوازنة — المحلي لاعيبته قليلة فلازم الناس تضحّي' : 'المتوازنة'}</small></div>
+    <div style="display:flex;gap:8px;margin-top:10px">
+      <div style="flex:1"><label class="fl" style="margin-top:0">ميزانية بإيدك</label>
+        <input class="in" type="number" step="0.5" min="40" max="200" value="${ps.budget}" onchange="ps.budget=Number(this.value);renderPricing()"></div>
+      <div style="flex:1"><label class="fl" style="margin-top:0">أقصى لاعيبة من فريق</label>
+        <input class="in" type="number" min="1" max="11" value="${ps.maxTeam ?? ''}" placeholder="من غير حد" onchange="ps.maxTeam=this.value?Number(this.value):null"></div>
+    </div>
+    <p class="hint">أرخص فريق ممكن ${b.min_team} · أغلى فريق ممكن ${b.max_team}.</p>
+    <label class="fl">المستويات</label>`;
+  for (const pos of ['GK', 'DEF', 'MID', 'FWD']) {
+    const t = (d.tiers || {})[pos] || {};
+    h += `<div class="tierrow"><b style="width:46px">${POS_AR[pos]}</b>${['elite','premium','mid','budget'].filter(k => t[k]).map(k =>
+      `<span>${TIER[k]} ${t[k].n} · ${t[k].min === t[k].max ? t[k].min : t[k].min + '–' + t[k].max}</span>`).join('')}</div>`;
+  }
+  h += `<label class="fl">اللاعيبة</label><div class="plist">` + (d.players || []).map(p => {
+      const pr = ps.over[p.id] ?? Number(p.auto);
+      return `<div class="pp"><span class="tg">${TIER[p.tier]}</span><div class="nm">${p.name_ar || p.name}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
+        <button class="${ps.over[p.id] != null ? 'ov' : ''}" onclick="editPrice('${p.id}', ${Number(p.auto)})">${pr}</button></div>`; }).join('') + `</div>`;
+  $('psBody').innerHTML = h;
+}
+function editPrice(id, auto) {
+  const cur = ps.over[id] ?? auto;
+  const v = prompt(`السعر (الأوتوماتيك ${auto}) — سيبه فاضي يرجع للأوتوماتيك`, cur);
+  if (v === null) return;
+  if (v.trim() === '' || Number(v) === auto) delete ps.over[id];
+  else { const n = Math.round(Number(v) * 2) / 2; if (!(n >= 3.5 && n <= 15)) return alert('السعر لازم بين 3.5 و 15'); ps.over[id] = n; }
+  renderPricing();
+}
+$('psApply').onclick = async () => {
+  if (!ps || !ps.data) return;
+  if (!confirm(`تعتمد الأسعار دي والميزانية ${ps.budget} للجولة ${ps.no}؟`)) return;
+  $('psApply').disabled = true; setMsg($('psMsg'), 'بنحفظ…');
+  const { error } = await sb.rpc('mgmt_price_apply', { p_event_id: ps.id, p_budget: ps.budget, p_max_per_team: ps.maxTeam,
+    p_overrides: Object.entries(ps.over).map(([player_id, price]) => ({ player_id, price })) });
+  $('psApply').disabled = false;
+  if (error) return setMsg($('psMsg'), /squads_exist/.test(error.message) ? 'فيه ناس حفظت تشكيلات في الجولة دي — مينفعش تتغير.' : errText(error), 'err');
+  setMsg($('psMsg'), 'اتعتمدت ✅', 'ok'); setTimeout(() => { closeSheet('priceSheet'); loadRounds(); }, 600);
 };
 
 /* ─── أرقام الفانتازي (عرض بس) ─── */
