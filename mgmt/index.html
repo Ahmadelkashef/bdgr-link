@@ -127,6 +127,23 @@
   .pchip.elite .pv{background:var(--gold)}
   .labsum{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px}
   .labsum b{color:var(--text)}
+  /* كارت اللاعب */
+  .pcq{background:var(--card2);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-bottom:8px}
+  .pcq .t{font-size:14px;font-weight:700;display:flex;align-items:center;gap:8px}
+  .pcq .t small{color:var(--muted);font-weight:600;font-size:11px;margin-inline-start:auto}
+  .pcq .seg{margin-top:8px;width:100%} .pcq .seg button{flex:1;padding:7px 4px;font-size:12.5px}
+  .pcq .seg button.on{background:var(--text);color:#0B0B0F}
+  .pcq.yn{display:flex;align-items:center;justify-content:space-between;gap:8px}
+  .yn2{display:flex;gap:6px;flex:none}
+  .yn2 button{padding:6px 14px;border-radius:999px;border:1px solid var(--line);background:transparent;color:var(--muted);font-weight:800;font-family:inherit;cursor:pointer}
+  .yn2 button.yes{background:rgba(0,255,135,.12);border-color:var(--green);color:var(--green)}
+  .yn2 button.no{background:rgba(255,92,92,.12);border-color:var(--red);color:var(--red)}
+  .pbox{background:linear-gradient(135deg,#2B210A,var(--card));border:1px solid rgba(255,179,0,.45);border-radius:18px;padding:14px;margin-top:12px}
+  .pbox .big{font-size:40px;font-weight:900;color:var(--gold);line-height:1}
+  .pbox .was{color:var(--muted);font-size:13px;text-decoration:line-through;margin-top:6px}
+  .pbar{font-size:12px;margin-top:8px}.pbar .r{display:flex;justify-content:space-between;color:#d8d8de;margin-bottom:4px}
+  .pbar .trk{height:7px;background:var(--bg);border-radius:6px;overflow:hidden}.pbar .trk i{display:block;height:100%;border-radius:6px}
+  .why{margin-top:12px;border-top:1px solid var(--line);padding-top:10px}.why div{font-size:13px;line-height:1.7}
   /* أرقام الفانتازي */
   .fk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
   .fk div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
@@ -455,6 +472,17 @@
     <div id="psBody"><p class="hint">بنحسب…</p></div>
     <button class="btn primary" id="psApply" style="margin-top:14px">اعتمد الأسعار والميزانية</button>
     <div class="msg" id="psMsg"></div>
+  </div>
+</div>
+
+<!-- كارت اللاعب -->
+<div id="cardSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="pcTitle">كارت اللاعب</h2><button class="icon-btn" onclick="closeSheet('cardSheet')">✕</button></div>
+    <p class="hint" id="pcSub"></p>
+    <div id="pcBody"><p class="hint">بنحمّل…</p></div>
+    <button class="btn primary" id="pcSave" style="margin-top:14px">حفظ كارت اللاعب</button>
+    <div class="msg" id="pcMsg"></div>
   </div>
 </div>
 
@@ -1019,7 +1047,8 @@ function renderPricing() {
   const pv = p => ps.over[p.id] ?? Number(p.auto);
   list = [...list].sort({ price_desc: (a, b) => pv(b) - pv(a), price_asc: (a, b) => pv(a) - pv(b),
     mv_desc: (a, b) => b.mv - a.mv, name: (a, b) => (a.name_ar || a.name).localeCompare(b.name_ar || b.name) }[S]);
-  h += `<label class="fl">اللاعيبة (${list.length})</label>
+  const cards = (d.players || []).filter(p => p.card).length;
+  h += `<label class="fl">اللاعيبة (${list.length}) · 📋 اتعملهم كارت ${cards} من ${(d.players || []).length} · دوس على أي لاعب يفتح كارته</label>
     <div style="display:flex;gap:6px;margin-bottom:6px">
       ${sel('c', [['', 'كل الأندية'], ...clubs.map(c => [c, c])], C, "ps.fClub=this.value;renderPricing()")}
       ${sel('p', [['', 'كل المراكز'], ['GK', 'حراس'], ['DEF', 'دفاع'], ['MID', 'وسط'], ['FWD', 'هجوم']], P, "ps.fPos=this.value;renderPricing()")}
@@ -1027,8 +1056,9 @@ function renderPricing() {
     </div>
     <div class="plist">` + list.map(p => {
       const pr = ps.over[p.id] ?? Number(p.auto);
-      return `<div class="pp"><span class="tg">${TIER[p.tier]}</span><div class="nm">${p.name_ar || p.name}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
-        <button class="${ps.over[p.id] != null ? 'ov' : ''}" onclick="editPrice('${p.id}', ${Number(p.auto)})">${pr}</button></div>`; }).join('') + `</div>`;
+      return `<div class="pp" style="cursor:pointer" onclick="openCard('${p.id}')"><span class="tg">${TIER[p.tier]}</span>
+        <div class="nm">${p.card ? '📋 ' : ''}${p.name_ar || p.name}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
+        <button class="${ps.over[p.id] != null ? 'ov' : ''}">${pr}</button></div>`; }).join('') + `</div>`;
   $('psBody').innerHTML = h;
 }
 /* ── مختبر الميزانية: بيبني تشكيلات حقيقية من لاعيبة الجولة ── */
@@ -1100,6 +1130,109 @@ function budgetLab() {
     + ex.map(card).join('')
     + `<div class="lab"><h4>💎 أغلى تشكيلة ممكنة (الحلم) <span style="color:var(--red);font-size:12px">${dreamC > B ? 'مستحيلة ✔' : 'ممكنة ⚠️'}</span></h4>${pitch(dream)}</div>`;
 }
+
+/* ── كارت اللاعب: أسئلة على حسب المركز → سعر + ليه ── */
+const PQ = {
+  starter: { t: '⏱️ بيلعب أساسي؟', s: 'أهم سؤال', o: [['always', 'دايمًا'], ['sometimes', 'ساعات'], ['rarely', 'نادرًا']] },
+  team_def: { t: '🧱 فريقه دفاعه قوي؟', s: 'شباك نضيفة = +4', o: [['high', 'قوي'], ['mid', 'متوسط'], ['low', 'ضعيف']] },
+  goals: { t: '⚽ بيجيب أجوان؟', s: '', o: [['high', 'كتير'], ['mid', 'ساعات'], ['low', 'نادرًا']] },
+  assists: { t: '🅰️ بيعمل أسيستات؟', s: 'أسيست = +3', o: [['high', 'كتير'], ['mid', 'ساعات'], ['low', 'نادرًا']] },
+  pens: { t: '🎯 بيشوط ضربات الجزاء؟', yn: true },
+  pen_saver: { t: '🧤 بيصد ضربات الجزاء كويس؟', s: 'صد جزاء = +6', yn: true },
+  defensive: { t: '🛡️ دوره دفاعي بس؟', yn: true },
+  misses: { t: '😬 بيضيّع فرص وجزاء كتير؟', s: 'ضياع جزاء = −5', yn: true },
+  cards: { t: '🟨 بياخد كروت كتير؟', s: 'أصفر −1 · أحمر −3', yn: true } };
+const POSQ = { GK: ['starter', 'team_def', 'pen_saver', 'cards'], DEF: ['starter', 'team_def', 'goals', 'assists', 'cards'],
+  MID: ['starter', 'goals', 'assists', 'pens', 'defensive', 'cards'], FWD: ['starter', 'goals', 'assists', 'pens', 'misses', 'cards'] };
+const GOAL_PTS = { GK: 10, DEF: 6, MID: 5, FWD: 4 };
+let pc = null, pcTimer = null;
+async function openCard(pid) {
+  const p = (ps.data.players || []).find(x => x.id === pid); if (!p) return;
+  pc = { p, ans: {}, card: null, fixed: '', delta: '', note: '', round: ps.over[pid] ?? '' };
+  $('pcTitle').textContent = p.name_ar || p.name;
+  $('pcSub').textContent = `${p.team} · ${({ GK: 'حارس', DEF: 'مدافع', MID: 'وسط', FWD: 'مهاجم' })[p.pos]} · القيمة السوقية ${p.mv}M€`;
+  $('pcBody').innerHTML = '<p class="hint">بنحمّل…</p>'; setMsg($('pcMsg'), '');
+  $('cardSheet').classList.remove('hidden');
+  const { data, error } = await sb.rpc('mgmt_player_card', { p_event_id: ps.id, p_player_id: pid });
+  if (error) { $('pcBody').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  pc.card = data; pc.ans = { ...(data.saved?.answers || {}) };
+  pc.fixed = data.saved?.fixed_price ?? ''; pc.delta = data.saved?.price_delta ?? ''; pc.note = data.saved?.note ?? '';
+  pc.before = Number(data.price);
+  renderCard();
+}
+function setAns(k, v) { if (pc.ans[k] === v) delete pc.ans[k]; else pc.ans[k] = v; renderCard(); previewCard(); }
+function previewCard() {
+  clearTimeout(pcTimer);
+  pcTimer = setTimeout(async () => {
+    const { data } = await sb.rpc('mgmt_player_card', { p_event_id: ps.id, p_player_id: pc.p.id, p_answers: pc.ans });
+    if (data) { pc.card = { ...pc.card, ...data, saved: pc.card.saved }; renderCard(); }
+  }, 250);
+}
+function cardReasons() {
+  const a = pc.ans, pos = pc.p.pos, out = [];
+  const lv = { high: 'كتير', mid: 'ساعات', low: 'نادرًا' };
+  if (a.starter) out.push(a.starter === 'always' ? '✅ أساسي دايمًا، فهيلعب كل ماتش' : a.starter === 'rarely' ? '⚠️ نادرًا ما بيلعب أساسي، فممكن ميجيبش نقط خالص' : '➖ بيلعب ساعات');
+  if (a.goals) out.push((a.goals === 'high' ? '⚽ بيجيب أجوان كتير' : a.goals === 'low' ? '❌ أجوانه نادرة' : '⚽ بيجيب أجوان ساعات') + ` (الجون = +${GOAL_PTS[pos]})`);
+  if (a.assists) out.push(a.assists === 'high' ? '🅰️ أسيستات كتير' : a.assists === 'low' ? '❌ أسيستات نادرة' : '🅰️ أسيستات ساعات');
+  if (a.team_def) out.push(a.team_def === 'high' ? '🧱 فريقه دفاعه قوي، فشباك نضيفة كتير' : a.team_def === 'low' ? '🧱 فريقه بيستقبل كتير' : '🧱 فريقه دفاعه متوسط');
+  if (a.pens) out.push('🎯 بيشوط الجزاء، فأجوان زيادة');
+  if (a.pen_saver) out.push('🧤 بيصد الجزاء (+6)');
+  if (a.defensive) out.push('🛡️ دوره دفاعي: مهم للفريق بس نقطه في الفانتازي قليلة');
+  if (a.misses) out.push('😬 بيضيّع كتير (جزاء ضايع −5)');
+  if (a.cards) out.push('🟨 كروت كتير، فنقط بتتخصم');
+  const c = pc.card;
+  if (c.games >= 3) out.push(`📈 جاب ${c.ppm ?? 0} نقطة في الماتش في آخر ${c.games} ماتش`);
+  if (Number(c.s_mv) >= 0.85 && Number(c.price) < pc.before) out.push('➡️ قيمته السوقية عالية، بس ده مش معناه نقط كتير في الفانتازي');
+  return out;
+}
+function renderCard() {
+  const c = pc.card, pos = pc.p.pos, a = pc.ans;
+  const q = k => { const Q = PQ[k];
+    const sub = k === 'goals' ? `جون = +${GOAL_PTS[pos]}` : (Q.s || '');
+    if (Q.yn) return `<div class="pcq yn"><div class="t">${Q.t}${sub ? ` <small>${sub}</small>` : ''}</div>
+        <div class="yn2"><button class="${a[k] === true ? 'yes' : ''}" onclick="setAns('${k}',true)">آه</button><button class="${a[k] === false ? 'no' : ''}" onclick="setAns('${k}',false)">لا</button></div></div>`;
+    return `<div class="pcq"><div class="t">${Q.t}${sub ? ` <small>${sub}</small>` : ''}</div>
+        <div class="seg">${Q.o.map(([v, l]) => `<button class="${a[k] === v ? 'on' : ''}" onclick="setAns('${k}','${v}')">${l}</button>`).join('')}</div></div>`; };
+  const pct = x => Math.round(Number(x || 0) * 100);
+  const pr = Number(c.price), wasP = pc.before;
+  const ev = c.event_price != null ? Number(c.event_price) : null;
+  const reasons = cardReasons();
+  $('pcBody').innerHTML = `<label class="fl" style="margin-top:0">📋 أسئلة السعر</label>${POSQ[pos].map(q).join('')}
+    <div class="pbox">
+      <div style="display:flex;justify-content:space-between;align-items:flex-end">
+        <div><div style="color:var(--muted);font-size:12px;font-weight:800">السعر من الكارت</div><div class="big num">${pr}</div></div>
+        <div style="text-align:left"><span class="tag">${TIER[c.tier]} ${({ elite: 'نجوم', premium: 'كويسين', mid: 'متوسطين', budget: 'رخاص' })[c.tier]}</span>
+          ${wasP !== pr ? `<div class="was">كان ${wasP}</div>` : ''}${ev != null && ev !== pr ? `<div style="color:var(--muted);font-size:11.5px;margin-top:4px">سعره المعتمد في الجولة دي ${ev}${c.event_override ? ' (معدّل بإيدك)' : ''}</div>` : ''}</div>
+      </div>
+      <div class="pbar"><div class="r"><span>📋 من إجاباتك (40%)</span><b>${c.s_xp == null ? 'لسه ماجاوبتش' : c.xp + ' نقطة متوقعة/ماتش'}</b></div><div class="trk"><i style="width:${pct(c.s_xp)}%;background:var(--gold)"></i></div></div>
+      <div class="pbar"><div class="r"><span>💶 القيمة السوقية (30%)</span><b>${pc.p.mv}M€ · أعلى من ${pct(c.s_mv)}% من مركزه</b></div><div class="trk"><i style="width:${pct(c.s_mv)}%;background:#5AA9FF"></i></div></div>
+      <div class="pbar"><div class="r"><span>📈 نقطه الفعلية (30%)</span><b>${c.games >= 3 ? (c.ppm ?? 0) + '/ماتش · ' + c.games + ' ماتش' : 'أقل من 3 ماتشات'}</b></div><div class="trk"><i style="width:${c.games >= 3 ? pct(c.s_pts) : 0}%;background:var(--green)"></i></div></div>
+      ${reasons.length ? `<div class="why"><b style="font-size:13.5px">💡 ليه ${pr}؟</b>${reasons.map(r => `<div>${r}</div>`).join('')}</div>` : ''}
+      ${c.saved ? `<p class="hint" style="margin-bottom:0">آخر تعديل: <bdi dir="ltr">${c.saved.updated_by || ''}</bdi> · ${fmtDT(c.saved.updated_at)} · بيتطبق على كل الجولات الجاية</p>` : ''}
+    </div>
+    <label class="fl">تعديل يدوي (اختياري)</label>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl" style="margin-top:0">سعر ثابت دايمًا</label><input class="in" type="number" step="0.5" min="3.5" max="15" value="${pc.fixed}" placeholder="—" oninput="pc.fixed=this.value"></div>
+      <div style="flex:1"><label class="fl" style="margin-top:0">زوّد/نقّص دايمًا</label><input class="in" type="number" step="0.5" min="-5" max="5" value="${pc.delta}" placeholder="مثلًا -1" oninput="pc.delta=this.value"></div>
+    </div>
+    <div style="margin-top:8px"><label class="fl" style="margin-top:0">سعر للجولة دي بس</label><input class="in" type="number" step="0.5" min="3.5" max="15" value="${pc.round}" placeholder="—" oninput="pc.round=this.value"></div>
+    <label class="fl">ملاحظة (ليه؟)</label><input class="in" value="${(pc.note || '').replace(/"/g, '&quot;')}" placeholder="مثلًا: وسط دفاعي، مهم للمدرب بس مش بيسجل" oninput="pc.note=this.value">`;
+}
+$('pcSave').onclick = async () => {
+  if (!pc) return;
+  $('pcSave').disabled = true; setMsg($('pcMsg'), 'بنحفظ…');
+  const num = v => (v === '' || v == null) ? null : Number(v);
+  const { error } = await sb.rpc('mgmt_player_profile_save', { p_player_id: pc.p.id, p_answers: pc.ans,
+    p_fixed: num(pc.fixed), p_delta: num(pc.delta), p_note: pc.note || null });
+  $('pcSave').disabled = false;
+  if (error) return setMsg($('pcMsg'), errText(error), 'err');
+  const r = num(pc.round); if (r == null) delete ps.over[pc.p.id]; else ps.over[pc.p.id] = Math.round(r * 2) / 2;
+  setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
+  // نحدّث القايمة والميزانيات بالأسعار الجديدة
+  const { data } = await sb.rpc('mgmt_price_preview', { p_event_id: ps.id });
+  if (data) { ps.data = data; renderPricing(); }
+  setTimeout(() => closeSheet('cardSheet'), 500);
+};
 
 function editPrice(id, auto) {
   const cur = ps.over[id] ?? auto;
