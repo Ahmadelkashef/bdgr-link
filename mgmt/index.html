@@ -1010,7 +1010,22 @@ function renderPricing() {
     h += `<div class="tierrow"><b style="width:46px">${POS_AR[pos]}</b>${['elite','premium','mid','budget'].filter(k => t[k]).map(k =>
       `<span>${TIER[k]} ${t[k].n} · ${t[k].min === t[k].max ? t[k].min : t[k].min + '–' + t[k].max}</span>`).join('')}</div>`;
   }
-  h += `<label class="fl">اللاعيبة</label><div class="plist">` + (d.players || []).map(p => {
+  // فلاتر القايمة: النادي · المركز · الترتيب
+  const clubs = [...new Set((d.players || []).map(p => p.team))].sort();
+  const sel = (id, opts, cur, on) => `<select class="aw-sel" style="min-width:0;flex:1;padding:9px" onchange="${on}">${opts.map(([v, a]) =>
+      `<option value="${v}" ${v === cur ? 'selected' : ''}>${a}</option>`).join('')}</select>`;
+  const P = (ps.fPos || ''), C = (ps.fClub || ''), S = (ps.sort || 'price_desc');
+  let list = (d.players || []).filter(p => (!P || p.pos === P) && (!C || p.team === C));
+  const pv = p => ps.over[p.id] ?? Number(p.auto);
+  list = [...list].sort({ price_desc: (a, b) => pv(b) - pv(a), price_asc: (a, b) => pv(a) - pv(b),
+    mv_desc: (a, b) => b.mv - a.mv, name: (a, b) => (a.name_ar || a.name).localeCompare(b.name_ar || b.name) }[S]);
+  h += `<label class="fl">اللاعيبة (${list.length})</label>
+    <div style="display:flex;gap:6px;margin-bottom:6px">
+      ${sel('c', [['', 'كل الأندية'], ...clubs.map(c => [c, c])], C, "ps.fClub=this.value;renderPricing()")}
+      ${sel('p', [['', 'كل المراكز'], ['GK', 'حراس'], ['DEF', 'دفاع'], ['MID', 'وسط'], ['FWD', 'هجوم']], P, "ps.fPos=this.value;renderPricing()")}
+      ${sel('s', [['price_desc', 'السعر ↓'], ['price_asc', 'السعر ↑'], ['mv_desc', 'القيمة السوقية ↓'], ['name', 'الاسم']], S, "ps.sort=this.value;renderPricing()")}
+    </div>
+    <div class="plist">` + list.map(p => {
       const pr = ps.over[p.id] ?? Number(p.auto);
       return `<div class="pp"><span class="tg">${TIER[p.tier]}</span><div class="nm">${p.name_ar || p.name}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
         <button class="${ps.over[p.id] != null ? 'ov' : ''}" onclick="editPrice('${p.id}', ${Number(p.auto)})">${pr}</button></div>`; }).join('') + `</div>`;
