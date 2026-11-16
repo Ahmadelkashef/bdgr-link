@@ -114,6 +114,19 @@
   .plist .pp .tg{font-size:11px;color:var(--muted);width:24px;text-align:center}
   .plist .pp button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:9px;padding:5px 10px;font-weight:900;font-family:inherit;cursor:pointer;min-width:56px}
   .plist .pp button.ov{border-color:var(--gold);color:var(--gold)}
+  /* جرّب الميزانية: ملعب صغير */
+  .lab{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px}
+  .lab h4{margin:0 0 4px;font-size:14.5px;display:flex;align-items:center;gap:8px}
+  .lab .verdict{font-size:12.5px;line-height:1.6;color:#d8d8de;margin:6px 0 10px}
+  .lab.no{opacity:.75}
+  .pitch{background:linear-gradient(#123526,#0C2219);border:1px solid #1e4a36;border-radius:14px;padding:8px 4px}
+  .prow{display:flex;justify-content:space-evenly;gap:4px;margin:6px 0}
+  .pchip{flex:1;max-width:84px;text-align:center;font-size:10.5px;line-height:1.3}
+  .pchip .pn{background:rgba(0,0,0,.65);border-radius:6px;padding:3px 2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:800}
+  .pchip .pv{display:inline-block;margin-top:2px;background:#fff;color:#000;border-radius:5px;padding:0 6px;font-weight:900}
+  .pchip.elite .pv{background:var(--gold)}
+  .labsum{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:8px}
+  .labsum b{color:var(--text)}
   /* أرقام الفانتازي */
   .fk{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
   .fk div{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:10px;text-align:center}
@@ -979,7 +992,7 @@ function renderPricing() {
       ${opt('easy', '😌 سهلة', '2 نجوم + 2 كويسين')}
     </div>
     <div class="bopt ${ps.budget === rec ? 'on' : ''}" style="margin-top:12px" onclick="ps.budget=${rec};renderPricing()">
-      <span class="rec">✨ المقترحة</span><b class="num">${rec}</b><small>${rdType === 'LOCAL' ? 'بين الصعبة والمتوازنة — المحلي لاعيبته قليلة فلازم الناس تضحّي' : 'المتوازنة'}</small></div>
+      <span class="rec">✨ المقترحة</span><b class="num">${rec}</b><small>اللي ياخد نجمين، باقي فريقه يبقى رخاص ومتوسطين — فالناس تحتار وتضحّي</small></div>
     <div style="display:flex;gap:8px;margin-top:10px">
       <div style="flex:1"><label class="fl" style="margin-top:0">ميزانية بإيدك</label>
         <input class="in" type="number" step="0.5" min="40" max="200" value="${ps.budget}" onchange="ps.budget=Number(this.value);renderPricing()"></div>
@@ -987,6 +1000,10 @@ function renderPricing() {
         <input class="in" type="number" min="1" max="11" value="${ps.maxTeam ?? ''}" placeholder="من غير حد" onchange="ps.maxTeam=this.value?Number(this.value):null"></div>
     </div>
     <p class="hint">أرخص فريق ممكن ${b.min_team} · أغلى فريق ممكن ${b.max_team}.</p>
+    <label class="fl">🧪 جرّب الميزانية دي (${ps.budget})</label>
+    <div class="chips">${['4-4-2','4-3-3','3-5-2','3-4-3','5-3-2','4-5-1','5-4-1'].map(fm =>
+      `<button class="chip ${fm === (ps.formation || '4-4-2') ? 'on' : ''}" onclick="ps.formation='${fm}';renderPricing()">${fm}</button>`).join('')}</div>
+    ${budgetLab()}
     <label class="fl">المستويات</label>`;
   for (const pos of ['GK', 'DEF', 'MID', 'FWD']) {
     const t = (d.tiers || {})[pos] || {};
@@ -999,6 +1016,76 @@ function renderPricing() {
         <button class="${ps.over[p.id] != null ? 'ov' : ''}" onclick="editPrice('${p.id}', ${Number(p.auto)})">${pr}</button></div>`; }).join('') + `</div>`;
   $('psBody').innerHTML = h;
 }
+/* ── مختبر الميزانية: بيبني تشكيلات حقيقية من لاعيبة الجولة ── */
+function budgetLab() {
+  const d = ps.data, B = ps.budget, maxT = ps.maxTeam || 99;
+  const fm = (ps.formation || '4-4-2').split('-').map(Number);
+  const need = { GK: 1, DEF: fm[0], MID: fm[1], FWD: fm[2] };
+  const all = (d.players || []).map(p => ({ ...p, pr: ps.over[p.id] ?? Number(p.auto) }));
+  const byPos = pos => all.filter(p => p.pos === pos);
+  const att = all.filter(p => p.pos === 'MID' || p.pos === 'FWD').sort((a, b) => b.pr - a.pr);
+  const sum = xs => xs.reduce((a, p) => a + p.pr, 0);
+  const teamOk = (sq, p) => sq.filter(x => x.team === p.team).length < maxT;
+  const left = (sq) => { const n = { ...need }; sq.forEach(p => n[p.pos]--); return n; };
+  const minRest = (n, sq) => Object.entries(n).reduce((a, [pos, k]) => a + byPos(pos).filter(p => !sq.includes(p))
+      .sort((x, y) => x.pr - y.pr).slice(0, Math.max(k, 0)).reduce((s, p) => s + p.pr, 0), 0);
+  // يكمّل باقي الخانات بالتساوي: كل خانة تاخد لاعب قريب من (الفلوس الفاضلة ÷ الخانات الفاضلة)،
+  // من غير المستويات الممنوعة في السيناريو ده، ومع سيبان فلوس كفاية لأرخص لاعيبة في الباقي
+  function fill(fixed, opts = {}) {
+    const sq = [...fixed], ban = new Set(opts.ban || []);
+    for (const p of fixed) if (left(sq)[p.pos] < 0) return null;
+    const order = []; const n0 = left(sq);
+    let more = true;
+    while (more) { more = false; for (const pos of ['MID', 'FWD', 'DEF', 'GK']) if (n0[pos] > 0) { order.push(pos); n0[pos]--; more = true; } }
+    for (const pos of order) {
+      const slots = Object.values(left(sq)).reduce((a, k) => a + k, 0);
+      const target = (B - sum(sq)) / slots;
+      const cands = byPos(pos).filter(p => !sq.includes(p) && teamOk(sq, p) && !ban.has(p.tier))
+        .sort((a, b) => Math.abs(a.pr - target) - Math.abs(b.pr - target) || b.pr - a.pr);
+      let pick = null;
+      for (const c of cands) {
+        if (c.pr > target + 1.5) continue;
+        if (sum(sq) + c.pr + minRest(left([...sq, c]), [...sq, c]) <= B + 1e-9) { pick = c; break; }
+      }
+      if (!pick) pick = byPos(pos).filter(p => !sq.includes(p) && teamOk(sq, p)).sort((a, b) => a.pr - b.pr)[0];
+      if (!pick) return null;
+      sq.push(pick);
+    }
+    return sum(sq) <= B + 1e-9 ? sq : null;
+  }
+  const pickFixed = (list, k) => { const out = []; for (const p of list) { if (out.length >= k) break; if (teamOk(out, p)) out.push(p); } return out; };
+  const elites = att.filter(p => p.tier === 'elite'), prems = att.filter(p => p.tier === 'premium');
+  const dream = ['GK','DEF','MID','FWD'].flatMap(pos => byPos(pos).sort((a, b) => b.pr - a.pr).slice(0, need[pos]));
+  const cheap = ['GK','DEF','MID','FWD'].flatMap(pos => byPos(pos).sort((a, b) => a.pr - b.pr).slice(0, need[pos]));
+  const ex = [
+    { k: 'two', t: '💎💎 نجمين', sq: fill(pickFixed(elites, 2), { ban: ['elite'] }) },
+    { k: 'one', t: '💎⭐⭐ نجم + 2 كويسين', sq: fill([...pickFixed(elites, 1), ...pickFixed(prems, 2)], { ban: ['elite'] }) },
+    { k: 'none', t: '🔸 من غير نجوم (متوازن)', sq: fill([], { ban: ['elite'] }) },
+  ];
+  // مستوى باقي الفريق بعد النجوم: ده اللي بيقول الميزانية سهلة ولا صعبة
+  const restAvg = (e, k) => e.sq ? (sum(e.sq) - sum(e.sq.slice(0, k))) / (11 - k) : null;
+  ex[0].rest = restAvg(ex[0], 2); ex[1].rest = restAvg(ex[1], 3); ex[2].rest = ex[2].sq ? sum(ex[2].sq) / 11 : null;
+  const lvl = a => a == null ? '' : a >= 6.5 ? 'كويس 💪' : a >= 5.25 ? 'متوسط' : 'تعبان 😬';
+  const two = ex[0].rest;
+  const verdict = two == null ? '😤 <b>صعبة:</b> نجمين مع بعض مستحيل. حتى نجم واحد هيخلّي الباقي رخاص.'
+    : two >= 6.5 ? '😌 <b>سهلة:</b> نجمين والباقي لسه كويس (متوسط ' + two.toFixed(1) + ')، فالناس كلها هتجيب نفس النجوم والتشكيلات هتبقى شبه بعض.'
+    : two >= 5.25 ? '⚖️ <b>متوازنة:</b> اللي ياخد نجمين، باقي فريقه هينزل لمتوسط ' + two.toFixed(1) + ' (رخاص ومتوسطين). الناس هتحتار: نجمين وفريق ضعيف، ولا نجم وفريق أحسن؟'
+    : '😤 <b>صعبة:</b> نجمين ممكن بس باقي الفريق هيبقى تعبان جدًا (متوسط ' + two.toFixed(1) + ')، فمعظم الناس هتاخد نجم واحد بس.';
+  const tierCount = sq => ['elite','premium','mid','budget'].map(t => `${TIER[t]}${sq.filter(p => p.tier === t).length}`).join(' ');
+  const pitch = sq => { const rows = ['FWD','MID','DEF','GK'].map(pos => `<div class="prow">${sq.filter(p => p.pos === pos).map(p =>
+      `<div class="pchip ${p.tier}"><div class="pn">${(p.name_ar || p.name).split(' ').slice(-1)[0]}</div><span class="pv">${p.pr}</span></div>`).join('')}</div>`).join('');
+    return `<div class="pitch">${rows}</div><div class="labsum"><span>${tierCount(sq)}</span><span>المجموع <b class="num">${sum(sq)}</b> · فاضل <b class="num">${(B - sum(sq)).toFixed(1)}</b></span></div>`; };
+  const card = e => `<div class="lab ${e.sq ? '' : 'no'}"><h4>${e.t} ${e.sq ? '✅' : '❌'}</h4>
+      ${e.sq ? `<p class="verdict" style="margin:0 0 8px">باقي الفريق: متوسط <b>${e.rest.toFixed(1)}</b> · ${lvl(e.rest)}</p>` : ''}${e.sq ? pitch(e.sq)
+      : `<p class="verdict">مش هينفع بميزانية ${B} في ${ps.formation || '4-4-2'}، حتى لو كمّل بأرخص لاعيبة.</p>`}</div>`;
+  const dreamC = sum(dream), cheapC = sum(cheap);
+  return `<div class="lab"><h4>الحكم</h4><p class="verdict">${verdict}</p>
+      <div class="labsum"><span>💎 أغلى تشكيلة <b class="num">${dreamC}</b> (${Math.round(dreamC / B * 100)}% من الميزانية)</span>
+      <span>▫️ أرخص <b class="num">${cheapC}</b></span></div></div>`
+    + ex.map(card).join('')
+    + `<div class="lab"><h4>💎 أغلى تشكيلة ممكنة (الحلم) <span style="color:var(--red);font-size:12px">${dreamC > B ? 'مستحيلة ✔' : 'ممكنة ⚠️'}</span></h4>${pitch(dream)}</div>`;
+}
+
 function editPrice(id, auto) {
   const cur = ps.over[id] ?? auto;
   const v = prompt(`السعر (الأوتوماتيك ${auto}) — سيبه فاضي يرجع للأوتوماتيك`, cur);
