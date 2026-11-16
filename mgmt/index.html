@@ -114,6 +114,10 @@
   .plist .pp .tg{font-size:11px;color:var(--muted);width:24px;text-align:center}
   .plist .pp button{border:1px solid var(--line);background:var(--card2);color:var(--text);border-radius:9px;padding:5px 10px;font-weight:900;font-family:inherit;cursor:pointer;min-width:56px}
   .plist .pp button.ov{border-color:var(--gold);color:var(--gold)}
+  .plist .pp.done{background:rgba(0,255,135,.05);border-radius:10px}
+  .plist .pp.fresh{background:rgba(255,179,0,.10);border-radius:10px;box-shadow:inset 3px 0 0 var(--gold)}
+  .plist .pp .when{display:inline-block;font-size:10.5px;font-weight:800;color:var(--green);margin-inline-start:6px}
+  .plist .pp.fresh .when{color:var(--gold)}
   /* جرّب الميزانية: ملعب صغير */
   .lab{background:var(--card2);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:12px}
   .lab h4{margin:0 0 4px;font-size:14.5px;display:flex;align-items:center;gap:8px}
@@ -1047,7 +1051,7 @@ function renderPricing() {
   const pv = p => ps.over[p.id] ?? Number(p.auto);
   list = [...list].sort({ price_desc: (a, b) => pv(b) - pv(a), price_asc: (a, b) => pv(a) - pv(b),
     mv_desc: (a, b) => b.mv - a.mv, name: (a, b) => (a.name_ar || a.name).localeCompare(b.name_ar || b.name) }[S]);
-  const cards = (d.players || []).filter(p => p.card).length;
+  const cards = (d.players || []).filter(p => p.card || p.card_fixed).length;
   h += `<label class="fl">اللاعيبة (${list.length}) · 📋 اتعملهم كارت ${cards} من ${(d.players || []).length} · دوس على أي لاعب يفتح كارته</label>
     <div style="display:flex;gap:6px;margin-bottom:6px">
       ${sel('c', [['', 'كل الأندية'], ...clubs.map(c => [c, c])], C, "ps.fClub=this.value;renderPricing()")}
@@ -1056,8 +1060,10 @@ function renderPricing() {
     </div>
     <div class="plist">` + list.map(p => {
       const pr = ps.over[p.id] ?? Number(p.auto);
-      return `<div class="pp" style="cursor:pointer" onclick="openCard('${p.id}')"><span class="tg">${TIER[p.tier]}</span>
-        <div class="nm">${p.card ? '📋 ' : ''}${p.name_ar || p.name}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
+      const edited = p.card || p.card_fixed || ps.over[p.id] != null;
+      const fresh = p.card_at && (Date.now() - new Date(p.card_at).getTime()) < 30 * 60 * 1000;
+      return `<div class="pp ${fresh ? 'fresh' : edited ? 'done' : ''}" style="cursor:pointer" onclick="openCard('${p.id}')"><span class="tg">${TIER[p.tier]}</span>
+        <div class="nm">${edited ? '✏️ ' : ''}${p.name_ar || p.name}${p.card_at ? `<span class="when">${ago(p.card_at)}</span>` : ''}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
         <button class="${ps.over[p.id] != null ? 'ov' : ''}">${pr}</button></div>`; }).join('') + `</div>`;
   $('psBody').innerHTML = h;
 }
@@ -1131,6 +1137,14 @@ function budgetLab() {
     + `<div class="lab"><h4>💎 أغلى تشكيلة ممكنة (الحلم) <span style="color:var(--red);font-size:12px">${dreamC > B ? 'مستحيلة ✔' : 'ممكنة ⚠️'}</span></h4>${pitch(dream)}</div>`;
 }
 
+// "اتعدل من 3 دقايق"
+function ago(t) {
+  const s = Math.max(0, (Date.now() - new Date(t).getTime()) / 1000);
+  if (s < 60) return 'اتعدل دلوقتي';
+  if (s < 3600) return `اتعدل من ${Math.round(s / 60)} د`;
+  if (s < 86400) return `اتعدل من ${Math.round(s / 3600)} س`;
+  return `اتعدل من ${Math.round(s / 86400)} يوم`;
+}
 /* ── كارت اللاعب: أسئلة على حسب المركز → سعر + ليه ── */
 const PQ = {
   starter: { t: '⏱️ بيلعب أساسي؟', s: 'أهم سؤال', o: [['always', 'دايمًا'], ['sometimes', 'ساعات'], ['rarely', 'نادرًا']] },
