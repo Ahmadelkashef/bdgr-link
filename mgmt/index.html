@@ -1162,13 +1162,13 @@ async function loadPriceList() {
 function renderPriceList() {
   const C = $('prClub').value, P = $('prPos').value, all = pt.data.players || [];
   const list = all.filter(p => (!C || p.team === C) && (!P || p.pos === P));   // الترتيب ثابت من السيرفر
-  const done = all.filter(p => p.card || p.round_override).length;
+  const done = all.filter(p => p.card).length;
   $('prSum').textContent = `${list.length} لاعب · اتعدل منهم ${done} من ${all.length}` + (pt.data.squads ? ' · ⚠️ فيه تشكيلات محفوظة، مينفعش تتغير' : '');
   $('prList').innerHTML = list.map(p => {
     const recent = p.edited_at && (Date.now() - new Date(p.edited_at).getTime()) < 10 * 60 * 1000;
     return `<div class="pp" style="cursor:pointer" onclick="openCard('${p.id}', 'tab')"><span class="tg">${TIER[p.tier]}</span>
       <div class="nm">${p.name_ar || p.name}${recent ? '<span class="ok">✓</span>' : ''}<small>${p.team} · ${p.pos} · ${p.mv}M€</small></div>
-      <button class="${p.round_override ? 'ov' : ''}">${Number(p.price)}</button></div>`; }).join('') || '<p class="hint">مفيش لاعيبة بالفلتر ده.</p>';
+      <b class="num" style="min-width:34px;text-align:center">${Number(p.price)}</b><button>✏️ تعديل</button></div>`; }).join('') || '<p class="hint">مفيش لاعيبة بالفلتر ده.</p>';
 }
 // ✓ يختفي لوحده بعد 10 دقايق
 setInterval(() => { if (tab === 'prices' && pt.data) renderPriceList(); }, 60000);
@@ -1200,8 +1200,7 @@ async function openCard(pid, from) {
   const fromTab = from === 'tab';
   const src = fromTab ? (pt.data.players || []) : (ps.data.players || []);
   const p = src.find(x => x.id === pid); if (!p) return;
-  pc = { p, ev: fromTab ? pt.ev : ps.id, fromTab, ans: {}, card: null, fixed: '', delta: '', note: '',
-         round: fromTab ? (p.round_override ? Number(p.price) : '') : (ps.over[pid] ?? '') };
+  pc = { p, ev: fromTab ? pt.ev : ps.id, fromTab, ans: {}, card: null, fixed: '', note: '' };
   $('pcTitle').textContent = p.name_ar || p.name;
   $('pcSub').textContent = `${p.team} · ${({ GK: 'حارس', DEF: 'مدافع', MID: 'وسط', FWD: 'مهاجم' })[p.pos]} · القيمة السوقية ${p.mv}M€`;
   $('pcBody').innerHTML = '<p class="hint">بنحمّل…</p>'; setMsg($('pcMsg'), '');
@@ -1209,8 +1208,8 @@ async function openCard(pid, from) {
   const { data, error } = await sb.rpc('mgmt_player_card', { p_event_id: pc.ev, p_player_id: pid });
   if (error) { $('pcBody').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
   pc.card = data; pc.ans = { ...(data.saved?.answers || {}) };
-  pc.fixed = data.saved?.fixed_price ?? ''; pc.delta = data.saved?.price_delta ?? ''; pc.note = data.saved?.note ?? '';
   pc.before = Number(data.price);
+  pc.fixed = data.saved?.fixed_price ?? data.price; pc.note = data.saved?.note ?? '';
   renderCard();
 }
 function setAns(k, v) { if (pc.ans[k] === v) delete pc.ans[k]; else pc.ans[k] = v; renderCard(); previewCard(); }
@@ -1247,15 +1246,15 @@ function renderCard() {
     return `<div class="pcq"><div class="t">${Q.t}${sub ? ` <small>${sub}</small>` : ''}</div>
         <div class="seg">${Q.o.map(([v, l]) => `<button class="${a[k] === v ? 'on' : ''}" onclick="setAns('${k}','${v}')">${l}</button>`).join('')}</div></div>`; };
   const pct = x => Math.round(Number(x || 0) * 100);
-  const pr = Number(c.price), wasP = pc.before;
+  const pr = Number(c.model_price), wasP = pc.before;
   const ev = c.event_price != null ? Number(c.event_price) : null;
   const reasons = cardReasons();
   $('pcBody').innerHTML = `<label class="fl" style="margin-top:0">📋 أسئلة السعر</label>${POSQ[pos].map(q).join('')}
     <div class="pbox">
       <div style="display:flex;justify-content:space-between;align-items:flex-end">
-        <div><div style="color:var(--muted);font-size:12px;font-weight:800">السعر من الكارت</div><div class="big num">${pr}</div></div>
+        <div><div style="color:var(--muted);font-size:12px;font-weight:800">سعر الموديل من إجاباتك</div><div class="big num">${Number(c.model_price)}</div></div>
         <div style="text-align:left"><span class="tag">${TIER[c.tier]} ${({ elite: 'نجوم', premium: 'كويسين', mid: 'متوسطين', budget: 'رخاص' })[c.tier]}</span>
-          ${wasP !== pr ? `<div class="was">كان ${wasP}</div>` : ''}${ev != null && ev !== pr ? `<div style="color:var(--muted);font-size:11.5px;margin-top:4px">سعره المعتمد في الجولة دي ${ev}${c.event_override ? ' (معدّل بإيدك)' : ''}</div>` : ''}</div>
+          <div style="color:var(--muted);font-size:11.5px;margin-top:6px">سعره دلوقتي <b style="color:#fff">${wasP}</b></div></div>
       </div>
       <div class="pbar"><div class="r"><span>📋 من إجاباتك (40%)</span><b>${c.s_xp == null ? 'لسه ماجاوبتش' : c.xp + ' نقطة متوقعة/ماتش'}</b></div><div class="trk"><i style="width:${pct(c.s_xp)}%;background:var(--gold)"></i></div></div>
       <div class="pbar"><div class="r"><span>💶 القيمة السوقية (30%)</span><b>${pc.p.mv}M€ · أعلى من ${pct(c.s_mv)}% من مركزه</b></div><div class="trk"><i style="width:${pct(c.s_mv)}%;background:#5AA9FF"></i></div></div>
@@ -1263,39 +1262,26 @@ function renderCard() {
       ${reasons.length ? `<div class="why"><b style="font-size:13.5px">💡 ليه ${pr}؟</b>${reasons.map(r => `<div>${r}</div>`).join('')}</div>` : ''}
       ${c.saved ? `<p class="hint" style="margin-bottom:0">آخر تعديل: <bdi dir="ltr">${c.saved.updated_by || ''}</bdi> · ${fmtDT(c.saved.updated_at)} · بيتطبق على كل الجولات الجاية</p>` : ''}
     </div>
-    <label class="fl">تعديل يدوي (اختياري)</label>
-    <div style="display:flex;gap:8px">
-      <div style="flex:1"><label class="fl" style="margin-top:0">سعر ثابت دايمًا</label><input class="in" type="number" step="0.5" min="3.5" max="15" value="${pc.fixed}" placeholder="—" oninput="pc.fixed=this.value"></div>
-      <div style="flex:1"><label class="fl" style="margin-top:0">زوّد/نقّص دايمًا</label><input class="in" type="number" step="0.5" min="-5" max="5" value="${pc.delta}" placeholder="مثلًا -1" oninput="pc.delta=this.value"></div>
+    <label class="fl">💲 سعر اللاعب (بيتنقل لكل الجولات الجاية)</label>
+    <div style="display:flex;gap:8px;align-items:center">
+      <input class="in" id="pcPrice" type="number" step="0.5" min="3.5" max="15" value="${pc.fixed}" oninput="pc.fixed=this.value" style="flex:1;font-size:20px;font-weight:900;text-align:center">
+      <button class="btn" onclick="pc.fixed=${Number(c.model_price)};$('pcPrice').value=${Number(c.model_price)}">استخدم سعر الموديل (${Number(c.model_price)})</button>
     </div>
-    <div style="margin-top:8px"><label class="fl" style="margin-top:0">سعر للجولة دي بس</label><input class="in" type="number" step="0.5" min="3.5" max="15" value="${pc.round}" placeholder="—" oninput="pc.round=this.value"></div>
     <label class="fl">ملاحظة (ليه؟)</label><input class="in" value="${(pc.note || '').replace(/"/g, '&quot;')}" placeholder="مثلًا: وسط دفاعي، مهم للمدرب بس مش بيسجل" oninput="pc.note=this.value">`;
 }
 $('pcSave').onclick = async () => {
   if (!pc) return;
+  const price = Math.round(Number(pc.fixed) * 2) / 2;
+  if (!(price >= 3.5 && price <= 15)) return setMsg($('pcMsg'), 'السعر لازم بين 3.5 و 15.', 'err');
   $('pcSave').disabled = true; setMsg($('pcMsg'), 'بنحفظ…');
-  const num = v => (v === '' || v == null) ? null : Number(v);
   const { error } = await sb.rpc('mgmt_player_profile_save', { p_player_id: pc.p.id, p_answers: pc.ans,
-    p_fixed: num(pc.fixed), p_delta: num(pc.delta), p_note: pc.note || null });
+    p_fixed: price, p_delta: null, p_note: pc.note || null });
   $('pcSave').disabled = false;
   if (error) return setMsg($('pcMsg'), errText(error), 'err');
-  const r = num(pc.round);
-  if (pc.fromTab) {
-    // سعر الجولة دي بس: بيتحفظ على طول
-    const cur = pc.p.round_override ? Number(pc.p.price) : null;
-    if (r !== cur) {
-      const { error: e2 } = await sb.rpc('mgmt_price_set_round', { p_event_id: pc.ev, p_player_id: pc.p.id, p_price: r });
-      if (e2) return setMsg($('pcMsg'), /squads_exist/.test(e2.message) ? 'فيه ناس حفظت تشكيلات في الجولة دي — مينفعش تتغير.' : errText(e2), 'err');
-    }
-    setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
-    await loadPriceList();
-  } else {
-    if (r == null) delete ps.over[pc.p.id]; else ps.over[pc.p.id] = Math.round(r * 2) / 2;
-    setMsg($('pcMsg'), 'اتحفظ ✅', 'ok');
-    const { data } = await sb.rpc('mgmt_price_preview', { p_event_id: ps.id });
-    if (data) { ps.data = data; renderPricing(); }
-  }
-  setTimeout(() => closeSheet('cardSheet'), 500);
+  setMsg($('pcMsg'), `اتحفظ ✅ ${price} في كل الجولات الجاية`, 'ok');
+  if (pc.fromTab) await loadPriceList();
+  else { const { data } = await sb.rpc('mgmt_price_preview', { p_event_id: ps.id }); if (data) { ps.data = data; renderPricing(); } }
+  setTimeout(() => closeSheet('cardSheet'), 600);
 };
 
 function editPrice(id, auto) {
