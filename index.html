@@ -44,6 +44,7 @@
   <p id="sub">المحتوى بيتشاف جوه التطبيق بس. افتحه في BDGR، أو نزّل التطبيق لو مش عندك.</p>
 
   <a id="open" class="btn primary" href="#">افتح في BDGR</a>
+  <button id="copy" class="btn secondary hidden" type="button">📋 انسخ الكود</button>
   <a id="get"  class="btn secondary" href="#">نزّل التطبيق</a>
   <small id="soon" class="hidden">التطبيق هيبقى على Google Play قريب.</small>
 </main>
@@ -64,6 +65,15 @@
     document.getElementById('title').textContent = 'اتعزمت على ليج في BDGR فانتازي 🏆';
     document.getElementById('sub').innerHTML = 'افتح التطبيق وهتدخل الليج على طول.<br>الكود: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + code + '</b>';
     document.getElementById('open').textContent = 'ادخل الليج في BDGR';
+    // معندوش التطبيق: ينسخ الكود ويكتبه بعد التحميل (الفانتازي › الليجز › ادخل بكود)
+    var copyBtn = document.getElementById('copy');
+    copyBtn.classList.remove('hidden');
+    copyBtn.addEventListener('click', function () {
+      var done = function () { copyBtn.textContent = '✅ الكود اتنسخ: ' + code; };
+      if (navigator.clipboard) navigator.clipboard.writeText(code).then(done, done); else done();
+    });
+    document.getElementById('soon').textContent = 'بعد ما تنزّل التطبيق: الفانتازي ← الليجز ← ادخل بكود، والزق الكود.';
+    document.getElementById('soon').classList.remove('hidden');
   }
 
   var ua = navigator.userAgent || '';
