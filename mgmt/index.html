@@ -1143,10 +1143,10 @@ async function loadPricesTab() {
   $('prList').innerHTML = '<p class="hint">بنحمّل…</p>';
   const { data, error } = await sb.rpc('mgmt_rounds_overview', { p_type: pt.type });
   if (error) { $('prList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
-  pt.rounds = (data.rounds || []).filter(r => r.state === 'upcoming').sort((a, b) => a.round_no - b.round_no);
+  pt.rounds = (data.rounds || []).filter(r => r.state === 'upcoming' || r.state === 'open').sort((a, b) => a.round_no - b.round_no);
   if (!pt.rounds.length) { $('prRound').innerHTML = '<option value="">مفيش جولات جاية</option>'; $('prList').innerHTML = '<p class="hint">جهّز جولة جاية من تابة الجولات الأول.</p>'; $('prSum').textContent = ''; return; }
   if (!pt.rounds.some(r => r.event_id === pt.ev)) pt.ev = pt.rounds[0].event_id;
-  $('prRound').innerHTML = pt.rounds.map(r => `<option value="${r.event_id}" ${r.event_id === pt.ev ? 'selected' : ''}>الجولة ${r.round_no} · بتتفتح ${fmtDT(r.opens_at)}</option>`).join('');
+  $('prRound').innerHTML = pt.rounds.map(r => `<option value="${r.event_id}" ${r.event_id === pt.ev ? 'selected' : ''}>الجولة ${r.round_no} · ${r.state === 'open' ? '🟢 مفتوحة دلوقتي' : 'بتتفتح ' + fmtDT(r.opens_at)}</option>`).join('');
   loadPriceList();
 }
 async function loadPriceList() {
@@ -1163,7 +1163,7 @@ function renderPriceList() {
   const C = $('prClub').value, P = $('prPos').value, all = pt.data.players || [];
   const list = all.filter(p => (!C || p.team === C) && (!P || p.pos === P));   // الترتيب ثابت من السيرفر
   const done = all.filter(p => p.card).length;
-  $('prSum').textContent = `${list.length} لاعب · اتعدل منهم ${done} من ${all.length}` + (pt.data.squads ? ' · ⚠️ فيه تشكيلات محفوظة، مينفعش تتغير' : '');
+  $('prSum').textContent = `${list.length} لاعب · اتعدل منهم ${done} من ${all.length}` + (pt.data.squads ? ` · 🟢 ${pt.data.squads} فريق محفوظ: أي تعديل هيوصلهم تنبيه، واللي في فريقهم بيفضل بسعر الشرا` : '');
   $('prList').innerHTML = list.map(p => {
     const recent = p.edited_at && (Date.now() - new Date(p.edited_at).getTime()) < 10 * 60 * 1000;
     return `<div class="pp" style="cursor:pointer" onclick="openCard('${p.id}', 'tab')"><span class="tg">${TIER[p.tier]}</span>
