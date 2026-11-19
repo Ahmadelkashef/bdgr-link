@@ -1781,7 +1781,7 @@ $('spReopen').onclick = () => setSupportStatus('seen');
 
 /* ─── 🚩 البلاغات: محتوى اليوزرز (perm content) ─── */
 const RP_REASON = { nudity: '🔞 عري / جنسي', violence: '⚠️ عنف', harassment: '💬 تحرش / تنمّر', spam: '🚫 سبام', child_safety: '👶 سلامة الأطفال', other: '📋 تانية' };
-const RP_ST = { published: '🟢 ظاهر', hidden: '🟡 مستخبي لحد المراجعة', removed: '🔴 اتمسح', deleted: '⚪ صاحبه مسحه' };
+const RP_ST = { published: '🟢 ظاهر',  hidden: '🟡 مستخبي لحد المراجعة', removed: '🔴 اتمسح', deleted: '⚪ صاحبه مسحه' };
 let rpFilter = 'open', rpData = [];
 document.querySelectorAll('#rpSeg button').forEach(b => b.onclick = () => {
   rpFilter = b.dataset.x; document.querySelectorAll('#rpSeg button').forEach(x => x.classList.toggle('on', x === b)); loadReports(); });
@@ -1812,8 +1812,9 @@ async function loadReports() {
     const id = esc(r.content_id), ty = esc(r.content_type);
     return `
     <div class="card" style="margin-top:8px">
-      <div style="display:flex;gap:8px">${media || '<p class="hint">مفيش ملفات.</p>'}</div>
-      <div style="margin-top:8px"><b>${it?.kind === 'story' ? '⭕ ستوري' : '📝 بوست'}</b> · ${RP_ST[it?.status] || esc(it?.status || ty)} · ${fmt(r.reports)} بلاغ · ${fmtDT(r.last_at)}</div>
+      ${r.comment ? `<div style="padding:10px;border-radius:10px;background:#0002;border:1px solid var(--line)">💬 "${esc(r.comment.body)}"<div class="hint" style="margin:4px 0 0">كتبه: ${esc(r.comment.display_name || '—')} <bdi dir="ltr">@${esc(r.comment.username || '')}</bdi> · #${esc(r.comment.user_id || '')}</div></div>`
+        : `<div style="display:flex;gap:8px">${media || '<p class="hint">مفيش ملفات.</p>'}</div>`}
+      <div style="margin-top:8px"><b>${r.comment ? '💬 كومنت' : it?.kind === 'story' ? '⭕ ستوري' : '📝 بوست'}</b> · ${RP_ST[(it || r.comment)?.status] || esc((it || r.comment)?.status || ty)} · ${fmt(r.reports)} بلاغ · ${fmtDT(r.last_at)}</div>
       ${it?.caption ? `<div class="hint" style="margin:4px 0 0">"${esc(it.caption)}"</div>` : ''}
       <div>${reasons}</div>
       <div class="hint" style="margin:6px 0 0">صاحبه: ${esc(o.display_name || '—')} <bdi dir="ltr">@${esc(o.username || '')}</bdi> · #${esc(o.user_id || '')}${o.removed_count ? ` · اتمسحله ${fmt(o.removed_count)} قبل كده` : ''}${o.banned ? ' · <b style="color:var(--red)">ممنوع من الرفع</b>' : ''}</div>
