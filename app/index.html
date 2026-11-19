@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <base href="/bdgr-link/app/">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BDGR</title>
+  <meta name="description" content="BDGR — Fantasy football, sports competitions and a feed for athletes in Egypt. Unranked. Unafraid.">
+  <meta name="theme-color" content="#0B0B0F">
+  <meta name="color-scheme" content="dark">
+
+  <!-- Social preview -->
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="BDGR">
+  <meta property="og:title" content="BDGR">
+  <meta property="og:description" content="Fantasy football, sports competitions and a feed for athletes. Unranked. Unafraid.">
+  <meta property="og:image" content="https://ahmadelkashef.github.io/bdgr-link/preview.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+
+  <link rel="icon" type="image/png" href="favicon.png">
+  <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+  <style>
+    html, body { margin: 0; height: 100%; background: #0B0B0F; overflow: hidden; }
+    #bdgr-splash {
+      position: fixed; inset: 0; display: flex; align-items: center; justify-content: center;
+      background: radial-gradient(circle at 50% 42%, rgba(255,255,255,0.06), rgba(0,0,0,0) 60%), #0B0B0F;
+      transition: opacity .35s ease; z-index: 10;
+    }
+    #bdgr-splash img { width: 150px; height: auto; animation: bdgr-pulse 1.6s ease-in-out infinite; }
+    #bdgr-splash.hide { opacity: 0; pointer-events: none; }
+    @keyframes bdgr-pulse { 0%,100% { opacity: .55; transform: scale(.98); } 50% { opacity: 1; transform: scale(1); } }
+  </style>
+</head>
+<body>
+  <div id="bdgr-splash"><img src="splash-logo.png" alt="BDGR"></div>
+  <noscript style="color:#ddd;font-family:sans-serif;display:block;text-align:center;margin-top:40vh">
+    BDGR needs JavaScript to run.
+  </noscript>
+  <script>
+    // يختفي اللوجو أول ما Flutter يرسم أول فريم
+    window.addEventListener('flutter-first-frame', function () {
+      var s = document.getElementById('bdgr-splash');
+      if (s) { s.classList.add('hide'); setTimeout(function () { s.remove(); }, 400); }
+    });
+  </script>
+  <script src="flutter_bootstrap.js" async></script>
+</body>
+</html>
