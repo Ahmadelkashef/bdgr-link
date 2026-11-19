@@ -46,6 +46,7 @@
   <a id="open" class="btn primary" href="#">افتح في BDGR</a>
   <button id="copy" class="btn secondary hidden" type="button">📋 انسخ الكود</button>
   <a id="get"  class="btn secondary" href="#">نزّل التطبيق</a>
+  <a id="web"  class="btn secondary" href="app/">🌐 افتح على الموقع</a>
   <small id="soon" class="hidden">التطبيق هيبقى على Google Play قريب.</small>
 </main>
 
@@ -95,7 +96,7 @@
 
   var appLink = PKG + '://' + path;
   // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
-  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : '')));
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : (isUgc ? '&u=' + ugc : ''))));
   var intentLink = 'intent://' + path +
     '#Intent;scheme=' + PKG + ';package=' + PKG +
     ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
@@ -108,10 +109,15 @@
     document.getElementById('soon').classList.remove('hidden');
   });
 
-  // أول ما الصفحة تفتح: نحاول نفتح التطبيق على طول
+  // نسخة الويب (آيفون / كمبيوتر): نفس اللينك بيفتح البوست / الليج جوه الموقع
+  var webQuery = valid ? '?m=' + id : (isLeague ? '?l=' + code : (isPost ? '?p=' + post : (isUgc ? '?u=' + ugc : '')));
+  var webUrl = 'app/' + webQuery;
+  document.getElementById('web').href = webUrl;
+
+  // أول ما الصفحة تفتح: أندرويد = التطبيق، غير كده = الموقع
   if (!params.get('nf')) {
     if (isAndroid) { location.href = intentLink; }
-    else { setTimeout(function () { location.href = appLink; }, 150); }
+    else { location.replace(webUrl); }
   }
 })();
 </script>
