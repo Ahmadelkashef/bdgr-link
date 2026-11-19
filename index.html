@@ -63,7 +63,14 @@
   // بوست في الفيد: ?p=<id>
   var post = (params.get('p') || '').toLowerCase();
   var isPost = !valid && !isLeague && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(post);
-  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : ''));
+  // بوست يوزر: ?u=<id>
+  var ugc = (params.get('u') || '').toLowerCase();
+  var isUgc = !valid && !isLeague && !isPost && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(ugc);
+  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : (isUgc ? 'ugc/' + ugc : '')));
+  if (isUgc) {
+    document.getElementById('title').textContent = 'بوست على BDGR 🦡';
+    document.getElementById('open').textContent = 'شوفه في BDGR';
+  }
   if (isPost) {
     document.getElementById('title').textContent = 'بوست جديد من BDGR 🦡';
     document.getElementById('open').textContent = 'شوفه في BDGR';
