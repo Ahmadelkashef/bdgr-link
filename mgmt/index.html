@@ -316,6 +316,18 @@
   .fp .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
   .fp .acts .btn{padding:6px 10px;font-size:12px}
   .chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
+  /* الإشعارات */
+  .pn-kpis{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
+  .pn-kpis div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:10px}
+  .pn-kpis b{display:block;font-size:20px} .pn-kpis small{color:var(--muted);font-size:11.5px}
+  .pn-prev{background:#1f2026;border-radius:16px;padding:12px 14px;margin-top:12px;display:flex;gap:10px;align-items:flex-start}
+  .pn-prev img{width:28px;height:28px;border-radius:7px;background:#000}
+  .pn-prev .t{font-weight:800;font-size:13.5px} .pn-prev .b{color:#cfcfd6;font-size:13px;line-height:1.55;margin-top:2px;white-space:pre-wrap}
+  .pn-prev small{color:var(--muted);font-size:11px}
+  .pn-count{margin-top:10px;font-size:13.5px;font-weight:800;color:var(--gold)}
+  .pn-h{padding:9px 0;border-top:1px solid var(--line);font-size:12.5px;line-height:1.7}
+  .pn-h:first-child{border-top:0} .pn-h small{color:var(--muted)}
+  select.in{appearance:auto}
   /* الدعم */
   .sp-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer}
   .sp-item.new{border-color:var(--gold)}
@@ -519,6 +531,36 @@
     </div>
     <div class="card"><b style="font-size:13px">بوستات BDGR</b><div id="fpList" style="margin-top:6px">—</div></div>
     <div class="card"><b style="font-size:13px">آخر تعديلات باسم BDGR</b><div class="of-log" id="ofLog">—</div></div>
+  </section>
+
+  <!-- ═══ الإشعارات (كنترول) ═══ -->
+  <section id="t-push" class="hidden">
+    <div class="pn-kpis"><div><b class="num" id="pnUsers">…</b><small>يوزر الإشعارات شغالة عندهم</small></div><div><b class="num" id="pnDevices">…</b><small>موبايل</small></div></div>
+    <div class="card form">
+      <b>إشعار جديد</b>
+      <label class="fl2">نوعه</label>
+      <div class="seg" id="pnKind" style="display:flex"><button data-x="marketing" class="on" style="flex:1">🎁 عروض وأخبار</button><button data-x="service" style="flex:1">📣 إعلان مهم</button></div>
+      <p class="hint" id="pnKindHint" style="margin:6px 0 0"></p>
+      <label class="fl2">يوصل لمين</label>
+      <select id="pnTo" class="in"><option value="all">كل اليوزرز</option><option value="fantasy">اللي بيلعبوا فانتازي</option><option value="governorate">محافظة معينة</option><option value="test">رقم التجربة بس</option></select>
+      <select id="pnGov" class="in hidden" style="margin-top:6px"></select>
+      <label class="fl2">العنوان (عربي)</label><input id="pnTitleAr" class="in" maxlength="80" placeholder="مثلاً: الجولة 10 فتحت ⚽">
+      <label class="fl2">الرسالة (عربي)</label><textarea id="pnBodyAr" class="in" maxlength="240" placeholder="مثلاً: اعمل تشكيلتك قبل الديدلاين وكسّب الجايزة 🏆"></textarea>
+      <label class="fl2">English (اختياري — لو فاضي هيتبعت العربي للكل)</label>
+      <input id="pnTitleEn" class="in" maxlength="80" dir="ltr" placeholder="Title">
+      <textarea id="pnBodyEn" class="in" maxlength="240" dir="ltr" placeholder="Message" style="margin-top:6px"></textarea>
+      <label class="fl2">لما يدوس عليه يفتح</label>
+      <select id="pnTab" class="in"><option value="">التطبيق بس</option><option value="home">الهوم</option><option value="fantasy">الفانتازي</option><option value="feed">الفيد</option><option value="competitions">المسابقات</option><option value="profile">البروفايل</option></select>
+      <div class="pn-prev"><img src="logo.png" alt=""><div style="flex:1;min-width:0"><small>BDGR · دلوقتي</small><div class="t" id="pnPrevT">العنوان</div><div class="b" id="pnPrevB">الرسالة</div></div></div>
+      <div class="pn-count" id="pnCount"></div>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn" style="flex:1" id="pnTest">🧪 ابعت لرقم التجربة</button>
+        <button class="btn primary" style="flex:1;margin-top:0;font-size:14px" id="pnSend">ابعت</button>
+      </div>
+      <div id="pnMsg" class="msg"></div>
+      <p class="hint">الحد: 3 إشعارات في اليوم (غير التجربة). "عروض وأخبار" بيوصل بس للي موافقين عليها.</p>
+    </div>
+    <div class="card"><b style="font-size:13px">اللي اتبعت</b><div id="pnHist" style="margin-top:6px">—</div></div>
   </section>
 
   <!-- ═══ الدعم (كنترول) ═══ -->
@@ -733,10 +775,11 @@ const NAV = {
     { k: 'comp', ar: '🏆 المسابقات', soon: true }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
+    { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','support','official','admins'];
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -781,6 +824,7 @@ function go(t) {
   if (t === 'prices') loadPricesTab();
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
+  if (t === 'push') loadPush();
   if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
 document.querySelectorAll('#chartSeg button').forEach(b => b.onclick = () => {
@@ -1581,6 +1625,66 @@ $('msSave').onclick = async () => {
   setMsg($('msMsg'), `اتحفظت ✅ ${h} - ${a}`, 'ok');
   setTimeout(() => { closeSheet('matchSheet'); loadResults(); }, 500);
 };
+
+/* ─── الإشعارات ─── */
+let pnKind = 'marketing', pnCountTimer = null;
+const PN_TO = { all: 'كل اليوزرز', fantasy: 'اللي بيلعبوا فانتازي', governorate: 'محافظة', test: 'رقم التجربة' };
+const PN_TAB = { home: 'الهوم', fantasy: 'الفانتازي', feed: 'الفيد', competitions: 'المسابقات', profile: 'البروفايل' };
+const PN_ERR = { daily_limit: 'وصلت للحد: 3 إشعارات في اليوم.', arabic_required: 'اكتب العنوان والرسالة بالعربي.', not_allowed: 'مفيش صلاحية.' };
+const pnAudience = () => ({ to: $('pnTo').value, ...($('pnTo').value === 'governorate' ? { governorate: $('pnGov').value } : {}) });
+function pnKindHint() {
+  $('pnKindHint').textContent = pnKind === 'marketing'
+    ? 'عروض، جوايز، أخبار. بيوصل بس للي موافقين على "العروض والأخبار".'
+    : 'حاجة مهمة عن التطبيق أو الفانتازي (جولة فتحت، تحديث مهم). بيوصل للكل، فاستخدمه قليل.';
+}
+document.querySelectorAll('#pnKind button').forEach(b => b.onclick = () => {
+  pnKind = b.dataset.x; document.querySelectorAll('#pnKind button').forEach(x => x.classList.toggle('on', x === b)); pnKindHint(); pnRecount(); });
+function pnPreview() {
+  $('pnPrevT').textContent = $('pnTitleAr').value.trim() || 'العنوان';
+  $('pnPrevB').textContent = $('pnBodyAr').value.trim() || 'الرسالة';
+}
+['pnTitleAr', 'pnBodyAr'].forEach(id => $(id).addEventListener('input', pnPreview));
+$('pnTo').onchange = () => { $('pnGov').classList.toggle('hidden', $('pnTo').value !== 'governorate'); pnRecount(); };
+$('pnGov').onchange = pnRecount;
+function pnRecount() {
+  clearTimeout(pnCountTimer); $('pnCount').textContent = '…';
+  pnCountTimer = setTimeout(async () => {
+    const kind = $('pnTo').value === 'test' ? 'service' : pnKind;
+    const { data, error } = await sb.rpc('mgmt_push_count', { p_audience: pnAudience(), p_kind: kind });
+    $('pnCount').textContent = error ? errText(error) : `هيوصل لـ ${fmt(data)} يوزر`;
+  }, 250);
+}
+async function loadPush() {
+  pnKindHint(); pnPreview();
+  const { data, error } = await sb.rpc('mgmt_push_overview');
+  if (error) { $('pnHist').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
+  $('pnUsers').textContent = fmt(data.users); $('pnDevices').textContent = fmt(data.devices);
+  const cur = $('pnGov').value;
+  $('pnGov').innerHTML = (data.governorates || []).map(g => `<option value="${esc(g)}">${esc(lbl('governorate', g))}</option>`).join('') || '<option value="">مفيش محافظات لسه</option>';
+  if (cur) $('pnGov').value = cur;
+  $('pnHist').innerHTML = (data.history || []).map(h => `
+    <div class="pn-h"><b>${esc(h.title_ar)}</b> — ${esc(h.body_ar)}<br>
+      <small>${fmtDT(h.created_at)} · ${h.kind === 'marketing' ? '🎁 عروض' : h.kind === 'test' ? '🧪 تجربة' : '📣 إعلان'} · ${PN_TO[h.audience?.to] || ''}${h.audience?.governorate ? ' ' + esc(lbl('governorate', h.audience.governorate)) : ''}${h.open_tab ? ' · يفتح ' + PN_TAB[h.open_tab] : ''}
+      · اتبعت لـ ${fmt(h.queued)} · وصل ${fmt(h.delivered)}${h.waiting ? ' · مستني ' + fmt(h.waiting) : ''} · <bdi dir="ltr">${esc(h.admin_email || '')}</bdi></small></div>`).join('') || '<p class="hint">لسه مفيش.</p>';
+  pnRecount();
+}
+async function pnSend(test) {
+  const p = { kind: pnKind, audience: test ? { to: 'test' } : pnAudience(), open_tab: $('pnTab').value,
+    title_ar: $('pnTitleAr').value.trim(), body_ar: $('pnBodyAr').value.trim(), title_en: $('pnTitleEn').value.trim(), body_en: $('pnBodyEn').value.trim() };
+  if (!p.title_ar || !p.body_ar) return setMsg($('pnMsg'), 'اكتب العنوان والرسالة بالعربي.', 'err');
+  if (!test) {
+    const { data: n } = await sb.rpc('mgmt_push_count', { p_audience: p.audience, p_kind: pnKind });
+    if (!confirm(`هيتبعت "${p.title_ar}" لـ ${fmt(n || 0)} يوزر. متأكد؟`)) return;
+  }
+  $('pnSend').disabled = $('pnTest').disabled = true;
+  const { data, error } = await sb.rpc('mgmt_push_broadcast', { p });
+  $('pnSend').disabled = $('pnTest').disabled = false;
+  if (error) { const m = (error.message || ''); const k = Object.keys(PN_ERR).find(k => m.includes(k)); return setMsg($('pnMsg'), k ? PN_ERR[k] : errText(error), 'err'); }
+  setMsg($('pnMsg'), data.queued ? `اتبعت لـ ${fmt(data.queued)} ✓ هيوصل في خلال دقيقة.` : 'مفيش حد ينفع يوصله (يمكن لسه محدش شغّل الإشعارات).', data.queued ? 'ok' : '');
+  loadPush();
+}
+$('pnTest').onclick = () => pnSend(true);
+$('pnSend').onclick = () => pnSend(false);
 
 /* ─── الدعم ─── */
 let spFilter = 'active', spCur = null;
