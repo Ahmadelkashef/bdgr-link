@@ -1882,7 +1882,7 @@ async function loadOfficialPosts() {
       <div class="b">
         <b>${p.is_pinned ? '📌 ' : ''}${ext ? (p.source === 'youtube' ? '▶ YouTube · ' : '▶ TikTok · ') : (p.kind === 'image' ? '🖼️ ' : '🎬 ')}${esc(p.title || '—')}</b>
         <small>${esc(p.description || '')}</small>
-        <small>🐾 Hype ${fmt(p.hypes || 0)} · 👁 ${fmt(p.views || 0)}</small>
+        <small>🦡 Hype ${fmt(p.hypes || 0)} · 👁 ${fmt(p.views || 0)}</small>
         <small>${p.status === 'published' ? '🟢 منشور' : '⚪ مخفي'} · ${fmtDT(p.created_at)}${p.size_bytes ? ' · ' + (p.size_bytes / MB).toFixed(1) + ' MB' : ''}${dur}</small>
         <div class="acts">
           <button class="btn" onclick="fpUpdate('${esc(p.id)}', { is_pinned: ${!p.is_pinned} })">${p.is_pinned ? 'شيل التثبيت' : '📌 ثبّت'}</button>
