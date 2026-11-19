@@ -1,0 +1,387 @@
+{
+ "version": "v2.0",
+ "effective": "2026-11-19",
+ "docs": [
+  {
+   "id": "terms",
+   "title_en": "Terms of Service",
+   "title_ar": "شروط الاستخدام",
+   "sections": [
+    {
+     "h_en": "1. About these terms",
+     "h_ar": "١. عن الشروط دي",
+     "en": [
+      "BDGR is a sports app for fantasy football, competitions, profiles and sports content. It is operated by {entity}.",
+      "By creating an account or using BDGR you agree to these Terms. If you don't agree, please don't use the app.",
+      "Questions? Contact us at {email} or from Help & Support in the app."
+     ],
+     "ar": [
+      "BDGR تطبيق رياضي فيه فانتازي كورة ومسابقات وبروفايلات ومحتوى رياضي، وبيشغّله {entity}.",
+      "لما تعمل حساب أو تستخدم BDGR يبقى انت موافق على الشروط دي. لو مش موافق، ماتستخدمش التطبيق.",
+      "عندك سؤال؟ كلمنا على {email} أو من \"المساعدة والدعم\" جوه التطبيق."
+     ]
+    },
+    {
+     "h_en": "2. Who can use BDGR",
+     "h_ar": "٢. مين يقدر يستخدم BDGR",
+     "en": [
+      "You must be at least 13 years old to create an account.",
+      "If you are under 18, you need a parent or legal guardian's permission to use BDGR, and their written approval to receive any prize.",
+      "One account per person. Your information must be true and the phone number must be yours."
+     ],
+     "ar": [
+      "لازم يكون سنك 13 سنة أو أكتر علشان تعمل حساب.",
+      "لو سنك أقل من 18 سنة، لازم ولي أمرك يكون موافق إنك تستخدم BDGR، ولازم موافقته المكتوبة علشان تستلم أي جايزة.",
+      "حساب واحد لكل شخص. بياناتك لازم تكون حقيقية، ورقم الموبايل لازم يكون بتاعك."
+     ]
+    },
+    {
+     "h_en": "3. Your account and security",
+     "h_ar": "٣. حسابك وأمانه",
+     "en": [
+      "You log in with your phone number and a one-time code. Never share this code with anyone. BDGR will never ask you for it.",
+      "You are responsible for what happens on your account. If you think someone else used it, use \"Log out of other devices\" in Login & Security and contact us.",
+      "We may suspend or close accounts that break these Terms."
+     ],
+     "ar": [
+      "بتدخل برقم موبايلك وكود بيوصلك. ماتديش الكود ده لأي حد، وBDGR عمره ما هيطلبه منك.",
+      "انت مسؤول عن اللي بيحصل على حسابك. لو حاسس إن حد تاني دخل عليه، استخدم \"اخرج من الأجهزة التانية\" في \"الدخول والأمان\" وكلمنا.",
+      "من حقنا نوقف أو نقفل أي حساب بيخالف الشروط دي."
+     ]
+    },
+    {
+     "h_en": "4. Fantasy and competitions",
+     "h_ar": "٤. الفانتازي والمسابقات",
+     "en": [
+      "Fantasy is currently free to play. Each round has its own budget, deadline and player pool, shown in the app.",
+      "Your squad locks at the deadline (3 hours before the first match of the round). Player prices may change between rounds, but players already in your squad keep the price you paid.",
+      "Points are calculated from match results entered by BDGR. If we find a mistake we will correct it, and rankings may change.",
+      "Competition registration, rules and schedules are announced in the app for each competition."
+     ],
+     "ar": [
+      "الفانتازي مجاني دلوقتي. كل جولة ليها ميزانية وديدلاين ولاعيبة متاحين، وكله ظاهر في التطبيق.",
+      "تشكيلتك بتقفل عند الديدلاين (قبل أول ماتش في الجولة بـ 3 ساعات). أسعار اللاعيبة ممكن تتغير بين الجولات، بس اللاعيبة اللي في تشكيلتك بيفضلوا بالسعر اللي اشتريتهم بيه.",
+      "النقط بتتحسب من نتايج الماتشات اللي BDGR بيدخّلها. لو لقينا غلطة هنصلحها، والترتيب ممكن يتغير.",
+      "التسجيل في المسابقات وقواعدها ومواعيدها بتتعلن في التطبيق لكل مسابقة."
+     ]
+    },
+    {
+     "h_en": "5. Prizes",
+     "h_ar": "٥. الجوايز",
+     "en": [
+      "Prizes are announced with each round, period or competition. They may be cash, sports products (like kits or boots), vouchers or anything else we announce.",
+      "- One account per person. Winning with more than one account cancels the prize.",
+      "- To receive a prize you must prove your identity (national ID). Winners under 18 need a birth certificate and their guardian's written approval.",
+      "- You must claim your prize within 30 days of the winners being announced, or it is forfeited.",
+      "- We may replace a prize with another of similar value if it becomes unavailable.",
+      "- Prizes are personal: they can't be transferred, and non-cash prizes can't be exchanged for money.",
+      "- Cheating or manipulation cancels the prize and may close the account.",
+      "- For prizes provided by a sponsor, the sponsor is responsible for the product warranty."
+     ],
+     "ar": [
+      "الجوايز بتتعلن مع كل جولة أو فترة أو مسابقة، وممكن تكون فلوس، أو منتجات رياضية (زي تيشرتات أو جزم)، أو فاوتشرات، أو أي حاجة تانية بنعلن عنها.",
+      "- حساب واحد لكل شخص. اللي يكسب بأكتر من حساب بتتلغي جايزته.",
+      "- علشان تستلم الجايزة لازم تثبت شخصيتك (البطاقة). الفايز اللي أقل من 18 سنة محتاج شهادة ميلاد وموافقة مكتوبة من ولي أمره.",
+      "- لازم تطلب جايزتك في خلال 30 يوم من إعلان الفايزين، وإلا بتسقط.",
+      "- من حقنا نبدّل الجايزة بحاجة بنفس القيمة لو مش متاحة.",
+      "- الجايزة شخصية: مش بتتنقل لحد تاني، والجوايز العينية مش بتتحول لفلوس.",
+      "- الغش أو التلاعب بيلغي الجايزة وممكن يقفل الحساب.",
+      "- الجوايز اللي من راعي (Sponsor): الراعي هو المسؤول عن ضمان المنتج."
+     ]
+    },
+    {
+     "h_en": "6. Your content",
+     "h_ar": "٦. المحتوى بتاعك",
+     "en": [
+      "Photos, videos, moments and comments you post stay yours. You give BDGR permission to store and show them inside the app and its share links, so the app can work.",
+      "Only post content you have the right to post, and respect other people's privacy and images.",
+      "We may remove content that breaks these Terms."
+     ],
+     "ar": [
+      "الصور والفيديوهات والمومنتس والكومنتات اللي بتنزلها بتفضل بتاعتك. انت بتدي BDGR الإذن إنه يخزنها ويعرضها جوه التطبيق ولينكات المشاركة، علشان التطبيق يشتغل.",
+      "نزّل بس المحتوى اللي من حقك تنزله، واحترم خصوصية الناس وصورهم.",
+      "من حقنا نشيل أي محتوى بيخالف الشروط دي."
+     ]
+    },
+    {
+     "h_en": "7. Not allowed",
+     "h_ar": "٧. الممنوع",
+     "en": [
+      "- Harassing, threatening, bullying or insulting others.",
+      "- Hate speech, nudity, violence or illegal content.",
+      "- Pretending to be someone else, including BDGR (only the account with the gold badge is official).",
+      "- Spam, scams, or selling accounts.",
+      "- Cheating in fantasy or competitions, or using bots or multiple accounts.",
+      "- Trying to hack, overload or misuse the app or other people's accounts."
+     ],
+     "ar": [
+      "- التحرش أو التهديد أو التنمّر أو الشتيمة.",
+      "- خطاب الكراهية، أو العري، أو العنف، أو أي محتوى مخالف للقانون.",
+      "- إنك تنتحل شخصية حد، ومنهم BDGR (الحساب الرسمي الوحيد هو اللي عليه العلامة الدهبي).",
+      "- السبام أو النصب أو بيع الحسابات.",
+      "- الغش في الفانتازي أو المسابقات، أو استخدام بوتات أو أكتر من حساب.",
+      "- محاولة اختراق التطبيق أو حسابات الناس أو الضغط عليه أو استخدامه غلط."
+     ]
+    },
+    {
+     "h_en": "8. Blocking and reporting",
+     "h_ar": "٨. البلوك والبلاغ",
+     "en": [
+      "You can block any user from their profile, and report moments or comments. We review reports and may warn, remove content, or suspend accounts."
+     ],
+     "ar": [
+      "تقدر تعمل بلوك لأي يوزر من بروفايله، وتبلّغ عن أي مومنت أو كومنت. بنراجع البلاغات، وممكن ننبّه أو نشيل المحتوى أو نوقف الحساب."
+     ]
+    },
+    {
+     "h_en": "9. Changes to the app",
+     "h_ar": "٩. التغييرات في التطبيق",
+     "en": [
+      "We keep improving BDGR. Features may be added, changed or removed, and the app may sometimes be unavailable for maintenance."
+     ],
+     "ar": [
+      "إحنا بنطوّر BDGR على طول، فممكن مزايا تتضاف أو تتغير أو تتشال، وممكن التطبيق يقف شوية للصيانة."
+     ]
+    },
+    {
+     "h_en": "10. Responsibility",
+     "h_ar": "١٠. المسؤولية",
+     "en": [
+      "BDGR is provided \"as is\". To the extent allowed by Egyptian law, we are not responsible for indirect losses, or for content posted by other users."
+     ],
+     "ar": [
+      "BDGR متاح \"زي ما هو\". في حدود اللي القانون المصري بيسمح بيه، إحنا مش مسؤولين عن الخسارة غير المباشرة، ولا عن المحتوى اللي بينزّله يوزرز تانيين."
+     ]
+    },
+    {
+     "h_en": "11. Deleting your account",
+     "h_ar": "١١. مسح حسابك",
+     "en": [
+      "You can delete your account anytime from Account Settings → Delete my account. It is deleted after 30 days. If you log in again within those 30 days, the request is cancelled."
+     ],
+     "ar": [
+      "تقدر تمسح حسابك في أي وقت من إعدادات الحساب ← امسح حسابي. بيتمسح بعد 30 يوم، ولو دخلت تاني في خلالهم الطلب بيتلغي."
+     ]
+    },
+    {
+     "h_en": "12. Changes to these terms",
+     "h_ar": "١٢. تغيير الشروط",
+     "en": [
+      "If we change these Terms in an important way, we will tell you in the app and ask you to agree again."
+     ],
+     "ar": [
+      "لو غيّرنا الشروط دي في حاجة مهمة، هنبلّغك جوه التطبيق ونطلب موافقتك تاني."
+     ]
+    },
+    {
+     "h_en": "13. Law",
+     "h_ar": "١٣. القانون",
+     "en": [
+      "These Terms are governed by the laws of the Arab Republic of Egypt."
+     ],
+     "ar": [
+      "الشروط دي بتخضع لقوانين جمهورية مصر العربية."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "privacy",
+   "title_en": "Privacy Policy",
+   "title_ar": "سياسة الخصوصية",
+   "sections": [
+    {
+     "h_en": "1. Who we are",
+     "h_ar": "١. إحنا مين",
+     "en": [
+      "BDGR is operated by {entity}. For any privacy question or request, contact {email}."
+     ],
+     "ar": [
+      "BDGR بيشغّله {entity}. لأي سؤال أو طلب عن الخصوصية، كلمنا على {email}."
+     ]
+    },
+    {
+     "h_en": "2. What we collect",
+     "h_ar": "٢. بنجمع إيه",
+     "en": [
+      "- Phone number: to create your account and log you in.",
+      "- Profile you add: name, username, photo, cover, bio, birth date, gender, sports and social links.",
+      "- Location: only when you allow it and tap update. We save your GPS coordinates, the address they point to (street, district, city, governorate), and the time. We use OpenStreetMap to turn the coordinates into an address.",
+      "- Device: phone model, operating system, app version, a device ID created by the app, and login times.",
+      "- Activity: your moments, reels, likes, comments, follows, blocks and reports.",
+      "- Fantasy and competitions: squads, points, leagues, rankings and the sports you register for.",
+      "- Support: the messages you send us, with your app version and phone model.",
+      "- Choices: your consents, privacy settings and notification settings."
+     ],
+     "ar": [
+      "- رقم الموبايل: علشان نعمل حسابك وتدخل بيه.",
+      "- البروفايل اللي بتكتبه: الاسم واليوزرنيم والصورة والغلاف والنبذة وتاريخ الميلاد والنوع والرياضات ولينكات السوشيال.",
+      "- المكان: بس لما تسمح وتدوس \"حدّث\". بنحفظ إحداثيات الـ GPS، والعنوان اللي بتشاور عليه (الشارع والحي والمدينة والمحافظة)، والوقت. وبنستخدم OpenStreetMap علشان نحوّل الإحداثيات لعنوان.",
+      "- الموبايل: نوعه، ونظام التشغيل، ونسخة التطبيق، ورقم جهاز بيعمله التطبيق، وأوقات الدخول.",
+      "- النشاط: المومنتس والريلز واللايكات والكومنتات والمتابعات والبلوك والبلاغات.",
+      "- الفانتازي والمسابقات: التشكيلات والنقط والدوريات والترتيب والرياضات اللي سجلت فيها.",
+      "- الدعم: الرسايل اللي بتبعتهالنا، ومعاها نسخة التطبيق ونوع الموبايل.",
+      "- اختياراتك: موافقاتك وإعدادات الخصوصية والإشعارات."
+     ]
+    },
+    {
+     "h_en": "3. Why we use it",
+     "h_ar": "٣. بنستخدمها ليه",
+     "en": [
+      "- To run your account and the app features you use.",
+      "- To calculate fantasy points, rankings and governorate/city rankings, and to deliver prizes.",
+      "- To keep accounts safe and stop cheating and abuse.",
+      "- To answer your support messages.",
+      "- To send you offers and news, only if you agreed. You can turn this off anytime in Privacy.",
+      "- To understand how the app is used and improve it."
+     ],
+     "ar": [
+      "- علشان نشغّل حسابك والمزايا اللي بتستخدمها.",
+      "- علشان نحسب نقط الفانتازي والترتيب وترتيب المحافظة والمدينة، ونسلّم الجوايز.",
+      "- علشان نحمي الحسابات ونوقف الغش وإساءة الاستخدام.",
+      "- علشان نرد على رسايل الدعم.",
+      "- علشان نبعتلك عروض وأخبار، بس لو انت موافق. وتقدر تقفلها في أي وقت من الخصوصية.",
+      "- علشان نفهم الناس بتستخدم التطبيق إزاي ونطوّره."
+     ]
+    },
+    {
+     "h_en": "4. What other users see",
+     "h_ar": "٤. اليوزرز التانيين بيشوفوا إيه",
+     "en": [
+      "Other users can see your name, username, photo, cover, bio, followers and your fantasy ranking. Your age and city are shown only if you allow it in Privacy. Your moments are visible to everyone, or to followers only if you choose.",
+      "If you win a prize, your name, photo and ranking may appear in the winners section.",
+      "Your phone number, exact location and birth date are never shown to other users."
+     ],
+     "ar": [
+      "اليوزرز التانيين يقدروا يشوفوا اسمك ويوزرنيمك وصورتك وغلافك ونبذتك ومتابعينك وترتيبك في الفانتازي. عمرك ومدينتك بيظهروا بس لو سمحت بده في الخصوصية. والمومنتس بتاعتك بتظهر للكل، أو للمتابعين بس لو اخترت كده.",
+      "لو كسبت جايزة، اسمك وصورتك وترتيبك ممكن يظهروا في جزء الكسبانين.",
+      "رقم موبايلك ومكانك بالظبط وتاريخ ميلادك عمرهم ما بيظهروا لحد."
+     ]
+    },
+    {
+     "h_en": "5. Who we share it with",
+     "h_ar": "٥. بنشاركها مع مين",
+     "en": [
+      "We don't sell your data. We only share what's needed with services that help us run BDGR:",
+      "- Supabase: hosts our database, files and login.",
+      "- An SMS provider: sends your login code.",
+      "- OpenStreetMap: turns GPS coordinates into an address.",
+      "- Google, Facebook, TikTok or X: only if you link that account to your profile.",
+      "- Prize sponsors: only the details needed to deliver your prize, with your approval.",
+      "We may also share data if the law requires it."
+     ],
+     "ar": [
+      "إحنا مش بنبيع بياناتك. بنشارك بس اللي محتاجينه مع الخدمات اللي بتساعدنا نشغّل BDGR:",
+      "- Supabase: بيستضيف الداتابيز والملفات والدخول.",
+      "- شركة رسايل SMS: بتبعتلك كود الدخول.",
+      "- OpenStreetMap: بيحوّل إحداثيات الـ GPS لعنوان.",
+      "- Google أو Facebook أو TikTok أو X: بس لو ربطت الحساب ده ببروفايلك.",
+      "- رعاة الجوايز: بس البيانات اللي محتاجينها علشان نوصّلك جايزتك، وبموافقتك.",
+      "وممكن نشارك بيانات لو القانون طلب كده."
+     ]
+    },
+    {
+     "h_en": "6. How long we keep it",
+     "h_ar": "٦. بنحتفظ بيها قد إيه",
+     "en": [
+      "We keep your data while your account is active.",
+      "When you delete your account, it is deleted after 30 days, and your photos and videos are removed from our storage within about a day after that. Copies may remain in backups for a short time before they are overwritten.",
+      "Some records may be kept longer if the law requires it, for example prize delivery records."
+     ],
+     "ar": [
+      "بنحتفظ ببياناتك طول ما حسابك شغال.",
+      "لما تمسح حسابك، بيتمسح بعد 30 يوم، وصورك وفيديوهاتك بتتشال من عندنا في خلال يوم تقريبًا بعدها. ممكن تفضل نسخ في الباك أب فترة قصيرة لحد ما تتمسح.",
+      "بعض السجلات ممكن نحتفظ بيها أكتر لو القانون طلب كده، زي سجلات تسليم الجوايز."
+     ]
+    },
+    {
+     "h_en": "7. Your choices",
+     "h_ar": "٧. اختياراتك",
+     "en": [
+      "- See and edit your data in Profile and Account Settings.",
+      "- Choose who sees your moments, age and city in Privacy.",
+      "- Turn offers and news on or off in Privacy.",
+      "- Turn off location access anytime from your phone settings.",
+      "- Delete your account from Account Settings.",
+      "- Ask us for a copy of your data or any privacy request at {email}."
+     ],
+     "ar": [
+      "- شوف بياناتك وعدّلها من البروفايل وإعدادات الحساب.",
+      "- اختار مين يشوف المومنتس وعمرك ومدينتك من الخصوصية.",
+      "- شغّل أو اقفل العروض والأخبار من الخصوصية.",
+      "- اقفل صلاحية المكان في أي وقت من إعدادات الموبايل.",
+      "- امسح حسابك من إعدادات الحساب.",
+      "- اطلب نسخة من بياناتك أو أي طلب خصوصية على {email}."
+     ]
+    },
+    {
+     "h_en": "8. Security",
+     "h_ar": "٨. الأمان",
+     "en": [
+      "We protect your data with access controls and encrypted connections. Sensitive fields like your phone number and birth date can't be read by other users. No system is 100% secure, so keep your login code private."
+     ],
+     "ar": [
+      "بنحمي بياناتك بصلاحيات وصول واتصالات مشفّرة. البيانات الحساسة زي رقم موبايلك وتاريخ ميلادك محدش من اليوزرز يقدر يقراها. مفيش نظام آمن 100%، فخلّي كود الدخول سر."
+     ]
+    },
+    {
+     "h_en": "9. Children",
+     "h_ar": "٩. الأطفال",
+     "en": [
+      "BDGR is not for children under 13. If we learn that a child under 13 has an account, we will delete it. Users under 18 need a parent or guardian's permission."
+     ],
+     "ar": [
+      "BDGR مش للأطفال اللي أقل من 13 سنة. لو عرفنا إن طفل أقل من 13 سنة عنده حساب، هنمسحه. واليوزرز اللي أقل من 18 سنة محتاجين موافقة ولي الأمر."
+     ]
+    },
+    {
+     "h_en": "10. Changes",
+     "h_ar": "١٠. التغييرات",
+     "en": [
+      "If we change this policy in an important way, we will tell you in the app."
+     ],
+     "ar": [
+      "لو غيّرنا السياسة دي في حاجة مهمة، هنبلّغك جوه التطبيق."
+     ]
+    }
+   ]
+  },
+  {
+   "id": "delete",
+   "title_en": "Delete your account",
+   "title_ar": "امسح حسابك",
+   "sections": [
+    {
+     "h_en": "From the app",
+     "h_ar": "من التطبيق",
+     "en": [
+      "Open the gear menu on Home → Account Settings → Delete my account. Your account is deleted after 30 days. If you log in again within those 30 days, the request is cancelled."
+     ],
+     "ar": [
+      "افتح منيو الترس في الهوم ← إعدادات الحساب ← امسح حسابي. حسابك بيتمسح بعد 30 يوم، ولو دخلت تاني في خلالهم الطلب بيتلغي."
+     ]
+    },
+    {
+     "h_en": "Without the app",
+     "h_ar": "من غير التطبيق",
+     "en": [
+      "Email {email} from any address with the subject \"Delete my BDGR account\" and the phone number of your account. We will confirm with you, then delete it the same way."
+     ],
+     "ar": [
+      "ابعت إيميل على {email} من أي إيميل، وخلّي العنوان \"Delete my BDGR account\"، واكتب رقم الموبايل اللي عليه الحساب. هنتأكد معاك، وبعدين هنمسحه بنفس الطريقة."
+     ]
+    },
+    {
+     "h_en": "What gets deleted",
+     "h_ar": "إيه اللي بيتمسح",
+     "en": [
+      "Your profile, photos, moments, reels, comments, likes, follows, fantasy squads and points, location history, devices, support messages and settings. Fantasy leagues you created move to the oldest other member."
+     ],
+     "ar": [
+      "البروفايل والصور والمومنتس والريلز والكومنتات واللايكات والمتابعات وتشكيلات ونقط الفانتازي وسجل المكان والأجهزة ورسايل الدعم والإعدادات. الدوريات اللي انت عاملها بتتنقل لأقدم عضو تاني فيها."
+     ]
+    }
+   ]
+  }
+ ]
+}

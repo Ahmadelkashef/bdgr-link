@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BDGR · الشروط والخصوصية</title>
+<meta name="description" content="BDGR Terms of Service, Privacy Policy and account deletion.">
+<link rel="icon" href="../logo.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0B0B0F;--card:#16171C;--line:#2A2C33;--text:#F4F4F6;--muted:#A6AAB5;--accent:#FF1A1A;--gold:#D4AF37}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--text);font-family:Cairo,system-ui,sans-serif}
+  .wrap{max-width:760px;margin:0 auto;padding:16px 16px 60px}
+  header{display:flex;align-items:center;gap:10px;padding:6px 0 14px}
+  header img{height:26px}
+  header .sp{flex:1}
+  .lang{border:1px solid var(--line);background:var(--card);color:var(--text);border-radius:10px;padding:6px 12px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .tabs{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;position:sticky;top:0;background:rgba(11,11,15,.94);backdrop-filter:blur(8px);padding:8px 0;z-index:5}
+  .tabs::-webkit-scrollbar{display:none}
+  .tabs button{flex:none;border:1px solid var(--line);background:transparent;color:var(--text);padding:8px 14px;border-radius:999px;font:inherit;font-size:13px;font-weight:700;cursor:pointer}
+  .tabs button.on{border-color:var(--accent);color:#fff;background:rgba(255,26,26,.12)}
+  h1{font-size:24px;margin:18px 0 4px}
+  .meta{color:var(--muted);font-size:12.5px;margin-bottom:18px}
+  section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;margin-top:10px}
+  h2{font-size:15.5px;margin:0 0 8px}
+  p{color:#D6D8DF;font-size:14px;line-height:1.85;margin:0 0 8px}
+  ul{margin:0 0 8px;padding-inline-start:20px}
+  li{color:#D6D8DF;font-size:14px;line-height:1.85}
+  .foot{color:var(--muted);font-size:12px;text-align:center;margin-top:28px;line-height:1.9}
+  a{color:var(--gold)}
+  .err{color:var(--muted);text-align:center;padding:40px 0}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header><img src="../logo.png" alt="BDGR"><span class="sp"></span><button class="lang" id="langBtn">English</button></header>
+  <nav class="tabs" id="tabs"></nav>
+  <main id="doc"><p class="err">…</p></main>
+  <div class="foot" id="foot"></div>
+</div>
+<script>
+// المحتوى في content.json (نفس الملف اللي التطبيق بيقراه). اسم الجهة والإيميل من الداتابيز (legal_info) علشان يتغيروا من غير تعديل هنا.
+const SUPABASE_URL = 'https://xjorftvsuztxapdnceao.supabase.co';
+const SUPABASE_KEY = 'sb_publishable_C2R3qaePoEtO8vZ940n5iA_ud5JR1Zj';
+const FALLBACK = { entity: 'BDGR', email: 'mekkawy4@gmail.com' };
+let data = null, info = FALLBACK, lang = 'ar', cur = 'terms';
+try { const q = new URLSearchParams(location.search).get('lang'); if (q === 'en' || q === 'ar') lang = q; else if (localStorage.getItem('legal_lang') === 'en') lang = 'en'; } catch (_) {}
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const fill = t => esc(t).replace(/\{entity\}/g, esc(info.entity)).replace(/\{email\}/g, `<a href="mailto:${esc(info.email)}">${esc(info.email)}</a>`);
+function para(list) {
+  let html = '', items = [];
+  const flush = () => { if (items.length) { html += '<ul>' + items.map(i => `<li>${fill(i)}</li>`).join('') + '</ul>'; items = []; } };
+  for (const line of list) { if (line.startsWith('- ')) items.push(line.slice(2)); else { flush(); html += `<p>${fill(line)}</p>`; } }
+  flush(); return html;
+}
+function render() {
+  const ar = lang === 'ar';
+  document.documentElement.lang = lang; document.documentElement.dir = ar ? 'rtl' : 'ltr';
+  document.title = 'BDGR · ' + (ar ? 'الشروط والخصوصية' : 'Terms & Privacy');
+  $('langBtn').textContent = ar ? 'English' : 'عربي';
+  if (!data) return;
+  $('tabs').innerHTML = data.docs.map(d => `<button class="${d.id === cur ? 'on' : ''}" data-id="${esc(d.id)}">${esc(ar ? d.title_ar : d.title_en)}</button>`).join('');
+  document.querySelectorAll('#tabs button').forEach(b => b.onclick = () => { cur = b.dataset.id; history.replaceState(null, '', '#' + cur); render(); scrollTo({ top: 0 }); });
+  const d = data.docs.find(x => x.id === cur) || data.docs[0];
+  $('doc').innerHTML = `<h1>${esc(ar ? d.title_ar : d.title_en)}</h1>
+    <div class="meta">${ar ? 'النسخة' : 'Version'} ${esc(data.version)} · ${ar ? 'سارية من' : 'Effective'} ${esc(data.effective)}</div>` +
+    d.sections.map(s => `<section><h2>${esc(ar ? s.h_ar : s.h_en)}</h2>${para(ar ? s.ar : s.en)}</section>`).join('');
+  $('foot').innerHTML = `${esc(info.entity)} · <a href="mailto:${esc(info.email)}">${esc(info.email)}</a>`;
+}
+const $ = id => document.getElementById(id);
+$('langBtn').onclick = () => { lang = lang === 'ar' ? 'en' : 'ar'; try { localStorage.setItem('legal_lang', lang); } catch (_) {} render(); };
+const h = location.hash.slice(1); if (['terms', 'privacy', 'delete'].includes(h)) cur = h;
+Promise.all([
+  fetch('content.json', { cache: 'no-cache' }).then(r => r.json()),
+  fetch(SUPABASE_URL + '/rest/v1/rpc/legal_info', { method: 'POST', headers: { apikey: SUPABASE_KEY, 'Content-Type': 'application/json' }, body: '{}' })
+    .then(r => r.ok ? r.json() : null).catch(() => null),
+]).then(([c, i]) => {
+  data = c;
+  if (i && i.entity) info = { entity: i.entity, email: i.email || FALLBACK.email };
+  render();
+}).catch(() => { $('doc').innerHTML = '<p class="err">Couldn\'t load. Please refresh. · مقدرناش نحمّل الصفحة، اعمل تحديث.</p>'; });
+render();
+</script>
+</body>
+</html>
