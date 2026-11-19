@@ -533,7 +533,16 @@
       <button id="fpSave" class="btn primary">انشر</button>
       <div id="fpMsg" class="msg"></div>
     </div>
-    <div class="card"><b style="font-size:13px">بوستات BDGR</b><div id="fpList" style="margin-top:6px">—</div></div>
+    <div class="card"><b style="font-size:13px">بوستات BDGR</b>
+      <div style="display:flex;gap:6px;margin-top:8px">
+        <input id="fpFind" class="in" style="flex:1;margin:0" placeholder="🔍 ابحث بالعنوان، أو الصق لينك البوست">
+        <button class="btn" id="fpFindGo">بحث</button>
+        <button class="btn hidden" id="fpFindClear">✕</button>
+      </div>
+      <p class="hint" style="margin:4px 0 0">لينك البوست = زرار "شير" من التطبيق. ينفع كمان لينك اليوتيوب / التيك توك نفسه.</p>
+      <div id="fpList" style="margin-top:6px">—</div>
+      <button class="btn hidden" id="fpMore" style="width:100%;margin-top:8px">اعرض أكتر</button>
+    </div>
     <div class="card form">
       <b>⭕ ستوري BDGR</b>
       <p class="hint" style="margin:6px 0 0">بتظهر أول دايرة في شريط الستوريز فوق الفيد (قبل كسبانين الفانتازي). صورة، أو فيديو لحد 30 ثانية و15 ميجا.</p>
@@ -1867,10 +1876,35 @@ async function signed(paths) {
   (r.data || []).forEach(x => { if (x.signedUrl) out[x.path] = x.signedUrl; });
   return out;
 }
-async function loadOfficialPosts() {
-  const { data, error } = await sb.rpc('mgmt_official_posts');
+// القايمة بتتحمّل 20 بوست في المرة؛ البحث بالعنوان/الوصف أو بلينك البوست (?p=<id>) أو لينك يوتيوب/تيك توك
+let fpFilter = {}, fpMoreAvail = false;
+function fpParseFind(v) {
+  v = (v || '').trim(); if (!v) return {};
+  const id = v.match(/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i);
+  if (id) return { id: id[0].toLowerCase() };
+  if (/youtu|tiktok\.com/i.test(v)) { const l = parseLink(v); if (l && !l.error) return { external_id: l.id }; }
+  return { q: v };
+}
+async function loadOfficialPosts(more = false) {
+  const p = { ...fpFilter, limit: 20 };
+  if (more && fpData.length) {
+    const last = [...fpData].reverse().find(x => !x.is_pinned);
+    p.before = last ? last.created_at : '9999-12-31';
+  }
+  $('fpMore').disabled = true;
+  const { data, error } = await sb.rpc('mgmt_official_posts_find', { p });
+  $('fpMore').disabled = false;
   if (error) { $('fpList').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
-  fpData = data || [];
+  const items = (data && data.items) || [];
+  fpData = more ? fpData.concat(items.filter(x => !fpData.some(y => y.id === x.id))) : items;
+  fpMoreAvail = !!(data && data.has_more);
+  $('fpMore').classList.toggle('hidden', !fpMoreAvail);
+  const searching = Object.keys(fpFilter).length > 0;
+  $('fpFindClear').classList.toggle('hidden', !searching);
+  if (!fpData.length) {
+    $('fpList').innerHTML = `<p class="hint">${searching ? 'مفيش بوست بالبحث ده.' : 'لسه مفيش بوستات.'}</p>`;
+    return;
+  }
   const urls = await signed(fpData.filter(p => !p.source || p.source === 'upload').map(p => p.kind === 'image' ? p.storage_path : p.poster_path));
   $('fpList').innerHTML = fpData.map(p => {
     const ext = p.source && p.source !== 'upload';
@@ -1893,7 +1927,7 @@ async function loadOfficialPosts() {
         </div>
       </div>
     </div>`;
-  }).join('') || '<p class="hint">لسه مفيش بوستات.</p>';
+  }).join('');
 }
 async function fpUpdate(id, patch) {
   const { error } = await sb.rpc('mgmt_official_post_update', { p_id: id, p: patch });
@@ -1925,6 +1959,11 @@ function parseLink(u) {
   if (/vm\.tiktok\.com|vt\.tiktok\.com|tiktok\.com\/t\//.test(u)) return { error: 'ده لينك تيك توك مختصر. افتحه في المتصفح وانسخ اللينك الكامل اللي فيه /video/ ورقم.' };
   return { error: 'اللينك مش يوتيوب ولا تيك توك.' };
 }
+const fpFindRun = () => { fpFilter = fpParseFind($('fpFind').value); loadOfficialPosts(); };
+$('fpFindGo').onclick = fpFindRun;
+$('fpFind').addEventListener('keydown', e => { if (e.key === 'Enter') fpFindRun(); });
+$('fpFindClear').onclick = () => { $('fpFind').value = ''; fpFilter = {}; loadOfficialPosts(); };
+$('fpMore').onclick = () => loadOfficialPosts(true);
 $('fpLink').addEventListener('input', () => {
   const r = parseLink($('fpLink').value);
   $('fpLinkHint').textContent = !r ? '' : r.error ? '⚠️ ' + r.error : (r.source === 'youtube' ? '▶ يوتيوب' : '▶ تيك توك') + ' · ' + r.id + ' ✓';
