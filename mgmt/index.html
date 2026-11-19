@@ -711,8 +711,15 @@
       <div style="flex:1"><label class="fl2">القالب</label><select id="crTpl" class="in">
         <option value="title">برعاية (اسم + لوجو)</option><option value="logo">لوجو صغير</option><option value="text">سطر كلام</option>
         <option value="banner">بانر (صورة عريضة)</option><option value="native">كارت (صورة + كلام + زرار)</option><option value="video">كارت فيديو</option>
-        <option value="story">ستوري</option><option value="fullscreen">شاشة كاملة</option></select></div>
+        <option value="story">ستوري</option><option value="fullscreen">شاشة كاملة</option><option value="takeover">Takeover (أول ما الهوم تفتح)</option></select></div>
       <div style="flex:1"><label class="fl2">اللغة</label><select id="crLang" class="in"><option value="any">الاتنين</option><option value="ar">عربي</option><option value="en">English</option></select></div>
+    </div>
+    <div id="crTo" class="card hidden" style="border-color:var(--gold)">
+      <b style="font-size:13px">Takeover — الكارت الكبير أول ما الهوم تفتح (مرة في اليوم لكل يوزر، ومش لليوزر الجديد)، وبعد ما يتقفل بينزل مكان البانر في الهوم</b>
+      <label class="fl2">الباقة</label>
+      <select id="crToPkg" class="in"><option value="std">عادي — ✕ ظاهرة على طول، "اعرف أكتر" بيفتح اللينك</option><option value="prem">بريميوم — ✕ بتظهر بعد 2 ثانية + صفحة تفاصيل جوه التطبيق</option></select>
+      <label class="fl2">مدة الظهور (ثواني، 2–15)</label><input id="crDur" type="number" min="2" max="15" class="in" value="3">
+      <div id="crDetBox"><label class="fl2">صفحة التفاصيل (بريميوم)</label><textarea id="crDetails" class="in" maxlength="1500" placeholder="تفاصيل العرض اللي هتظهر في صفحة جوه التطبيق"></textarea></div>
     </div>
     <label class="fl2">العنوان</label><input id="crTitleIn" class="in" maxlength="80">
     <label class="fl2">الكلام</label><textarea id="crBody" class="in" maxlength="300"></textarea>
@@ -2338,7 +2345,7 @@ let adOv = null, adEditS = null, adEditC = null, adEditCr = null, adCrCamp = nul
 const AD_PUB = 'https://xjorftvsuztxapdnceao.supabase.co/storage/v1/object/public/ads/';
 const adUrl = k => !k ? '' : /^https?:\/\//i.test(k) ? k : AD_PUB + k;
 const AD_ST = { draft: ['مسودة', ''], live: ['🟢 شغالة', ''], paused: ['⏸ واقفة', 'off'], ended: ['⚪ خلصت', 'off'] };
-const AD_TPL = { title: 'برعاية', logo: 'لوجو', text: 'سطر', banner: 'بانر', native: 'كارت', video: 'فيديو', story: 'ستوري', fullscreen: 'شاشة كاملة' };
+const AD_TPL = { title: 'برعاية', logo: 'لوجو', text: 'سطر', banner: 'بانر', native: 'كارت', video: 'فيديو', story: 'ستوري', fullscreen: 'شاشة كاملة', takeover: 'Takeover' };
 const AD_ROUND_SLOTS = ['fantasy_round_title', 'fantasy_prize', 'fantasy_lobby_banner', 'fantasy_squad_saved'];
 const AD_SPORT_SLOTS = ['home_sports', 'competitions_sport', 'badger_card'];
 const adPl = k => (adOv?.placements || []).find(p => p.key === k);
@@ -2509,8 +2516,16 @@ function adCrOpen(campId, crId) {
   $('crLinkType').value = r.link_type || 'none'; $('crLink').value = r.link || '';
   $('crBg').value = r.bg_color || ''; $('crFg').value = r.text_color || ''; $('crActive').checked = r.active !== false;
   $('crDel').classList.toggle('hidden', !adEditCr);
+  $('crToPkg').value = (r.close_after_s || 0) > 0 || r.details ? 'prem' : 'std';
+  $('crDur').value = r.duration_s || 3; $('crDetails').value = r.details || '';
+  adCrToUI();
   setMsg($('crMsg'), ''); $('adCrSheet').classList.remove('hidden'); adCrPreview();
 }
+function adCrToUI() {
+  $('crTo').classList.toggle('hidden', $('crTpl').value !== 'takeover');
+  $('crDetBox').classList.toggle('hidden', $('crToPkg').value !== 'prem');
+}
+['crTpl', 'crToPkg'].forEach(id => $(id).addEventListener('change', adCrToUI));
 ['crTpl', 'crLang', 'crTitleIn', 'crBody', 'crCta', 'crMediaUrl', 'crFile', 'crBg', 'crFg', 'crLinkType'].forEach(id => $(id).addEventListener('input', adCrPreview));
 $('crFile').addEventListener('change', adCrPreview);
 function adCrPreview() {
@@ -2527,6 +2542,7 @@ function adCrPreview() {
   if (tpl === 'title' || tpl === 'logo') h = `<div style="display:flex;align-items:center;gap:6px;color:${fg}"><span style="opacity:.6;font-size:11px">${title || 'برعاية'}</span>${logo}<b style="font-size:13px">${esc(sp.name || 'الراعي')}</b></div>`;
   else if (tpl === 'text') h = `<div style="display:flex;gap:8px;align-items:center;padding:9px 12px;border-radius:12px;background:${bg === '#121217' ? '#ffffff0a' : bg};color:${fg};font-size:12px">${lab}<span>${body || title}</span></div>`;
   else if (tpl === 'banner') h = `<div style="position:relative;aspect-ratio:3.2;border-radius:14px;overflow:hidden">${m}<div style="position:absolute;top:8px;left:8px">${lab}</div>${title ? `<b style="position:absolute;bottom:8px;right:12px;color:${fg};font-size:13px;text-shadow:0 1px 4px #000">${title}</b>` : ''}</div>`;
+  else if (tpl === 'takeover') h = `<div style="background:#000b;border-radius:16px;padding:18px 10px"><div style="position:relative;aspect-ratio:3/4;border-radius:18px;overflow:hidden;max-width:240px;margin:auto">${m}<div style="position:absolute;top:6px;right:8px;left:8px"><div style="height:2.5px;background:#fff4;border-radius:2px"><div style="width:40%;height:100%;background:#fff"></div></div><div style="display:flex;gap:6px;align-items:center;color:#fff;margin-top:6px">${logo}<b style="font-size:12px;flex:1">${esc(sp.name || '')}</b>${lab} ✕</div></div><div style="position:absolute;bottom:10px;right:10px;left:10px;color:#fff"><b>${title}</b><div style="font-size:11px;opacity:.8">${body}</div><div style="margin-top:6px;background:#fff;color:#000;border-radius:8px;text-align:center;padding:6px;font-size:12px;font-weight:800">${cta}</div></div></div><div style="text-align:center;font-size:11px;color:#aaa;margin-top:8px">بعد القفل ← بينزل بانر في الهوم</div></div>`;
   else if (tpl === 'story' || tpl === 'fullscreen') h = `<div style="position:relative;aspect-ratio:9/16;border-radius:14px;overflow:hidden;max-width:220px;margin:auto">${m}<div style="position:absolute;top:8px;right:8px;left:8px;display:flex;gap:6px;align-items:center;color:#fff">${logo}<b style="font-size:12px;flex:1">${esc(sp.name || '')}</b>${lab}</div><div style="position:absolute;bottom:10px;right:10px;left:10px;color:#fff"><b>${title}</b><div style="font-size:11px;opacity:.8">${body}</div><div style="margin-top:6px;background:#fff;color:#000;border-radius:8px;text-align:center;padding:6px;font-size:12px;font-weight:800">${cta}</div></div></div>`;
   else h = `<div style="background:${bg};border-radius:16px;overflow:hidden;border:1px solid #ffffff14;color:${fg}"><div style="display:flex;gap:8px;align-items:center;padding:10px 12px">${logo}<div style="flex:1"><b style="font-size:13px">${esc(sp.name || '')}</b><div style="font-size:10.5px;opacity:.5">إعلان</div></div>✕</div><div style="aspect-ratio:${tpl === 'video' ? '4/5' : '16/10'}">${m}</div><div style="display:flex;gap:10px;align-items:center;padding:10px 12px"><div style="flex:1"><b style="font-size:14px">${title}</b><div style="font-size:12px;opacity:.7">${body}</div></div>${$('crLinkType').value !== 'none' ? `<span style="background:#fff;color:#000;border-radius:20px;padding:7px 12px;font-size:12px;font-weight:800">${cta}</span>` : ''}</div></div>`;
   $('crPrev').innerHTML = h;
@@ -2540,6 +2556,13 @@ $('crSave').onclick = async () => {
     const p = { id: adEditCr?.id || '', campaign_id: adCrCamp.id, template: $('crTpl').value, lang: $('crLang').value, title: $('crTitleIn').value.trim(),
       body: $('crBody').value.trim(), cta_text: $('crCta').value.trim(), link_type: lt, link: lt === 'none' ? '' : link,
       bg_color: $('crBg').value.trim(), text_color: $('crFg').value.trim(), active: $('crActive').checked };
+    if (p.template === 'takeover') {
+      const prem = $('crToPkg').value === 'prem';
+      p.duration_s = String(Math.min(15, Math.max(2, Number($('crDur').value) || 3)));
+      p.close_after_s = prem ? '2' : '0';
+      p.details = prem ? $('crDetails').value.trim() : '';
+      if (prem && !p.details) throw new Error('اكتب صفحة التفاصيل للبريميوم');
+    }
     const f = $('crFile').files[0], pf = $('crPoster').files[0], old = [];
     if (f) { if (f.type.startsWith('video') && f.size > 5 * 1024 * 1024) throw new Error('الفيديو أكبر من 5 ميجا'); p.media_key = await adUpload(f, 'creatives/' + adCrCamp.id); if (adEditCr?.media_key) old.push(adEditCr.media_key); }
     else if ($('crMediaUrl').value.trim()) p.media_key = $('crMediaUrl').value.trim();
