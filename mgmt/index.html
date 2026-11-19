@@ -589,6 +589,17 @@
   </section>
 
   <!-- ═══ الدعم (كنترول) ═══ -->
+  <!-- ═══ 🚩 البلاغات (محتوى اليوزرز) ═══ -->
+  <section id="t-reports" class="hidden">
+    <div class="aw-head">
+      <div class="seg" id="rpSeg"><button data-x="open" class="on">مفتوحة</button><button data-x="handled">اتعاملنا معاها</button></div>
+      <button class="btn" style="margin-inline-start:auto;padding:8px 12px;font-size:12.5px" onclick="loadReports()">↻ تحديث</button>
+    </div>
+    <p class="aw-sum" id="rpSum"></p>
+    <div id="rpList"></div>
+    <p class="hint">البوست اللي عليه بلاغ "سلامة الأطفال"، أو 3 بلاغات من ناس مختلفين، بيستخبى لوحده لحد ما تراجعه. "امسح" بيشيل البوست وملفاته خالص. "سيبه" بيرجّعه ويقفل البلاغات. "امنع الرفع" بيوقف اليوزر إنه ينزّل حاجة جديدة.</p>
+  </section>
+
   <section id="t-support" class="hidden">
     <div class="aw-head">
       <div class="seg" id="spSeg"><button data-x="active" class="on">المفتوحة</button><button data-x="resolved">اتحلت</button><button data-x="all">الكل</button></div>
@@ -802,9 +813,10 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
+    { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','official','admins'];
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -849,6 +861,7 @@ function go(t) {
   if (t === 'prices') loadPricesTab();
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
+  if (t === 'reports') loadReports();
   if (t === 'push') loadPush();
   if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
@@ -1764,6 +1777,78 @@ $('spSend').onclick = () => sendSupport(false);
 $('spSendClose').onclick = () => sendSupport(true);
 $('spClose').onclick = () => setSupportStatus('resolved');
 $('spReopen').onclick = () => setSupportStatus('seen');
+
+
+/* ─── 🚩 البلاغات: محتوى اليوزرز (perm content) ─── */
+const RP_REASON = { nudity: '🔞 عري / جنسي', violence: '⚠️ عنف', harassment: '💬 تحرش / تنمّر', spam: '🚫 سبام', child_safety: '👶 سلامة الأطفال', other: '📋 تانية' };
+const RP_ST = { published: '🟢 ظاهر', hidden: '🟡 مستخبي لحد المراجعة', removed: '🔴 اتمسح', deleted: '⚪ صاحبه مسحه' };
+let rpFilter = 'open', rpData = [];
+document.querySelectorAll('#rpSeg button').forEach(b => b.onclick = () => {
+  rpFilter = b.dataset.x; document.querySelectorAll('#rpSeg button').forEach(x => x.classList.toggle('on', x === b)); loadReports(); });
+async function ugcSigned(keys) {
+  const out = {}, list = [...new Set(keys.filter(Boolean))];
+  if (!list.length) return out;
+  const r = await sb.storage.from('ugc').createSignedUrls(list, 900);
+  (r.data || []).forEach(x => { if (x.signedUrl) out[x.path] = x.signedUrl; });
+  return out;
+}
+async function loadReports() {
+  $('rpSum').textContent = '…';
+  const { data, error } = await sb.rpc('mgmt_reports_list', { p: { status: rpFilter } });
+  if (error) { $('rpSum').textContent = errText(error); $('rpList').innerHTML = ''; return; }
+  rpData = data || [];
+  $('rpSum').textContent = rpFilter === 'open' ? `${fmt(rpData.length)} محتوى عليه بلاغات` : `آخر ${fmt(rpData.length)}`;
+  const keys = [];
+  rpData.forEach(r => (r.item?.media || []).forEach(m => keys.push(m.type === 'video' ? (m.poster_key || m.key) : m.key)));
+  const urls = await ugcSigned(keys);
+  $('rpList').innerHTML = rpData.map(r => {
+    const it = r.item, o = r.owner || {};
+    const media = (it?.media || []).map(m => {
+      const u = urls[m.type === 'video' ? (m.poster_key || m.key) : m.key];
+      return u ? `<img src="${esc(u)}" alt="" style="width:76px;height:110px;object-fit:cover;border-radius:8px;background:#000;flex:none;cursor:pointer" onclick="rpOpen('${esc(m.key)}')">`
+               : '<div style="width:76px;height:110px;border-radius:8px;background:#000;flex:none;display:flex;align-items:center;justify-content:center">' + (m.type === 'video' ? '🎬' : '🖼️') + '</div>';
+    }).join('');
+    const reasons = Object.entries(r.reasons || {}).map(([k, n]) => `<span class="tag ${k === 'child_safety' ? 'off' : ''}">${RP_REASON[k] || esc(k)} × ${fmt(n)}</span>`).join('');
+    const id = esc(r.content_id), ty = esc(r.content_type);
+    return `
+    <div class="card" style="margin-top:8px">
+      <div style="display:flex;gap:8px">${media || '<p class="hint">مفيش ملفات.</p>'}</div>
+      <div style="margin-top:8px"><b>${it?.kind === 'story' ? '⭕ ستوري' : '📝 بوست'}</b> · ${RP_ST[it?.status] || esc(it?.status || ty)} · ${fmt(r.reports)} بلاغ · ${fmtDT(r.last_at)}</div>
+      ${it?.caption ? `<div class="hint" style="margin:4px 0 0">"${esc(it.caption)}"</div>` : ''}
+      <div>${reasons}</div>
+      <div class="hint" style="margin:6px 0 0">صاحبه: ${esc(o.display_name || '—')} <bdi dir="ltr">@${esc(o.username || '')}</bdi> · #${esc(o.user_id || '')}${o.removed_count ? ` · اتمسحله ${fmt(o.removed_count)} قبل كده` : ''}${o.banned ? ' · <b style="color:var(--red)">ممنوع من الرفع</b>' : ''}</div>
+      ${rpFilter === 'open' ? `<div class="acts" style="margin-top:8px">
+        <button class="btn" style="color:var(--red)" onclick="rpAct('${id}','${ty}','remove',false)">🗑 امسح</button>
+        <button class="btn" style="color:var(--red)" onclick="rpAct('${id}','${ty}','remove',true)">🗑 امسح + امنع الرفع</button>
+        <button class="btn" onclick="rpAct('${id}','${ty}','dismiss',false)">✓ سيبه</button>
+      </div>` : (o.user_id ? `<div class="acts" style="margin-top:8px"><button class="btn" onclick="rpBan(${Number(o.user_id)}, ${!o.banned})">${o.banned ? 'رجّعله الرفع' : 'امنع الرفع'}</button></div>` : '')}
+    </div>`;
+  }).join('') || `<p class="hint">${rpFilter === 'open' ? 'مفيش بلاغات مفتوحة 👌' : 'لسه مفيش.'}</p>`;
+}
+async function rpOpen(key) {
+  const u = await ugcSigned([key]);
+  if (u[key]) window.open(u[key], '_blank', 'noopener');
+}
+async function rpAct(id, type, action, ban) {
+  const msg = action === 'remove' ? (ban ? 'تمسح البوست ده وتمنع صاحبه من الرفع؟' : 'تمسح البوست ده خالص؟') : 'تسيب البوست وتقفل البلاغات؟';
+  if (!confirm(msg)) return;
+  let note = '';
+  if (ban) { note = prompt('سبب المنع (بيتسجل عندنا بس)', '') ?? ''; }
+  const { data, error } = await sb.rpc('mgmt_report_action', { p: { content_id: id, content_type: type, action, ban, note } });
+  if (error) return alert(errText(error));
+  const keys = (data && data.remove_keys) || [];
+  if (keys.length) {
+    const rm = await sb.storage.from('ugc').remove(keys);
+    if (rm.error) alert('البوست اتشال، بس الملفات ما اتمسحتش دلوقتي (هتتمسح في التنضيف): ' + rm.error.message);
+  }
+  loadReports();
+}
+async function rpBan(userId, on) {
+  if (!confirm(on ? 'تمنع اليوزر ده من الرفع؟' : 'ترجّعله الرفع؟')) return;
+  const reason = on ? (prompt('السبب (بيتسجل عندنا بس)', '') ?? '') : '';
+  const { error } = await sb.rpc('mgmt_ugc_ban', { p: { user_id: userId, on, reason } });
+  if (error) return alert(errText(error)); loadReports();
+}
 
 /* ─── حساب BDGR الرسمي ─── */
 let ofData = null, ofImgKind = null;
