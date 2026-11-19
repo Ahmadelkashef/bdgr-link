@@ -1,6 +1,6 @@
 {
- "version": "v2.1",
- "effective": "2026-11-19",
+ "version": "v2.2",
+ "effective": "2026-11-20",
  "docs": [
   {
    "id": "terms",
@@ -142,8 +142,28 @@
      ]
     },
     {
-     "h_en": "9. Changes to the app",
-     "h_ar": "٩. التغييرات في التطبيق",
+     "h_en": "9. Ads and sponsors",
+     "h_ar": "٩. الإعلانات والرعاة",
+     "ar": [
+      "BDGR مجاني، وبيعيش من الرعاة والإعلانات. علشان كده هتلاقي إعلانات ورعاية في أماكن في التطبيق، زي \"الجولة برعاية X\"، أو بانر، أو كارت في الفيد، أو إعلان كبير أول ما الهوم تفتح.",
+      "- أي إعلان مكتوب عليه \"إعلان\"، وأي رعاية مكتوب عليها \"برعاية\". والبوستات المدفوعة اللي بينزلها حساب BDGR مكتوب عليها \"شراكة مدفوعة\".",
+      "- تقدر تقفل الإعلانات اللي عليها ✕، ومش هتظهرلك تاني في نفس اليوم.",
+      "- مش بنقبل إعلانات مراهنات، أو كحول، أو دخان وفيب، أو محتوى للكبار، أو كريبتو، أو منتجات صحية مش مرخّصة. وفيه إعلانات (زي مشروبات الطاقة) مش بتظهر للي سنه أقل من 18 سنة.",
+      "- لما تدوس على إعلان، ممكن يفتح موقع أو تطبيق تبع الراعي. ده مش تبع BDGR، والراعي هو المسؤول عن منتجه وعرضه وشروطه.",
+      "- الرعاة ممكن يقدّموا جوايز، والجوايز دي ماشية على بند الجوايز اللي فوق."
+     ],
+     "en": [
+      "BDGR is free and is funded by sponsors and ads. You will see ads and sponsorships in some places in the app, such as \"Round presented by X\", banners, cards in the feed, or a large ad when Home opens.",
+      "- Every ad is labelled \"Ad\" and every sponsorship is labelled \"Presented by\". Paid posts from the BDGR account are labelled \"Paid partnership\".",
+      "- You can close ads that have a ✕, and they will not show again that day.",
+      "- We do not accept ads for gambling or betting, alcohol, tobacco or vapes, adult content, crypto, or unlicensed health products. Some ads (such as energy drinks) are not shown to users under 18.",
+      "- Tapping an ad may open the sponsor's website or app. That is not part of BDGR, and the sponsor is responsible for its product, offer and terms.",
+      "- Sponsors may provide prizes. Those prizes follow the Prizes section above."
+     ]
+    },
+    {
+     "h_en": "10. Changes to the app",
+     "h_ar": "١٠. التغييرات في التطبيق",
      "en": [
       "We keep improving BDGR. Features may be added, changed or removed, and the app may sometimes be unavailable for maintenance."
      ],
@@ -152,8 +172,8 @@
      ]
     },
     {
-     "h_en": "10. Responsibility",
-     "h_ar": "١٠. المسؤولية",
+     "h_en": "11. Responsibility",
+     "h_ar": "١١. المسؤولية",
      "en": [
       "BDGR is provided \"as is\". To the extent allowed by Egyptian law, we are not responsible for indirect losses, or for content posted by other users."
      ],
@@ -162,8 +182,8 @@
      ]
     },
     {
-     "h_en": "11. Deleting your account",
-     "h_ar": "١١. مسح حسابك",
+     "h_en": "12. Deleting your account",
+     "h_ar": "١٢. مسح حسابك",
      "en": [
       "You can delete your account anytime from Account Settings → Delete my account. It is deleted after 30 days. If you log in again within those 30 days, the request is cancelled."
      ],
@@ -172,8 +192,8 @@
      ]
     },
     {
-     "h_en": "12. Changes to these terms",
-     "h_ar": "١٢. تغيير الشروط",
+     "h_en": "13. Changes to these terms",
+     "h_ar": "١٣. تغيير الشروط",
      "en": [
       "If we change these Terms in an important way, we will tell you in the app and ask you to agree again."
      ],
@@ -182,8 +202,8 @@
      ]
     },
     {
-     "h_en": "13. Law",
-     "h_ar": "١٣. القانون",
+     "h_en": "14. Law",
+     "h_ar": "١٤. القانون",
      "en": [
       "These Terms are governed by the laws of the Arab Republic of Egypt."
      ],
@@ -219,6 +239,7 @@
       "- Activity: your posts, stories, moments, reels, Hype, comments, follows, blocks and reports.",
       "- Fantasy and competitions: squads, points, leagues, rankings and the sports you register for.",
       "- Support: the messages you send us, with your app version and phone model.",
+      "- Ads: we count how many times each ad is shown and tapped, and we save on your phone the ads you closed today.",
       "- Choices: your consents, privacy settings and notification settings."
      ],
      "ar": [
@@ -229,6 +250,7 @@
       "- النشاط: البوستات والستوريز والمومنتس والريلز والـ Hype والكومنتات والمتابعات والبلوك والبلاغات.",
       "- الفانتازي والمسابقات: التشكيلات والنقط والدوريات والترتيب والرياضات اللي سجلت فيها.",
       "- الدعم: الرسايل اللي بتبعتهالنا، ومعاها نسخة التطبيق ونوع الموبايل.",
+      "- الإعلانات: بنعدّ مرات ظهور كل إعلان ومرات الضغط عليه، وبنحفظ على موبايلك الإعلانات اللي قفلتها النهارده.",
       "- اختياراتك: موافقاتك وإعدادات الخصوصية والإشعارات."
      ]
     },
@@ -241,6 +263,7 @@
       "- To keep accounts safe and stop cheating and abuse.",
       "- To answer your support messages.",
       "- To send you offers and news, only if you agreed. You can turn this off anytime in Privacy.",
+      "- To show you relevant ads and sponsorships: we use your governorate, age, gender, the app you use, and whether you play fantasy. This all happens inside BDGR: we do not bring in data about you from outside, and we do not track you across other apps or websites.",
       "- To understand how the app is used and improve it."
      ],
      "ar": [
@@ -249,6 +272,7 @@
       "- علشان نحمي الحسابات ونوقف الغش وإساءة الاستخدام.",
       "- علشان نرد على رسايل الدعم.",
       "- علشان نبعتلك عروض وأخبار، بس لو انت موافق. وتقدر تقفلها في أي وقت من الخصوصية.",
+      "- علشان نعرضلك إعلانات ورعاية مناسبة: بنستخدم محافظتك، وسنك، ونوعك، والتطبيق اللي بتستخدمه، وهل بتلعب فانتازي. ده كله بيحصل جوه BDGR بس: مش بنجيب بيانات عنك من برّه، ومش بنتتبعك في تطبيقات أو مواقع تانية.",
       "- علشان نفهم الناس بتستخدم التطبيق إزاي ونطوّره."
      ]
     },
@@ -276,6 +300,7 @@
       "- OpenStreetMap: turns GPS coordinates into an address.",
       "- Google, Facebook, TikTok or X: only if you link that account to your profile.",
       "- Prize sponsors: only the details needed to deliver your prize, with your approval.",
+      "- Advertisers and sponsors: they only get aggregated numbers (views, taps and people, by day and placement). They never get your name, number or anything that identifies you. If you tap an ad and it opens the sponsor's website, that site has its own privacy policy.",
       "We may also share data if the law requires it."
      ],
      "ar": [
@@ -285,6 +310,7 @@
       "- OpenStreetMap: بيحوّل إحداثيات الـ GPS لعنوان.",
       "- Google أو Facebook أو TikTok أو X: بس لو ربطت الحساب ده ببروفايلك.",
       "- رعاة الجوايز: بس البيانات اللي محتاجينها علشان نوصّلك جايزتك، وبموافقتك.",
+      "- المعلنين والرعاة: بياخدوا أرقام مجمّعة بس (عدد المشاهدات والضغطات والناس، حسب اليوم والمكان). عمرهم ما بياخدوا اسمك أو رقمك أو أي حاجة تعرّفك. ولو دوست على إعلان وفتح موقع الراعي، الموقع ده ليه سياسة الخصوصية بتاعته.",
       "وممكن نشارك بيانات لو القانون طلب كده."
      ]
     },
@@ -313,6 +339,7 @@
       "- Turn offers and news on or off in Privacy.",
       "- Turn off location access anytime from your phone settings.",
       "- Delete your account from Account Settings.",
+      "- Close any ad that has a ✕, and it will not show again today.",
       "- Ask us for a copy of your data or any privacy request at {email}."
      ],
      "ar": [
@@ -321,6 +348,7 @@
       "- شغّل أو اقفل العروض والأخبار من الخصوصية.",
       "- اقفل صلاحية المكان في أي وقت من إعدادات الموبايل.",
       "- امسح حسابك من إعدادات الحساب.",
+      "- اقفل أي إعلان عليه ✕، ومش هيظهرلك تاني النهارده.",
       "- اطلب نسخة من بياناتك أو أي طلب خصوصية على {email}."
      ]
     },
