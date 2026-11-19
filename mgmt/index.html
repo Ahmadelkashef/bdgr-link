@@ -307,6 +307,15 @@
   .fl2{display:block;color:var(--muted);font-size:12.5px;margin:12px 2px 5px;font-weight:700}
   textarea.in{resize:vertical;min-height:76px;line-height:1.6}
   .of-log{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.9}
+  .fp{display:flex;gap:10px;align-items:flex-start;padding:10px 0;border-top:1px solid var(--line)}
+  .fp:first-child{border-top:0}
+  .fp video{width:64px;height:96px;object-fit:cover;border-radius:8px;background:#000;flex:none}
+  .fp .b{flex:1;min-width:0}
+  .fp .b b{display:block;font-size:13.5px}
+  .fp .b small{display:block;color:var(--muted);font-size:11.5px;margin-top:2px;line-height:1.6}
+  .fp .acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+  .fp .acts .btn{padding:6px 10px;font-size:12px}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:13.5px}
   /* الدعم */
   .sp-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer}
   .sp-item.new{border-color:var(--gold)}
@@ -497,6 +506,18 @@
       <button id="ofSave" class="btn primary">حفظ</button>
       <div id="ofMsg" class="msg"></div>
     </div>
+    <div class="card form">
+      <b>📢 بوست جديد في الفيد (فيديو)</b>
+      <p class="hint" style="margin:6px 0 0">الفيديو بيظهر لكل اليوزرز في الفيد باسم BDGR بالعلامة الدهبي. المثبّت بيظهر أول واحد (بوست واحد بس يتثبت).</p>
+      <button class="btn" style="width:100%;margin-top:10px" onclick="$('fpFile').click()" id="fpPick">🎬 اختار فيديو</button>
+      <input type="file" id="fpFile" accept="video/mp4,video/quicktime,video/webm" class="hidden">
+      <label class="fl2">العنوان</label><input id="fpTitle" class="in" maxlength="80" placeholder="مثلاً: أهداف الجولة 9">
+      <label class="fl2">الوصف (اختياري)</label><textarea id="fpDesc" class="in" maxlength="300"></textarea>
+      <label class="chk"><input type="checkbox" id="fpPin"> 📌 ثبّته فوق</label>
+      <button id="fpSave" class="btn primary">انشر</button>
+      <div id="fpMsg" class="msg"></div>
+    </div>
+    <div class="card"><b style="font-size:13px">بوستات BDGR</b><div id="fpList" style="margin-top:6px">—</div></div>
     <div class="card"><b style="font-size:13px">آخر تعديلات باسم BDGR</b><div class="of-log" id="ofLog">—</div></div>
   </section>
 
@@ -1626,8 +1647,76 @@ async function loadOfficial() {
   ofData = data;
   Object.entries(OF_FIELDS).forEach(([id, k]) => { $(id).value = data[k] || ''; });
   renderOfficial();
-  $('ofLog').innerHTML = (data.log || []).map(l => `${fmtDT(l.created_at)} · <bdi dir="ltr">${esc(l.admin_email || '—')}</bdi> · ${l.action === 'profile_save' ? 'عدّل البروفايل' : esc(l.action)}`).join('<br>') || 'لسه مفيش.';
+  const ACT = { profile_save: 'عدّل البروفايل', feed_post: 'نزّل بوست', feed_post_edit: 'عدّل بوست', feed_post_delete: 'مسح بوست' };
+  $('ofLog').innerHTML = (data.log || []).map(l => `${fmtDT(l.created_at)} · <bdi dir="ltr">${esc(l.admin_email || '—')}</bdi> · ${ACT[l.action] || esc(l.action)}`).join('<br>') || 'لسه مفيش.';
+  loadOfficialPosts();
 }
+
+/* ─── بوستات BDGR في الفيد ─── */
+let fpData = [];
+$('fpFile').onchange = () => { const f = $('fpFile').files[0]; $('fpPick').textContent = f ? '🎬 ' + f.name + ' · ' + (f.size / 1048576).toFixed(1) + ' MB' : '🎬 اختار فيديو'; };
+async function loadOfficialPosts() {
+  const { data, error } = await sb.rpc('mgmt_official_posts');
+  if (error) { $('fpList').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
+  fpData = data || [];
+  const urls = {};
+  await Promise.all(fpData.map(async p => {
+    const r = await sb.storage.from('Reels').createSignedUrl(p.storage_path, 3600);
+    if (!r.error) urls[p.id] = r.data.signedUrl;
+  }));
+  $('fpList').innerHTML = fpData.map(p => `
+    <div class="fp">
+      ${urls[p.id] ? `<video src="${esc(urls[p.id])}#t=0.5" preload="metadata" muted playsinline controls></video>` : '<video></video>'}
+      <div class="b">
+        <b>${p.is_pinned ? '📌 ' : ''}${esc(p.title || '—')}</b>
+        <small>${esc(p.description || '')}</small>
+        <small>${p.status === 'published' ? '🟢 منشور' : '⚪ مخفي'} · ${fmtDT(p.created_at)}${p.size_bytes ? ' · ' + (p.size_bytes / 1048576).toFixed(1) + ' MB' : ''}</small>
+        <div class="acts">
+          <button class="btn" onclick="fpUpdate('${esc(p.id)}', { is_pinned: ${!p.is_pinned} })">${p.is_pinned ? 'شيل التثبيت' : '📌 ثبّت'}</button>
+          <button class="btn" onclick="fpUpdate('${esc(p.id)}', { status: '${p.status === 'published' ? 'hidden' : 'published'}' })">${p.status === 'published' ? 'اخفيه' : 'اظهره'}</button>
+          <button class="btn" onclick="fpEdit('${esc(p.id)}')">تعديل</button>
+          <button class="btn" style="color:var(--red)" onclick="fpDelete('${esc(p.id)}')">مسح</button>
+        </div>
+      </div>
+    </div>`).join('') || '<p class="hint">لسه مفيش بوستات.</p>';
+}
+async function fpUpdate(id, patch) {
+  const { error } = await sb.rpc('mgmt_official_post_update', { p_id: id, p: patch });
+  if (error) return alert(errText(error)); loadOfficial();
+}
+function fpEdit(id) {
+  const p = fpData.find(x => x.id === id); if (!p) return;
+  const title = prompt('العنوان', p.title || ''); if (title === null) return;
+  const desc = prompt('الوصف (اختياري)', p.description || ''); if (desc === null) return;
+  fpUpdate(id, { title, description: desc });
+}
+async function fpDelete(id) {
+  const p = fpData.find(x => x.id === id); if (!p) return;
+  if (!confirm('تمسح "' + (p.title || '') + '" من الفيد خالص؟')) return;
+  const rm = await sb.storage.from('Reels').remove([p.storage_path]);
+  if (rm.error) return alert('مقدرناش نمسح الفيديو: ' + rm.error.message);
+  const { error } = await sb.rpc('mgmt_official_post_delete', { p_id: id });
+  if (error) return alert(errText(error)); loadOfficial();
+}
+$('fpSave').onclick = async () => {
+  const f = $('fpFile').files[0], title = $('fpTitle').value.trim();
+  if (!f) return setMsg($('fpMsg'), 'اختار فيديو الأول.', 'err');
+  if (!/^video\//.test(f.type)) return setMsg($('fpMsg'), 'لازم يكون فيديو.', 'err');
+  if (f.size > 100 * 1048576) return setMsg($('fpMsg'), 'الفيديو أكبر من 100 ميجا.', 'err');
+  if (!title) return setMsg($('fpMsg'), 'اكتب عنوان.', 'err');
+  if (!ofData || !ofData.user_id) return setMsg($('fpMsg'), 'حساب BDGR مش متحمّل.', 'err');
+  const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+  const path = `Users_reels/${ofData.user_id}/${Date.now()}.${ext}`;
+  $('fpSave').disabled = true; setMsg($('fpMsg'), 'بنرفع الفيديو… (ممكن ياخد دقيقة)');
+  const up = await sb.storage.from('Reels').upload(path, f, { contentType: f.type, upsert: false, cacheControl: '3600' });
+  if (up.error) { $('fpSave').disabled = false; return setMsg($('fpMsg'), 'فشل الرفع: ' + up.error.message, 'err'); }
+  const { error } = await sb.rpc('mgmt_official_post_create', { p_storage_path: path, p_title: title, p_description: $('fpDesc').value.trim(),
+    p_pinned: $('fpPin').checked, p_size: f.size, p_mime: f.type });
+  $('fpSave').disabled = false;
+  if (error) { await sb.storage.from('Reels').remove([path]); return setMsg($('fpMsg'), errText(error), 'err'); }
+  $('fpFile').value = ''; $('fpFile').onchange(); $('fpTitle').value = ''; $('fpDesc').value = ''; $('fpPin').checked = false;
+  setMsg($('fpMsg'), 'اتنشر ✓ هيظهر في الفيد عند اليوزرز.', 'ok'); loadOfficial();
+};
 function renderOfficial() {
   const d = ofData || {};
   $('ofPName').textContent = $('ofName').value.trim() || 'BDGR';
