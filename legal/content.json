@@ -1,5 +1,5 @@
 {
- "version": "v2.0",
+ "version": "v2.1",
  "effective": "2026-11-19",
  "docs": [
   {
@@ -94,11 +94,15 @@
      "h_ar": "٦. المحتوى بتاعك",
      "en": [
       "Photos, videos, moments and comments you post stay yours. You give BDGR permission to store and show them inside the app and its share links, so the app can work.",
+      "You can post photos and videos to your profile and the feed (up to 2 files per post, at most one video of up to 60 seconds, 100 MB in total per account), and one story at a time that disappears after 24 hours.",
+      "You are responsible for what you post. Don't post other people's photos or videos without their permission, especially children.",
       "Only post content you have the right to post, and respect other people's privacy and images.",
       "We may remove content that breaks these Terms."
      ],
      "ar": [
       "الصور والفيديوهات والمومنتس والكومنتات اللي بتنزلها بتفضل بتاعتك. انت بتدي BDGR الإذن إنه يخزنها ويعرضها جوه التطبيق ولينكات المشاركة، علشان التطبيق يشتغل.",
+      "تقدر تنزّل صور وفيديوهات على بروفايلك والفيد (لحد ملفين في البوست، وفيديو واحد بالكتير مدته لحد دقيقة، و100 ميجا لكل حساب)، وستوري واحدة في المرة بتختفي بعد 24 ساعة.",
+      "انت مسؤول عن اللي بتنزّله. ماتنزّلش صور أو فيديوهات لناس من غير إذنهم، وخصوصًا الأطفال.",
       "نزّل بس المحتوى اللي من حقك تنزله، واحترم خصوصية الناس وصورهم.",
       "من حقنا نشيل أي محتوى بيخالف الشروط دي."
      ]
@@ -109,6 +113,8 @@
      "en": [
       "- Harassing, threatening, bullying or insulting others.",
       "- Hate speech, nudity, violence or illegal content.",
+      "- Any sexual content or nudity, and anything that sexualizes or puts children at risk. We remove it at once and may report it to the authorities.",
+      "- Content you don't have the rights to, like match broadcasts, films or music, unless the owner allows it.",
       "- Pretending to be someone else, including BDGR (only the account with the gold badge is official).",
       "- Spam, scams, or selling accounts.",
       "- Cheating in fantasy or competitions, or using bots or multiple accounts.",
@@ -117,6 +123,8 @@
      "ar": [
       "- التحرش أو التهديد أو التنمّر أو الشتيمة.",
       "- خطاب الكراهية، أو العري، أو العنف، أو أي محتوى مخالف للقانون.",
+      "- أي محتوى جنسي أو عري، وأي حاجة فيها استغلال أو خطر على الأطفال. بنشيلها فورًا وممكن نبلّغ الجهات المختصة.",
+      "- محتوى مش من حقك، زي بث الماتشات أو الأفلام أو الأغاني، إلا لو صاحبه سامح.",
       "- إنك تنتحل شخصية حد، ومنهم BDGR (الحساب الرسمي الوحيد هو اللي عليه العلامة الدهبي).",
       "- السبام أو النصب أو بيع الحسابات.",
       "- الغش في الفانتازي أو المسابقات، أو استخدام بوتات أو أكتر من حساب.",
@@ -127,10 +135,10 @@
      "h_en": "8. Blocking and reporting",
      "h_ar": "٨. البلوك والبلاغ",
      "en": [
-      "You can block any user from their profile, and report moments or comments. We review reports and may warn, remove content, or suspend accounts."
+      "You can block any user from their profile, and report any post, story, moment or comment. Content reported for child safety, or by several people, is hidden until we review it. We may remove content, stop an account from posting, or suspend it."
      ],
      "ar": [
-      "تقدر تعمل بلوك لأي يوزر من بروفايله، وتبلّغ عن أي مومنت أو كومنت. بنراجع البلاغات، وممكن ننبّه أو نشيل المحتوى أو نوقف الحساب."
+      "تقدر تعمل بلوك لأي يوزر من بروفايله، وتبلّغ عن أي بوست أو ستوري أو مومنت أو كومنت. المحتوى اللي عليه بلاغ \"سلامة الأطفال\"، أو بلاغات من كذا حد، بيستخبى لحد ما نراجعه. وممكن نشيل المحتوى، أو نمنع الحساب من الرفع، أو نوقفه."
      ]
     },
     {
@@ -208,7 +216,7 @@
       "- Profile you add: name, username, photo, cover, bio, birth date, gender, sports and social links.",
       "- Location: only when you allow it and tap update. We save your GPS coordinates, the address they point to (street, district, city, governorate), and the time. We use OpenStreetMap to turn the coordinates into an address.",
       "- Device: phone model, operating system, app version, a device ID created by the app, and login times.",
-      "- Activity: your moments, reels, likes, comments, follows, blocks and reports.",
+      "- Activity: your posts, stories, moments, reels, Hype, comments, follows, blocks and reports.",
       "- Fantasy and competitions: squads, points, leagues, rankings and the sports you register for.",
       "- Support: the messages you send us, with your app version and phone model.",
       "- Choices: your consents, privacy settings and notification settings."
@@ -218,7 +226,7 @@
       "- البروفايل اللي بتكتبه: الاسم واليوزرنيم والصورة والغلاف والنبذة وتاريخ الميلاد والنوع والرياضات ولينكات السوشيال.",
       "- المكان: بس لما تسمح وتدوس \"حدّث\". بنحفظ إحداثيات الـ GPS، والعنوان اللي بتشاور عليه (الشارع والحي والمدينة والمحافظة)، والوقت. وبنستخدم OpenStreetMap علشان نحوّل الإحداثيات لعنوان.",
       "- الموبايل: نوعه، ونظام التشغيل، ونسخة التطبيق، ورقم جهاز بيعمله التطبيق، وأوقات الدخول.",
-      "- النشاط: المومنتس والريلز واللايكات والكومنتات والمتابعات والبلوك والبلاغات.",
+      "- النشاط: البوستات والستوريز والمومنتس والريلز والـ Hype والكومنتات والمتابعات والبلوك والبلاغات.",
       "- الفانتازي والمسابقات: التشكيلات والنقط والدوريات والترتيب والرياضات اللي سجلت فيها.",
       "- الدعم: الرسايل اللي بتبعتهالنا، ومعاها نسخة التطبيق ونوع الموبايل.",
       "- اختياراتك: موافقاتك وإعدادات الخصوصية والإشعارات."
@@ -248,12 +256,12 @@
      "h_en": "4. What other users see",
      "h_ar": "٤. اليوزرز التانيين بيشوفوا إيه",
      "en": [
-      "Other users can see your name, username, photo, cover, bio, followers and your fantasy ranking. Your age and city are shown only if you allow it in Privacy. Your moments are visible to everyone, or to followers only if you choose.",
+      "Other users can see your name, username, photo, cover, bio, followers and your fantasy ranking. Your age and city are shown only if you allow it in Privacy. Your posts, stories and moments are shown to the people who follow you, or to everyone if your account isn't set to followers-only.",
       "If you win a prize, your name, photo and ranking may appear in the winners section.",
       "Your phone number, exact location and birth date are never shown to other users."
      ],
      "ar": [
-      "اليوزرز التانيين يقدروا يشوفوا اسمك ويوزرنيمك وصورتك وغلافك ونبذتك ومتابعينك وترتيبك في الفانتازي. عمرك ومدينتك بيظهروا بس لو سمحت بده في الخصوصية. والمومنتس بتاعتك بتظهر للكل، أو للمتابعين بس لو اخترت كده.",
+      "اليوزرز التانيين يقدروا يشوفوا اسمك ويوزرنيمك وصورتك وغلافك ونبذتك ومتابعينك وترتيبك في الفانتازي. عمرك ومدينتك بيظهروا بس لو سمحت بده في الخصوصية. البوستات والستوريز والمومنتس بتاعتك بتظهر للي متابعينك، أو للكل لو حسابك مش \"للمتابعين بس\".",
       "لو كسبت جايزة، اسمك وصورتك وترتيبك ممكن يظهروا في جزء الكسبانين.",
       "رقم موبايلك ومكانك بالظبط وتاريخ ميلادك عمرهم ما بيظهروا لحد."
      ]
@@ -286,11 +294,13 @@
      "en": [
       "We keep your data while your account is active.",
       "When you delete your account, it is deleted after 30 days, and your photos and videos are removed from our storage within about a day after that. Copies may remain in backups for a short time before they are overwritten.",
+      "Stories are deleted from our storage after 24 hours. When you delete a post, its photos and videos are removed from our storage.",
       "Some records may be kept longer if the law requires it, for example prize delivery records."
      ],
      "ar": [
       "بنحتفظ ببياناتك طول ما حسابك شغال.",
       "لما تمسح حسابك، بيتمسح بعد 30 يوم، وصورك وفيديوهاتك بتتشال من عندنا في خلال يوم تقريبًا بعدها. ممكن تفضل نسخ في الباك أب فترة قصيرة لحد ما تتمسح.",
+      "الستوريز بتتمسح من عندنا بعد 24 ساعة. ولما تمسح بوست، صوره وفيديوهاته بتتشال من عندنا.",
       "بعض السجلات ممكن نحتفظ بيها أكتر لو القانون طلب كده، زي سجلات تسليم الجوايز."
      ]
     },
