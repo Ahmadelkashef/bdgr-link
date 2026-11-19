@@ -588,6 +588,24 @@
     <div class="card"><b style="font-size:13px">اللي اتبعت</b><div id="pnHist" style="margin-top:6px">—</div></div>
   </section>
 
+  <!-- ═══ 📣 الإعلانات (perm ads) ═══ -->
+  <section id="t-ads" class="hidden">
+    <div class="aw-head" style="flex-wrap:wrap;gap:6px">
+      <button class="btn go" onclick="adSponsorOpen()">➕ راعي</button>
+      <button class="btn go" onclick="adCampOpen()">➕ حملة</button>
+      <button class="btn" id="adDemoBtn" onclick="adDemoToggle()">…</button>
+      <button class="btn" style="margin-inline-start:auto;padding:8px 12px;font-size:12.5px" onclick="loadAds()">↻ تحديث</button>
+    </div>
+    <p class="aw-sum" id="adSum"></p>
+    <div class="card"><h3>الرعاة</h3><div id="adSponsors" style="display:flex;flex-wrap:wrap;gap:8px"></div></div>
+    <div id="adCamps"></div>
+    <p class="hint">كل إعلان مكتوب عليه "إعلان" في التطبيق. الحملة بتظهر لما تبقى "شغالة" والنهارده بين البداية والنهاية. التغيير بيوصل للموبايلات في خلال 10 دقايق، من غير بيلد. "تجريبي" = حملات وهمية لعرض الأماكن بس.</p>
+  </section>
+  <section id="t-adslots" class="hidden">
+    <p class="aw-sum">أماكن الإعلانات في التطبيق. المكان المقفول مش بيظهر فيه أي إعلان حتى لو فيه حملة.</p>
+    <div id="adSlots"></div>
+  </section>
+
   <!-- ═══ الدعم (كنترول) ═══ -->
   <!-- ═══ 🚩 البلاغات (محتوى اليوزرز) ═══ -->
   <section id="t-reports" class="hidden">
@@ -632,6 +650,103 @@
     <input type="file" id="awFile" accept="image/jpeg,image/png,image/webp" class="hidden">
   </section>
 </main>
+
+<!-- 📣 راعي -->
+<div id="adSponsorSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="asTitle">راعي</h2><button class="icon-btn" onclick="closeSheet('adSponsorSheet')">✕</button></div>
+    <label class="fl2">الاسم</label><input id="asName" class="in" maxlength="80">
+    <label class="fl2">اللوجو (مربع، PNG/JPG/WebP، أقل من 1 ميجا)</label>
+    <div style="display:flex;gap:10px;align-items:center">
+      <img id="asLogoPrev" alt="" style="width:56px;height:56px;border-radius:14px;background:var(--card2);object-fit:cover">
+      <input type="file" id="asLogo" accept="image/png,image/jpeg,image/webp" class="in" style="padding:9px">
+    </div>
+    <label class="fl2">الموقع (اختياري)</label><input id="asWeb" class="in" dir="ltr" maxlength="200">
+    <label class="fl2">التواصل (اختياري)</label><input id="asContact" class="in" maxlength="200">
+    <label class="fl2">ملاحظات</label><textarea id="asNotes" class="in" maxlength="500"></textarea>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="asActive" checked> شغال</label>
+    <button class="btn primary" id="asSave">حفظ</button>
+    <button class="btn warn" id="asDel" style="width:100%;margin-top:8px">🗑 امسح الراعي</button>
+    <div id="asMsg" class="msg"></div>
+  </div>
+</div>
+<!-- 📣 حملة -->
+<div id="adCampSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="acTitle">حملة</h2><button class="icon-btn" onclick="closeSheet('adCampSheet')">✕</button></div>
+    <label class="fl2">الراعي</label><select id="acSponsor" class="in"></select>
+    <label class="fl2">اسم الحملة</label><input id="acName" class="in" maxlength="120">
+    <div style="display:flex;gap:8px"><div style="flex:1"><label class="fl2">من</label><input id="acStart" type="datetime-local" class="in"></div>
+      <div style="flex:1"><label class="fl2">لحد</label><input id="acEnd" type="datetime-local" class="in"></div></div>
+    <label class="fl2">الحالة</label>
+    <select id="acStatus" class="in"><option value="draft">مسودة</option><option value="live">شغالة</option><option value="paused">واقفة</option><option value="ended">خلصت</option></select>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">الأولوية</label><input id="acPrio" type="number" class="in" value="0"></div>
+      <div style="flex:1"><label class="fl2">الوزن (تدوير)</label><input id="acWeight" type="number" min="1" class="in" value="1"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">حد المشاهدات/يوم</label><input id="acDaily" type="number" min="1" class="in" placeholder="من غير حد"></div>
+      <div style="flex:1"><label class="fl2">حد المشاهدات كله</label><input id="acTotal" type="number" min="1" class="in" placeholder="من غير حد"></div>
+    </div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">أقل سن</label><input id="acAge" type="number" min="0" max="21" class="in" value="0"></div>
+      <div style="flex:1"><label class="fl2">النوع</label><select id="acCat" class="in">
+        <option value="">—</option><option value="sportswear">ملابس رياضية</option><option value="drinks">مشروبات</option><option value="food">أكل</option>
+        <option value="telecom">اتصالات</option><option value="sports_venue">ملاعب/أكاديميات</option><option value="club">أندية</option><option value="tech">تكنولوجيا</option><option value="other">تاني</option></select></div>
+    </div>
+    <p class="hint">ممنوع: مراهنات، كحول، دخان/فيب، محتوى للكبار، كريبتو، مكملات مش مرخصة.</p>
+    <label class="fl2">ملاحظة السعر (للأدمن بس)</label><input id="acBudget" class="in" maxlength="200">
+    <label class="fl2">الإعلان يظهر فين؟</label>
+    <div id="acTargets"></div>
+    <label class="fl2">المحافظات (اختياري، افصل بفاصلة — فاضي = الكل)</label><input id="acGovs" class="in" placeholder="Cairo, Giza" dir="ltr">
+    <button class="btn primary" id="acSave">حفظ</button>
+    <div id="acMsg" class="msg"></div>
+  </div>
+</div>
+<!-- 📣 شكل إعلان -->
+<div id="adCrSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="crTitle">شكل إعلان</h2><button class="icon-btn" onclick="closeSheet('adCrSheet')">✕</button></div>
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">القالب</label><select id="crTpl" class="in">
+        <option value="title">برعاية (اسم + لوجو)</option><option value="logo">لوجو صغير</option><option value="text">سطر كلام</option>
+        <option value="banner">بانر (صورة عريضة)</option><option value="native">كارت (صورة + كلام + زرار)</option><option value="video">كارت فيديو</option>
+        <option value="story">ستوري</option><option value="fullscreen">شاشة كاملة</option></select></div>
+      <div style="flex:1"><label class="fl2">اللغة</label><select id="crLang" class="in"><option value="any">الاتنين</option><option value="ar">عربي</option><option value="en">English</option></select></div>
+    </div>
+    <label class="fl2">العنوان</label><input id="crTitleIn" class="in" maxlength="80">
+    <label class="fl2">الكلام</label><textarea id="crBody" class="in" maxlength="300"></textarea>
+    <label class="fl2">الصورة / الفيديو (فيديو ≤ 15 ثانية، أقل من 5 ميجا)</label>
+    <input type="file" id="crFile" accept="image/png,image/jpeg,image/webp,video/mp4" class="in" style="padding:9px">
+    <input id="crMediaUrl" class="in" dir="ltr" placeholder="أو لينك ملف https://…" style="margin-top:6px">
+    <label class="fl2">صورة غلاف للفيديو (اختياري)</label>
+    <input type="file" id="crPoster" accept="image/png,image/jpeg,image/webp" class="in" style="padding:9px">
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">الضغط بيفتح</label><select id="crLinkType" class="in">
+        <option value="none">مفيش</option><option value="url">لينك برّه</option><option value="deeplink">صفحة جوه التطبيق</option></select></div>
+      <div style="flex:1"><label class="fl2">اللينك</label><input id="crLink" class="in" dir="ltr" placeholder="https://… أو fantasy"></div>
+    </div>
+    <p class="hint">جوه التطبيق: home · fantasy · feed · competitions · competitions:padel · profile</p>
+    <label class="fl2">كلمة الزرار</label><input id="crCta" class="in" maxlength="24" placeholder="اعرف أكتر">
+    <div style="display:flex;gap:8px">
+      <div style="flex:1"><label class="fl2">لون الخلفية</label><input id="crBg" class="in" dir="ltr" placeholder="#101014"></div>
+      <div style="flex:1"><label class="fl2">لون الكلام</label><input id="crFg" class="in" dir="ltr" placeholder="#FFFFFF"></div>
+    </div>
+    <label style="display:flex;gap:8px;align-items:center;margin-top:10px"><input type="checkbox" id="crActive" checked> شغال</label>
+    <label class="fl2">معاينة</label>
+    <div id="crPrev" style="background:#0B0B0F;border:1px solid var(--line);border-radius:22px;padding:14px;max-width:340px;margin:0 auto"></div>
+    <button class="btn primary" id="crSave">حفظ</button>
+    <button class="btn warn" id="crDel" style="width:100%;margin-top:8px">🗑 امسح الشكل ده</button>
+    <div id="crMsg" class="msg"></div>
+  </div>
+</div>
+<!-- 📣 تقرير -->
+<div id="adRepSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="arTitle">تقرير</h2><button class="icon-btn" onclick="closeSheet('adRepSheet')">✕</button></div>
+    <div id="arBody">…</div>
+  </div>
+</div>
 
 <!-- محادثة دعم -->
 <div id="supportSheet" class="overlay hidden">
@@ -814,9 +929,10 @@ const NAV = {
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
+    { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','official','admins'];
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -862,6 +978,8 @@ function go(t) {
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
   if (t === 'reports') loadReports();
+  if (t === 'ads') loadAds();
+  if (t === 'adslots') loadAdSlots();
   if (t === 'push') loadPush();
   if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
@@ -2213,6 +2331,267 @@ async function removeOfficialImg(kind) {
   if (!confirm(kind === 'avatar' ? 'تشيل صورة BDGR؟ هيظهر البادجر الدهبي مكانها.' : 'تشيل الغلاف؟')) return;
   const old = ofPath(ofData && ofData[kind + '_url']);
   if (await saveOfficial({ [kind + '_url']: '' }, 'اتشالت ✓') && old) await sb.storage.from('users').remove([old]);
+}
+
+/* ─── 📣 الإعلانات (perm ads) — ADS.md ─── */
+let adOv = null, adEditS = null, adEditC = null, adEditCr = null, adCrCamp = null;
+const AD_PUB = 'https://xjorftvsuztxapdnceao.supabase.co/storage/v1/object/public/ads/';
+const adUrl = k => !k ? '' : /^https?:\/\//i.test(k) ? k : AD_PUB + k;
+const AD_ST = { draft: ['مسودة', ''], live: ['🟢 شغالة', ''], paused: ['⏸ واقفة', 'off'], ended: ['⚪ خلصت', 'off'] };
+const AD_TPL = { title: 'برعاية', logo: 'لوجو', text: 'سطر', banner: 'بانر', native: 'كارت', video: 'فيديو', story: 'ستوري', fullscreen: 'شاشة كاملة' };
+const AD_ROUND_SLOTS = ['fantasy_round_title', 'fantasy_prize', 'fantasy_lobby_banner', 'fantasy_squad_saved'];
+const AD_SPORT_SLOTS = ['home_sports', 'competitions_sport', 'badger_card'];
+const adPl = k => (adOv?.placements || []).find(p => p.key === k);
+const adPlName = k => esc(adPl(k)?.notes || k);
+const ctr = (i, c) => i ? ((c / i) * 100).toFixed(1) + '%' : '—';
+
+async function loadAds() {
+  $('adSum').textContent = '…';
+  const { data, error } = await sb.rpc('mgmt_ads_overview');
+  if (error) { $('adSum').textContent = errText(error) + (/does not exist|function/i.test(error.message || '') ? ' — دوال الإعلانات لسه ماتركبتش في Supabase (supabase_manual/ads_v1_rpcs.sql).' : ''); return; }
+  adOv = data;
+  const camps = data.campaigns || [];
+  const live = camps.filter(c => c.status === 'live'), demos = camps.filter(c => c.is_demo);
+  $('adSum').textContent = `${fmt(camps.length)} حملة · ${fmt(live.length)} شغالة · ${fmt((data.sponsors || []).length)} راعي`;
+  const demoLive = demos.some(c => c.status === 'live');
+  $('adDemoBtn').textContent = demos.length ? (demoLive ? '⏸ وقّف التجريبي' : '▶ شغّل التجريبي') : 'مفيش تجريبي';
+  $('adDemoBtn').disabled = !demos.length;
+  $('adSponsors').innerHTML = (data.sponsors || []).map(s => `
+    <button class="btn" style="padding:6px 10px;gap:6px" onclick="adSponsorOpen('${s.id}')">
+      ${s.logo_url ? `<img src="${esc(s.logo_url)}" alt="" style="width:22px;height:22px;border-radius:6px;object-fit:cover">` : ''}
+      ${esc(s.name)}${s.active ? '' : ' <span class="tag off">موقوف</span>'}${s.notes === 'DEMO' ? ' <span class="tag">تجريبي</span>' : ''}</button>`).join('') || '<p class="hint">ضيف أول راعي.</p>';
+  $('adCamps').innerHTML = camps.map(c => {
+    const t = c.totals || {}, st = AD_ST[c.status] || [c.status, ''];
+    const tg = (c.targets || []).map(x => `<span class="tag">${adPlName(x.placement_key)}${x.sports?.length ? ' · ' + esc(x.sports.join('/')) : ''}${x.round_id ? ' · جولة' : ''}${x.arena ? ' · ' + esc(x.arena) : ''}</span>`).join('');
+    const crs = (c.creatives || []).map(cr => {
+      const img = cr.template === 'video' ? cr.poster_url : cr.media_url;
+      return `<button class="btn" style="padding:4px;flex-direction:column;gap:2px;width:84px;font-size:10.5px" onclick="adCrOpen('${c.id}','${cr.id}')">
+        ${img ? `<img src="${esc(img)}" alt="" style="width:74px;height:46px;object-fit:cover;border-radius:6px">` : `<div style="width:74px;height:46px;border-radius:6px;background:var(--card2);display:flex;align-items:center;justify-content:center">${esc(AD_TPL[cr.template] || cr.template)}</div>`}
+        <span>${esc(AD_TPL[cr.template] || cr.template)} · ${cr.lang === 'any' ? 'ع/E' : cr.lang === 'ar' ? 'ع' : 'E'}${cr.active ? '' : ' ⏸'}</span></button>`;
+    }).join('');
+    return `<div class="card" style="margin-top:8px">
+      <h3><span>${esc(c.name)} ${c.is_demo ? '<span class="tag">تجريبي</span>' : ''}</span><span class="tag ${st[1]}">${st[0]}</span></h3>
+      <div class="hint" style="margin:0">${esc(c.sponsor_name || '')} · ${fmtDT(c.starts_at)} ← ${fmtDT(c.ends_at)}${c.priority ? ' · أولوية ' + c.priority : ''}${c.daily_cap ? ' · ' + fmt(c.daily_cap) + '/يوم' : ''}${c.min_age ? ' · +' + c.min_age : ''}</div>
+      <div style="margin-top:6px">${tg || '<span class="hint">مش متحدد ليها أماكن</span>'}</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">${crs}
+        <button class="btn" style="width:84px;font-size:12px" onclick="adCrOpen('${c.id}')">➕ شكل</button></div>
+      <div class="hint" style="margin-top:8px">👁 ${fmt(t.impressions)} مشاهدة · 👤 ${fmt(t.unique_users)} · 👆 ${fmt(t.clicks)} ضغطة · CTR ${ctr(t.impressions, t.clicks)}</div>
+      <div class="acts" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <button class="btn" onclick="adCampOpen('${c.id}')">تعديل</button>
+        ${c.status === 'live' ? `<button class="btn" onclick="adCampStatus('${c.id}','paused')">⏸ وقّف</button>` : `<button class="btn go" onclick="adCampStatus('${c.id}','live')">▶ شغّل</button>`}
+        <button class="btn" onclick="adReport('${c.id}')">📊 تقرير الراعي</button>
+        <button class="btn warn" onclick="adDelete('campaign','${c.id}')">🗑</button>
+      </div></div>`;
+  }).join('') || '<p class="hint">مفيش حملات لسه.</p>';
+}
+
+async function adDemoToggle() {
+  const on = !(adOv?.campaigns || []).some(c => c.is_demo && c.status === 'live');
+  const { error } = await sb.rpc('mgmt_ads_demo', { p_on: on });
+  if (error) return alert(errText(error));
+  loadAds();
+}
+
+/* راعي */
+function adSponsorOpen(id) {
+  adEditS = (adOv?.sponsors || []).find(s => s.id === id) || null;
+  const s = adEditS || {};
+  $('asTitle').textContent = adEditS ? 'تعديل راعي' : 'راعي جديد';
+  $('asName').value = s.name || ''; $('asWeb').value = s.website || ''; $('asContact').value = s.contact || ''; $('asNotes').value = s.notes || '';
+  $('asActive').checked = s.active !== false; $('asLogo').value = '';
+  $('asLogoPrev').src = s.logo_url || ''; $('asDel').classList.toggle('hidden', !adEditS);
+  setMsg($('asMsg'), ''); $('adSponsorSheet').classList.remove('hidden');
+}
+$('asLogo').onchange = () => { const f = $('asLogo').files[0]; if (f) $('asLogoPrev').src = URL.createObjectURL(f); };
+async function adUpload(file, folder) {
+  if (file.size > 5 * 1024 * 1024) throw new Error('الملف أكبر من 5 ميجا');
+  const ext = (file.name.split('.').pop() || 'jpg').toLowerCase().replace(/[^a-z0-9]/g, '');
+  const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2, 8)}.${ext}`;
+  const { error } = await sb.storage.from('ads').upload(path, file, { contentType: file.type, upsert: false, cacheControl: '31536000' });
+  if (error) throw error;
+  return path;
+}
+$('asSave').onclick = async () => {
+  const name = $('asName').value.trim(); if (!name) return setMsg($('asMsg'), 'اكتب الاسم', 'err');
+  $('asSave').disabled = true; setMsg($('asMsg'), 'بنحفظ…');
+  try {
+    const p = { id: adEditS?.id || '', name, website: $('asWeb').value.trim(), contact: $('asContact').value.trim(), notes: $('asNotes').value.trim(), active: $('asActive').checked };
+    const f = $('asLogo').files[0];
+    let old = null;
+    if (f) { p.logo_key = await adUpload(f, 'sponsors'); old = adEditS?.logo_key; }
+    const { error } = await sb.rpc('mgmt_ad_sponsor_save', { p });
+    if (error) throw error;
+    if (old && !/^https?:/i.test(old)) await sb.storage.from('ads').remove([old]);
+    closeSheet('adSponsorSheet'); loadAds();
+  } catch (e) { setMsg($('asMsg'), errText(e), 'err'); }
+  $('asSave').disabled = false;
+};
+$('asDel').onclick = () => adEditS && adDelete('sponsor', adEditS.id, () => closeSheet('adSponsorSheet'));
+
+/* حملة */
+function adTargetsUI(targets) {
+  const byKey = Object.fromEntries((targets || []).map(t => [t.placement_key, t]));
+  const rounds = adOv?.rounds || [], sports = adOv?.sports || [];
+  $('acTargets').innerHTML = (adOv?.placements || []).map(p => {
+    const t = byKey[p.key];
+    const extra = AD_ROUND_SLOTS.includes(p.key) ? `
+      <div style="display:flex;gap:6px;margin-top:6px">
+        <select class="in" data-round style="padding:8px;font-size:13px"><option value="">كل الجولات</option>${rounds.map(r => `<option value="${r.id}" ${t?.round_id === r.id ? 'selected' : ''}>جولة ${r.round_no} · ${esc((r.types || []).join('/'))}</option>`).join('')}</select>
+        <select class="in" data-arena style="padding:8px;font-size:13px"><option value="">مصر + عالمي</option><option value="LOCAL" ${t?.arena === 'LOCAL' ? 'selected' : ''}>مصر</option><option value="WORLD" ${t?.arena === 'WORLD' ? 'selected' : ''}>عالمي</option></select>
+      </div>` : AD_SPORT_SLOTS.includes(p.key) ? `
+      <div class="poolbox" style="display:flex;flex-wrap:wrap;gap:4px;margin-top:6px">${sports.map(s => `<label style="padding:4px 8px;font-size:11.5px"><input type="checkbox" data-sport value="${s.id}" ${(t?.sports || []).includes(s.id) ? 'checked' : ''}>${esc(s.name_ar)}</label>`).join('')}</div>
+      <p class="hint" style="margin:2px">من غير اختيار = كل الرياضات</p>` : '';
+    return `<div class="card" data-pl="${p.key}" style="padding:9px;margin-top:6px">
+      <label style="display:flex;gap:8px;align-items:flex-start"><input type="checkbox" data-on ${t ? 'checked' : ''}>
+        <span><b style="font-size:13px">${esc(p.notes || p.key)}</b><br><small class="hint" style="margin:0">${(p.template_allowed || []).map(x => AD_TPL[x] || x).join(' · ')}${p.enabled ? '' : ' · <b style="color:var(--red)">المكان مقفول</b>'}</small></span></label>
+      ${extra}
+      <label style="display:flex;gap:6px;align-items:center;margin-top:6px;font-size:12px"><input type="checkbox" data-fp ${t?.fantasy_players_only ? 'checked' : ''}> لاعيبة الفانتازي بس</label>
+    </div>`;
+  }).join('');
+}
+function adCampOpen(id) {
+  adEditC = (adOv?.campaigns || []).find(c => c.id === id) || null;
+  const c = adEditC || {};
+  $('acTitle').textContent = adEditC ? 'تعديل حملة' : 'حملة جديدة';
+  $('acSponsor').innerHTML = (adOv?.sponsors || []).map(s => `<option value="${s.id}" ${s.id === c.sponsor_id ? 'selected' : ''}>${esc(s.name)}</option>`).join('');
+  if (!(adOv?.sponsors || []).length) return alert('ضيف راعي الأول');
+  const now = new Date(), later = new Date(Date.now() + 7 * 864e5);
+  $('acName').value = c.name || ''; $('acStart').value = toLocalInput(c.starts_at || now.toISOString()); $('acEnd').value = toLocalInput(c.ends_at || later.toISOString());
+  $('acStatus').value = c.status || 'draft'; $('acPrio').value = c.priority ?? 0; $('acWeight').value = c.weight ?? 1;
+  $('acDaily').value = c.daily_cap ?? ''; $('acTotal').value = c.total_cap ?? ''; $('acAge').value = c.min_age ?? 0;
+  $('acCat').value = c.category || ''; $('acBudget').value = c.budget_note || '';
+  $('acGovs').value = ((c.targets || [])[0]?.governorates || []).join(', ');
+  adTargetsUI(c.targets);
+  setMsg($('acMsg'), ''); $('adCampSheet').classList.remove('hidden');
+}
+$('acSave').onclick = async () => {
+  const name = $('acName').value.trim(); if (!name) return setMsg($('acMsg'), 'اكتب اسم الحملة', 'err');
+  const s = $('acStart').value, e = $('acEnd').value;
+  if (!s || !e || new Date(e) <= new Date(s)) return setMsg($('acMsg'), 'تاريخ النهاية لازم يبقى بعد البداية', 'err');
+  const govs = $('acGovs').value.split(',').map(x => x.trim()).filter(Boolean);
+  const targets = [...document.querySelectorAll('#acTargets [data-pl]')].filter(d => d.querySelector('[data-on]').checked).map(d => ({
+    placement_key: d.dataset.pl, governorates: govs,
+    round_id: d.querySelector('[data-round]')?.value || '', arena: d.querySelector('[data-arena]')?.value || '',
+    sports: [...d.querySelectorAll('[data-sport]:checked')].map(x => x.value),
+    fantasy_players_only: d.querySelector('[data-fp]').checked }));
+  if (!targets.length) return setMsg($('acMsg'), 'اختار مكان واحد على الأقل', 'err');
+  const p = { id: adEditC?.id || '', sponsor_id: $('acSponsor').value, name, starts_at: new Date(s).toISOString(), ends_at: new Date(e).toISOString(),
+    status: $('acStatus').value, priority: $('acPrio').value || '0', weight: $('acWeight').value || '1', daily_cap: $('acDaily').value, total_cap: $('acTotal').value,
+    min_age: $('acAge').value || '0', category: $('acCat').value, budget_note: $('acBudget').value.trim(), targets };
+  $('acSave').disabled = true; setMsg($('acMsg'), 'بنحفظ…');
+  const { error } = await sb.rpc('mgmt_ad_campaign_save', { p });
+  $('acSave').disabled = false;
+  if (error) return setMsg($('acMsg'), /banned_category/.test(error.message) ? 'النوع ده ممنوع' : errText(error), 'err');
+  closeSheet('adCampSheet'); loadAds();
+};
+async function adCampStatus(id, status) {
+  const { error } = await sb.rpc('mgmt_ad_campaign_save', { p: { id, status } });
+  if (error) return alert(errText(error)); loadAds();
+}
+async function adDelete(kind, id, after) {
+  if (!confirm(kind === 'campaign' ? 'تمسح الحملة دي بكل أشكالها وأرقامها؟' : kind === 'sponsor' ? 'تمسح الراعي ده؟ (لازم مايبقاش ليه حملات)' : 'تمسح الشكل ده؟')) return;
+  const { data, error } = await sb.rpc('mgmt_ad_delete', { p_kind: kind, p_id: id });
+  if (error) return alert(/has_campaigns/.test(error.message) ? 'الراعي ليه حملات، امسحها الأول' : errText(error));
+  const keys = data?.remove_keys || [];
+  if (keys.length) await sb.storage.from('ads').remove(keys);
+  after && after(); loadAds();
+}
+
+/* شكل إعلان */
+function adCrOpen(campId, crId) {
+  adCrCamp = (adOv?.campaigns || []).find(c => c.id === campId);
+  adEditCr = (adCrCamp?.creatives || []).find(x => x.id === crId) || null;
+  const r = adEditCr || {};
+  $('crTitle').textContent = adEditCr ? 'تعديل الشكل' : 'شكل إعلان جديد';
+  $('crTpl').value = r.template || 'native'; $('crLang').value = r.lang || 'any';
+  $('crTitleIn').value = r.title || ''; $('crBody').value = r.body || ''; $('crCta').value = r.cta_text || '';
+  $('crMediaUrl').value = /^https?:/i.test(r.media_key || '') ? r.media_key : ''; $('crFile').value = ''; $('crPoster').value = '';
+  $('crLinkType').value = r.link_type || 'none'; $('crLink').value = r.link || '';
+  $('crBg').value = r.bg_color || ''; $('crFg').value = r.text_color || ''; $('crActive').checked = r.active !== false;
+  $('crDel').classList.toggle('hidden', !adEditCr);
+  setMsg($('crMsg'), ''); $('adCrSheet').classList.remove('hidden'); adCrPreview();
+}
+['crTpl', 'crLang', 'crTitleIn', 'crBody', 'crCta', 'crMediaUrl', 'crFile', 'crBg', 'crFg', 'crLinkType'].forEach(id => $(id).addEventListener('input', adCrPreview));
+$('crFile').addEventListener('change', adCrPreview);
+function adCrPreview() {
+  const tpl = $('crTpl').value, sp = (adOv?.sponsors || []).find(s => s.id === adCrCamp?.sponsor_id) || {};
+  const f = $('crFile').files[0];
+  const media = f ? URL.createObjectURL(f) : ($('crMediaUrl').value.trim() || adEditCr?.media_url || '');
+  const isVid = f ? f.type.startsWith('video') : /\.(mp4|webm|mov)(\?|$)/i.test(media);
+  const bg = $('crBg').value.trim() || '#121217', fg = $('crFg').value.trim() || '#FFFFFF';
+  const title = esc($('crTitleIn').value), body = esc($('crBody').value), cta = esc($('crCta').value || 'اعرف أكتر');
+  const logo = sp.logo_url ? `<img src="${esc(sp.logo_url)}" style="width:22px;height:22px;border-radius:6px;object-fit:cover">` : '';
+  const m = media ? (isVid ? `<video src="${esc(media)}" muted autoplay loop playsinline style="width:100%;height:100%;object-fit:cover"></video>` : `<img src="${esc(media)}" style="width:100%;height:100%;object-fit:cover">`) : '<div style="width:100%;height:100%;background:#1B1B22"></div>';
+  const lab = '<span style="font-size:9.5px;padding:2px 6px;border-radius:6px;background:#0008;border:1px solid #fff3;color:#ddd">إعلان</span>';
+  let h = '';
+  if (tpl === 'title' || tpl === 'logo') h = `<div style="display:flex;align-items:center;gap:6px;color:${fg}"><span style="opacity:.6;font-size:11px">${title || 'برعاية'}</span>${logo}<b style="font-size:13px">${esc(sp.name || 'الراعي')}</b></div>`;
+  else if (tpl === 'text') h = `<div style="display:flex;gap:8px;align-items:center;padding:9px 12px;border-radius:12px;background:${bg === '#121217' ? '#ffffff0a' : bg};color:${fg};font-size:12px">${lab}<span>${body || title}</span></div>`;
+  else if (tpl === 'banner') h = `<div style="position:relative;aspect-ratio:3.2;border-radius:14px;overflow:hidden">${m}<div style="position:absolute;top:8px;left:8px">${lab}</div>${title ? `<b style="position:absolute;bottom:8px;right:12px;color:${fg};font-size:13px;text-shadow:0 1px 4px #000">${title}</b>` : ''}</div>`;
+  else if (tpl === 'story' || tpl === 'fullscreen') h = `<div style="position:relative;aspect-ratio:9/16;border-radius:14px;overflow:hidden;max-width:220px;margin:auto">${m}<div style="position:absolute;top:8px;right:8px;left:8px;display:flex;gap:6px;align-items:center;color:#fff">${logo}<b style="font-size:12px;flex:1">${esc(sp.name || '')}</b>${lab}</div><div style="position:absolute;bottom:10px;right:10px;left:10px;color:#fff"><b>${title}</b><div style="font-size:11px;opacity:.8">${body}</div><div style="margin-top:6px;background:#fff;color:#000;border-radius:8px;text-align:center;padding:6px;font-size:12px;font-weight:800">${cta}</div></div></div>`;
+  else h = `<div style="background:${bg};border-radius:16px;overflow:hidden;border:1px solid #ffffff14;color:${fg}"><div style="display:flex;gap:8px;align-items:center;padding:10px 12px">${logo}<div style="flex:1"><b style="font-size:13px">${esc(sp.name || '')}</b><div style="font-size:10.5px;opacity:.5">إعلان</div></div>✕</div><div style="aspect-ratio:${tpl === 'video' ? '4/5' : '16/10'}">${m}</div><div style="display:flex;gap:10px;align-items:center;padding:10px 12px"><div style="flex:1"><b style="font-size:14px">${title}</b><div style="font-size:12px;opacity:.7">${body}</div></div>${$('crLinkType').value !== 'none' ? `<span style="background:#fff;color:#000;border-radius:20px;padding:7px 12px;font-size:12px;font-weight:800">${cta}</span>` : ''}</div></div>`;
+  $('crPrev').innerHTML = h;
+}
+$('crSave').onclick = async () => {
+  const lt = $('crLinkType').value, link = $('crLink').value.trim();
+  if (lt !== 'none' && !link) return setMsg($('crMsg'), 'اكتب اللينك', 'err');
+  for (const c of [$('crBg').value.trim(), $('crFg').value.trim()]) if (c && !/^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(c)) return setMsg($('crMsg'), 'اللون لازم يبقى زي #101014', 'err');
+  $('crSave').disabled = true; setMsg($('crMsg'), 'بنحفظ…');
+  try {
+    const p = { id: adEditCr?.id || '', campaign_id: adCrCamp.id, template: $('crTpl').value, lang: $('crLang').value, title: $('crTitleIn').value.trim(),
+      body: $('crBody').value.trim(), cta_text: $('crCta').value.trim(), link_type: lt, link: lt === 'none' ? '' : link,
+      bg_color: $('crBg').value.trim(), text_color: $('crFg').value.trim(), active: $('crActive').checked };
+    const f = $('crFile').files[0], pf = $('crPoster').files[0], old = [];
+    if (f) { if (f.type.startsWith('video') && f.size > 5 * 1024 * 1024) throw new Error('الفيديو أكبر من 5 ميجا'); p.media_key = await adUpload(f, 'creatives/' + adCrCamp.id); if (adEditCr?.media_key) old.push(adEditCr.media_key); }
+    else if ($('crMediaUrl').value.trim()) p.media_key = $('crMediaUrl').value.trim();
+    if (pf) { p.poster_key = await adUpload(pf, 'creatives/' + adCrCamp.id); if (adEditCr?.poster_key) old.push(adEditCr.poster_key); }
+    const { error } = await sb.rpc('mgmt_ad_creative_save', { p });
+    if (error) throw error;
+    const rm = old.filter(k => !/^https?:/i.test(k)); if (rm.length) await sb.storage.from('ads').remove(rm);
+    closeSheet('adCrSheet'); loadAds();
+  } catch (e) { setMsg($('crMsg'), errText(e), 'err'); }
+  $('crSave').disabled = false;
+};
+$('crDel').onclick = () => adEditCr && adDelete('creative', adEditCr.id, () => closeSheet('adCrSheet'));
+
+/* تقرير الراعي */
+async function adReport(id) {
+  $('arBody').innerHTML = '…'; $('adRepSheet').classList.remove('hidden');
+  const { data: r, error } = await sb.rpc('mgmt_ad_report', { p_campaign: id });
+  if (error || !r) { $('arBody').innerHTML = `<div class="msg err">${errText(error || 'مفيش')}</div>`; return; }
+  $('arTitle').textContent = '📊 ' + (r.campaign || '');
+  const link = `https://ahmadelkashef.github.io/bdgr-link/ads-report/?t=${r.report_token}`;
+  const t = r.totals || {};
+  $('arBody').innerHTML = `
+    <div class="hint">${esc(r.sponsor || '')} · ${fmtDT(r.starts_at)} ← ${fmtDT(r.ends_at)}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px;text-align:center">
+      ${[['مشاهدات', fmt(t.impressions)], ['ناس مختلفة', fmt(t.unique_users)], ['ضغطات', fmt(t.clicks)], ['CTR', ctr(t.impressions, t.clicks)]].map(([a, b]) => `<div class="card" style="margin:0;padding:8px"><b style="font-size:16px">${b}</b><div class="hint" style="margin:0">${a}</div></div>`).join('')}</div>
+    <div class="card"><b>حسب المكان</b>${(r.by_placement || []).map(x => `<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-top:6px"><span>${adPlName(x.placement)}</span><span>${fmt(x.impressions)} · ${fmt(x.clicks)} ضغطة</span></div>`).join('') || '<p class="hint">لسه مفيش.</p>'}</div>
+    <div class="card"><b>حسب اليوم</b>${(r.by_day || []).slice(-14).map(x => `<div style="display:flex;justify-content:space-between;font-size:12.5px;margin-top:6px"><span>${esc(x.day)}</span><span>${fmt(x.impressions)} · ${fmt(x.unique_users)} شخص · ${fmt(x.clicks)} ضغطة</span></div>`).join('') || '<p class="hint">لسه مفيش.</p>'}</div>
+    <label class="fl2">لينك للراعي (يشوف الأرقام بس، من غير أي بيانات يوزرز)</label>
+    <input class="in" dir="ltr" readonly value="${esc(link)}" onclick="this.select()">
+    <button class="btn" style="width:100%;margin-top:8px" onclick="navigator.clipboard.writeText('${esc(link)}');this.textContent='اتنسخ ✓'">انسخ اللينك</button>`;
+}
+
+/* الأماكن */
+async function loadAdSlots() {
+  if (!adOv) await loadAds();
+  const counts = {};
+  (adOv?.campaigns || []).filter(c => c.status === 'live').forEach(c => (c.targets || []).forEach(t => counts[t.placement_key] = (counts[t.placement_key] || 0) + 1));
+  $('adSlots').innerHTML = (adOv?.placements || []).map(p => `
+    <div class="card" style="margin-top:8px">
+      <h3><span>${esc(p.notes || p.key)}</span>
+        <label style="display:flex;gap:6px;align-items:center;font-size:12.5px"><input type="checkbox" ${p.enabled ? 'checked' : ''} onchange="adSlotSave('${p.key}',{enabled:this.checked})"> ${p.enabled ? 'مفتوح' : 'مقفول'}</label></h3>
+      <div class="hint" style="margin:0"><bdi dir="ltr">${esc(p.key)}</bdi> · القوالب: ${(p.template_allowed || []).map(x => AD_TPL[x] || x).join(' · ')} · ${fmt(counts[p.key] || 0)} حملة شغالة</div>
+      ${['feed_inline', 'feed_viewer'].includes(p.key) ? `<div style="display:flex;gap:6px;margin-top:8px">
+        <label style="flex:1;font-size:12px">أول إعلان بعد<input class="in" type="number" min="1" value="${p.first_after ?? ''}" onchange="adSlotSave('${p.key}',{first_after:this.value})"></label>
+        <label style="flex:1;font-size:12px">وبعدها كل<input class="in" type="number" min="2" value="${p.every_n ?? ''}" onchange="adSlotSave('${p.key}',{every_n:this.value})"></label>
+        <label style="flex:1;font-size:12px">أقصى عدد/جلسة<input class="in" type="number" min="1" value="${p.max_per_session ?? ''}" placeholder="—" onchange="adSlotSave('${p.key}',{max_per_session:this.value})"></label></div>` : ''}
+    </div>`).join('');
+}
+async function adSlotSave(key, patch) {
+  const { error } = await sb.rpc('mgmt_ad_placement_save', { p: { key, ...patch } });
+  if (error) return alert(errText(error));
+  await loadAds(); loadAdSlots();
 }
 
 /* ─── الأدمنز ─── */

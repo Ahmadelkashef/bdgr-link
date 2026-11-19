@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex">
+<title>BDGR · تقرير الراعي</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{--bg:#0B0B0F;--card:#14141A;--line:#26262F;--text:#F4F4F6;--muted:#8C8C99;--red:#FF0000}
+  *{box-sizing:border-box} body{margin:0;background:var(--bg);color:var(--text);font-family:Cairo,system-ui,sans-serif}
+  main{max-width:640px;margin:0 auto;padding:20px 16px 40px}
+  .top{display:flex;align-items:center;gap:12px} .top img{width:52px;height:52px;border-radius:14px;object-fit:cover;background:var(--card)}
+  h1{font-size:20px;margin:0} .muted{color:var(--muted);font-size:13px}
+  .grid{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:16px}
+  .k{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px} .k b{font-size:24px;display:block} .k span{color:var(--muted);font-size:12.5px}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-top:12px}
+  .row{display:flex;justify-content:space-between;gap:10px;font-size:13.5px;padding:7px 0;border-bottom:1px solid var(--line)} .row:last-child{border:0}
+  .bar{height:6px;border-radius:6px;background:#ffffff14;margin-top:4px;overflow:hidden} .bar i{display:block;height:100%;background:#fff}
+  .foot{margin-top:22px;text-align:center;color:var(--muted);font-size:12px} .foot b{color:var(--red)}
+  .tag{display:inline-block;font-size:11px;padding:2px 8px;border-radius:999px;border:1px solid var(--line);color:var(--muted)}
+</style>
+</head>
+<body>
+<main id="m"><p class="muted">بنحمّل…</p></main>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script>
+<script>
+const sb = supabase.createClient('https://xjorftvsuztxapdnceao.supabase.co', 'sb_publishable_C2R3qaePoEtO8vZ940n5iA_ud5JR1Zj', { auth: { persistSession: false } });
+const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
+const fmt = n => Number(n || 0).toLocaleString('en-US');
+const dt = s => s ? new Date(s).toLocaleDateString('ar-EG', { day: 'numeric', month: 'short', year: 'numeric' }) : '—';
+const PL = { login_partner: 'شاشة الدخول', home_hero: 'الهوم · الهيرو', home_banner: 'الهوم · بانر', home_sports: 'الهوم · الرياضات',
+  fantasy_title: 'الفانتازي', fantasy_round_title: 'الفانتازي · الجولة', fantasy_prize: 'الفانتازي · الجوايز', fantasy_lobby_banner: 'الفانتازي · بانر الجولة',
+  fantasy_squad_saved: 'الفانتازي · بعد حفظ الفريق', fantasy_leaderboard: 'الفانتازي · الترتيب', fantasy_leagues: 'الفانتازي · الليجز',
+  fantasy_players: 'الفانتازي · اللاعيبة', fantasy_mystats: 'الفانتازي · الإحصائيات', feed_story: 'الفيد · ستوري', feed_inline: 'الفيد · بين البوستات',
+  feed_viewer: 'الفيد · شاشة كاملة', competitions_top: 'المسابقات · بانر', competitions_sport: 'المسابقات · الرياضة', badger_card: 'كارت الـ Badger', profile_own: 'البروفايل' };
+(async () => {
+  const t = new URLSearchParams(location.search).get('t');
+  const m = document.getElementById('m');
+  if (!t || !/^[0-9a-f-]{36}$/i.test(t)) { m.innerHTML = '<p class="muted">اللينك ده مش صحيح.</p>'; return; }
+  const { data: r, error } = await sb.rpc('ad_public_report', { p_token: t });
+  if (error || !r) { m.innerHTML = '<p class="muted">مش لاقيين التقرير ده.</p>'; return; }
+  const tt = r.totals || {}, ctr = tt.impressions ? (tt.clicks / tt.impressions * 100).toFixed(1) + '%' : '—';
+  const maxP = Math.max(1, ...(r.by_placement || []).map(x => x.impressions));
+  m.innerHTML = `
+    <div class="top">${r.logo ? `<img src="${esc(r.logo)}" alt="">` : ''}<div><h1>${esc(r.sponsor)}</h1>
+      <div class="muted">${esc(r.campaign)} · ${dt(r.starts_at)} ← ${dt(r.ends_at)} ${r.demo ? '<span class="tag">تجريبي</span>' : ''}</div></div></div>
+    <div class="grid">
+      <div class="k"><b>${fmt(tt.impressions)}</b><span>مشاهدات</span></div>
+      <div class="k"><b>${fmt(tt.unique_users)}</b><span>ناس مختلفة (في اليوم)</span></div>
+      <div class="k"><b>${fmt(tt.clicks)}</b><span>ضغطات</span></div>
+      <div class="k"><b>${ctr}</b><span>نسبة الضغط</span></div>
+    </div>
+    <div class="card"><b>حسب المكان في التطبيق</b>${(r.by_placement || []).map(x => `<div class="row" style="display:block"><div style="display:flex;justify-content:space-between"><span>${esc(PL[x.placement] || x.placement)}</span><span>${fmt(x.impressions)} · ${fmt(x.clicks)} ضغطة</span></div><div class="bar"><i style="width:${(x.impressions / maxP * 100).toFixed(1)}%"></i></div></div>`).join('') || '<p class="muted">لسه مفيش أرقام.</p>'}</div>
+    <div class="card"><b>حسب اليوم</b>${(r.by_day || []).slice().reverse().map(x => `<div class="row"><span>${esc(x.day)}</span><span>${fmt(x.impressions)} مشاهدة · ${fmt(x.unique_users)} شخص · ${fmt(x.clicks)} ضغطة</span></div>`).join('') || '<p class="muted">لسه مفيش أرقام.</p>'}</div>
+    <p class="muted" style="margin-top:14px">المشاهدة = الإعلان فضل ظاهر على الشاشة ثانية على الأقل (مرة في الجلسة). الأرقام مجمّعة ومن غير أي بيانات شخصية لليوزرز.</p>
+    <div class="foot">تقرير من <b>BDGR</b></div>`;
+})();
+</script>
+</body>
+</html>
