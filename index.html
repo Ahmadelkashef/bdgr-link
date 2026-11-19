@@ -60,7 +60,14 @@
   // دعوة ليج: ?l=CODE
   var code = (params.get('l') || '').toUpperCase();
   var isLeague = !valid && /^[A-Z0-9]{4,12}$/.test(code);
-  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : '');
+  // بوست في الفيد: ?p=<id>
+  var post = (params.get('p') || '').toLowerCase();
+  var isPost = !valid && !isLeague && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(post);
+  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : ''));
+  if (isPost) {
+    document.getElementById('title').textContent = 'بوست جديد من BDGR 🦡';
+    document.getElementById('open').textContent = 'شوفه في BDGR';
+  }
   if (isLeague) {
     document.getElementById('title').textContent = 'اتعزمت على ليج في BDGR فانتازي 🏆';
     document.getElementById('sub').innerHTML = 'افتح التطبيق وهتدخل الليج على طول.<br>الكود: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + code + '</b>';
@@ -81,7 +88,7 @@
 
   var appLink = PKG + '://' + path;
   // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
-  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : ''));
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : '')));
   var intentLink = 'intent://' + path +
     '#Intent;scheme=' + PKG + ';package=' + PKG +
     ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';

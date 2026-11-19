@@ -519,10 +519,11 @@
       <div id="ofMsg" class="msg"></div>
     </div>
     <div class="card form">
-      <b>📢 بوست جديد في الفيد (فيديو)</b>
-      <p class="hint" style="margin:6px 0 0">الفيديو بيظهر لكل اليوزرز في الفيد باسم BDGR بالعلامة الدهبي. المثبّت بيظهر أول واحد (بوست واحد بس يتثبت).</p>
-      <button class="btn" style="width:100%;margin-top:10px" onclick="$('fpFile').click()" id="fpPick">🎬 اختار فيديو</button>
-      <input type="file" id="fpFile" accept="video/mp4,video/quicktime,video/webm" class="hidden">
+      <b>📢 بوست جديد في الفيد</b>
+      <p class="hint" style="margin:6px 0 0">فيديو أو صورة، بيظهر لكل اليوزرز باسم BDGR. للفيديو بنعمل صورة غلاف صغيرة لوحدنا، فالفيد بيفضل خفيف والفيديو مش بيتحمّل غير لما حد يدوس عليه. الحد: فيديو 25 ميجا ودقيقتين، صورة 8 ميجا (بنصغّرها قبل الرفع). المثبّت بيظهر أول واحد.</p>
+      <button class="btn" style="width:100%;margin-top:10px" onclick="$('fpFile').click()" id="fpPick">🎬 / 🖼️ اختار فيديو أو صورة</button>
+      <input type="file" id="fpFile" accept="video/mp4,video/quicktime,video/webm,image/jpeg,image/png,image/webp" class="hidden">
+      <img id="fpPreview" class="hidden" alt="" style="width:100%;max-height:260px;object-fit:contain;border-radius:10px;margin-top:8px;background:#000">
       <label class="fl2">العنوان</label><input id="fpTitle" class="in" maxlength="80" placeholder="مثلاً: أهداف الجولة 9">
       <label class="fl2">الوصف (اختياري)</label><textarea id="fpDesc" class="in" maxlength="300"></textarea>
       <label class="chk"><input type="checkbox" id="fpPin"> 📌 ثبّته فوق</label>
@@ -530,6 +531,18 @@
       <div id="fpMsg" class="msg"></div>
     </div>
     <div class="card"><b style="font-size:13px">بوستات BDGR</b><div id="fpList" style="margin-top:6px">—</div></div>
+    <div class="card form">
+      <b>⭕ ستوري BDGR</b>
+      <p class="hint" style="margin:6px 0 0">بتظهر أول دايرة في شريط الستوريز فوق الفيد (قبل كسبانين الفانتازي). صورة، أو فيديو لحد 30 ثانية و15 ميجا.</p>
+      <button class="btn" style="width:100%;margin-top:10px" onclick="$('stFile').click()" id="stPick">🖼️ / 🎬 اختار صورة أو فيديو</button>
+      <input type="file" id="stFile" accept="image/jpeg,image/png,image/webp,video/mp4,video/quicktime,video/webm" class="hidden">
+      <label class="fl2">كلمة على الستوري (اختياري)</label><input id="stCap" class="in" maxlength="150" placeholder="مثلاً: الجولة 9 بتقفل النهارده 9 بالليل">
+      <label class="fl2">تفضل قد إيه؟</label>
+      <select id="stHours" class="in"><option value="24">24 ساعة</option><option value="48">يومين</option><option value="168">أسبوع</option><option value="">لحد ما أمسحها</option></select>
+      <button id="stSave" class="btn primary">انشر الستوري</button>
+      <div id="stMsg" class="msg"></div>
+      <div id="stList" style="margin-top:8px">—</div>
+    </div>
     <div class="card"><b style="font-size:13px">آخر تعديلات باسم BDGR</b><div class="of-log" id="ofLog">—</div></div>
   </section>
 
@@ -1751,30 +1764,77 @@ async function loadOfficial() {
   ofData = data;
   Object.entries(OF_FIELDS).forEach(([id, k]) => { $(id).value = data[k] || ''; });
   renderOfficial();
-  const ACT = { profile_save: 'عدّل البروفايل', feed_post: 'نزّل بوست', feed_post_edit: 'عدّل بوست', feed_post_delete: 'مسح بوست' };
+  const ACT = { profile_save: 'عدّل البروفايل', feed_post: 'نزّل بوست', feed_post_edit: 'عدّل بوست', feed_post_delete: 'مسح بوست', story: 'نزّل ستوري', story_delete: 'مسح ستوري' };
   $('ofLog').innerHTML = (data.log || []).map(l => `${fmtDT(l.created_at)} · <bdi dir="ltr">${esc(l.admin_email || '—')}</bdi> · ${ACT[l.action] || esc(l.action)}`).join('<br>') || 'لسه مفيش.';
   loadOfficialPosts();
+  loadOfficialStories();
 }
 
 /* ─── بوستات BDGR في الفيد ─── */
 let fpData = [];
-$('fpFile').onchange = () => { const f = $('fpFile').files[0]; $('fpPick').textContent = f ? '🎬 ' + f.name + ' · ' + (f.size / 1048576).toFixed(1) + ' MB' : '🎬 اختار فيديو'; };
+const MB = 1048576;
+// صورة → JPEG أصغر (أطول ضلع 1440) علشان الـ egress
+function shrinkImage(file, maxSide = 1440, q = 0.85) {
+  return new Promise((ok, bad) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      c.toBlob(b => b ? ok(b) : bad(new Error('image')), 'image/jpeg', q);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(new Error('مقدرناش نقرا الصورة')); };
+    img.src = url;
+  });
+}
+// فيديو → المدة + صورة غلاف (فريم من أول ثانية، عرض 720)
+function videoInfo(file) {
+  return new Promise((ok, bad) => {
+    const v = document.createElement('video'), url = URL.createObjectURL(file);
+    v.muted = true; v.playsInline = true; v.preload = 'auto'; v.src = url;
+    v.onloadedmetadata = () => { v.currentTime = Math.min(1, (v.duration || 1) / 3); };
+    v.onseeked = () => {
+      const s = Math.min(1, 720 / (v.videoWidth || 720));
+      const c = document.createElement('canvas');
+      c.width = Math.round((v.videoWidth || 720) * s); c.height = Math.round((v.videoHeight || 1280) * s);
+      c.getContext('2d').drawImage(v, 0, 0, c.width, c.height);
+      c.toBlob(b => { URL.revokeObjectURL(url); b ? ok({ duration: Math.round(v.duration || 0), poster: b }) : bad(new Error('poster')); }, 'image/jpeg', 0.8);
+    };
+    v.onerror = () => { URL.revokeObjectURL(url); bad(new Error('مقدرناش نقرا الفيديو')); };
+  });
+}
+const upReels = (path, body, type) => sb.storage.from('Reels').upload(path, body, { contentType: type, upsert: false, cacheControl: '31536000' });
+$('fpFile').onchange = () => {
+  const f = $('fpFile').files[0];
+  $('fpPick').textContent = f ? (/^image\//.test(f.type) ? '🖼️ ' : '🎬 ') + f.name + ' · ' + (f.size / MB).toFixed(1) + ' MB' : '🎬 / 🖼️ اختار فيديو أو صورة';
+  const pv = $('fpPreview');
+  if (f && /^image\//.test(f.type)) { pv.src = URL.createObjectURL(f); pv.classList.remove('hidden'); } else { pv.classList.add('hidden'); pv.removeAttribute('src'); }
+};
+async function signed(paths) {
+  const out = {}, list = [...new Set(paths.filter(Boolean))];
+  if (!list.length) return out;
+  const r = await sb.storage.from('Reels').createSignedUrls(list, 3600);
+  (r.data || []).forEach(x => { if (x.signedUrl) out[x.path] = x.signedUrl; });
+  return out;
+}
 async function loadOfficialPosts() {
   const { data, error } = await sb.rpc('mgmt_official_posts');
   if (error) { $('fpList').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
   fpData = data || [];
-  const urls = {};
-  await Promise.all(fpData.map(async p => {
-    const r = await sb.storage.from('Reels').createSignedUrl(p.storage_path, 3600);
-    if (!r.error) urls[p.id] = r.data.signedUrl;
-  }));
-  $('fpList').innerHTML = fpData.map(p => `
+  const urls = await signed(fpData.map(p => p.kind === 'image' ? p.storage_path : p.poster_path));
+  $('fpList').innerHTML = fpData.map(p => {
+    const thumb = urls[p.kind === 'image' ? p.storage_path : p.poster_path];
+    const dur = p.duration_s ? ` · ${Math.floor(p.duration_s / 60)}:${String(p.duration_s % 60).padStart(2, '0')}` : '';
+    return `
     <div class="fp">
-      ${urls[p.id] ? `<video src="${esc(urls[p.id])}#t=0.5" preload="metadata" muted playsinline controls></video>` : '<video></video>'}
+      ${thumb ? `<img src="${esc(thumb)}" alt="" style="width:64px;height:96px;object-fit:cover;border-radius:8px;background:#000;flex:none">` : '<div style="width:64px;height:96px;border-radius:8px;background:#000;flex:none;display:flex;align-items:center;justify-content:center">🎬</div>'}
       <div class="b">
-        <b>${p.is_pinned ? '📌 ' : ''}${esc(p.title || '—')}</b>
+        <b>${p.is_pinned ? '📌 ' : ''}${p.kind === 'image' ? '🖼️ ' : '🎬 '}${esc(p.title || '—')}</b>
         <small>${esc(p.description || '')}</small>
-        <small>${p.status === 'published' ? '🟢 منشور' : '⚪ مخفي'} · ${fmtDT(p.created_at)}${p.size_bytes ? ' · ' + (p.size_bytes / 1048576).toFixed(1) + ' MB' : ''}</small>
+        <small>🐾 Hype ${fmt(p.hypes || 0)} · 👁 ${fmt(p.views || 0)}</small>
+        <small>${p.status === 'published' ? '🟢 منشور' : '⚪ مخفي'} · ${fmtDT(p.created_at)}${p.size_bytes ? ' · ' + (p.size_bytes / MB).toFixed(1) + ' MB' : ''}${dur}</small>
         <div class="acts">
           <button class="btn" onclick="fpUpdate('${esc(p.id)}', { is_pinned: ${!p.is_pinned} })">${p.is_pinned ? 'شيل التثبيت' : '📌 ثبّت'}</button>
           <button class="btn" onclick="fpUpdate('${esc(p.id)}', { status: '${p.status === 'published' ? 'hidden' : 'published'}' })">${p.status === 'published' ? 'اخفيه' : 'اظهره'}</button>
@@ -1782,7 +1842,8 @@ async function loadOfficialPosts() {
           <button class="btn" style="color:var(--red)" onclick="fpDelete('${esc(p.id)}')">مسح</button>
         </div>
       </div>
-    </div>`).join('') || '<p class="hint">لسه مفيش بوستات.</p>';
+    </div>`;
+  }).join('') || '<p class="hint">لسه مفيش بوستات.</p>';
 }
 async function fpUpdate(id, patch) {
   const { error } = await sb.rpc('mgmt_official_post_update', { p_id: id, p: patch });
@@ -1797,29 +1858,110 @@ function fpEdit(id) {
 async function fpDelete(id) {
   const p = fpData.find(x => x.id === id); if (!p) return;
   if (!confirm('تمسح "' + (p.title || '') + '" من الفيد خالص؟')) return;
-  const rm = await sb.storage.from('Reels').remove([p.storage_path]);
-  if (rm.error) return alert('مقدرناش نمسح الفيديو: ' + rm.error.message);
+  const rm = await sb.storage.from('Reels').remove([p.storage_path, p.poster_path].filter(Boolean));
+  if (rm.error) return alert('مقدرناش نمسح الملف: ' + rm.error.message);
   const { error } = await sb.rpc('mgmt_official_post_delete', { p_id: id });
   if (error) return alert(errText(error)); loadOfficial();
 }
 $('fpSave').onclick = async () => {
   const f = $('fpFile').files[0], title = $('fpTitle').value.trim();
-  if (!f) return setMsg($('fpMsg'), 'اختار فيديو الأول.', 'err');
-  if (!/^video\//.test(f.type)) return setMsg($('fpMsg'), 'لازم يكون فيديو.', 'err');
-  if (f.size > 100 * 1048576) return setMsg($('fpMsg'), 'الفيديو أكبر من 100 ميجا.', 'err');
+  if (!f) return setMsg($('fpMsg'), 'اختار فيديو أو صورة الأول.', 'err');
+  const isImg = /^image\//.test(f.type), isVid = /^video\//.test(f.type);
+  if (!isImg && !isVid) return setMsg($('fpMsg'), 'لازم فيديو أو صورة.', 'err');
+  if (isVid && f.size > 25 * MB) return setMsg($('fpMsg'), 'الفيديو أكبر من 25 ميجا. صغّره الأول (720p كفاية).', 'err');
+  if (isImg && f.size > 8 * MB) return setMsg($('fpMsg'), 'الصورة أكبر من 8 ميجا.', 'err');
   if (!title) return setMsg($('fpMsg'), 'اكتب عنوان.', 'err');
   if (!ofData || !ofData.user_id) return setMsg($('fpMsg'), 'حساب BDGR مش متحمّل.', 'err');
-  const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
-  const path = `Users_reels/${ofData.user_id}/${Date.now()}.${ext}`;
-  $('fpSave').disabled = true; setMsg($('fpMsg'), 'بنرفع الفيديو… (ممكن ياخد دقيقة)');
-  const up = await sb.storage.from('Reels').upload(path, f, { contentType: f.type, upsert: false, cacheControl: '3600' });
-  if (up.error) { $('fpSave').disabled = false; return setMsg($('fpMsg'), 'فشل الرفع: ' + up.error.message, 'err'); }
-  const { error } = await sb.rpc('mgmt_official_post_create', { p_storage_path: path, p_title: title, p_description: $('fpDesc').value.trim(),
-    p_pinned: $('fpPin').checked, p_size: f.size, p_mime: f.type });
-  $('fpSave').disabled = false;
-  if (error) { await sb.storage.from('Reels').remove([path]); return setMsg($('fpMsg'), errText(error), 'err'); }
-  $('fpFile').value = ''; $('fpFile').onchange(); $('fpTitle').value = ''; $('fpDesc').value = ''; $('fpPin').checked = false;
-  setMsg($('fpMsg'), 'اتنشر ✓ هيظهر في الفيد عند اليوزرز.', 'ok'); loadOfficial();
+  const base = `Users_reels/${ofData.user_id}/${Date.now()}`;
+  const uploaded = [];
+  $('fpSave').disabled = true;
+  try {
+    let payload;
+    if (isImg) {
+      setMsg($('fpMsg'), 'بنجهّز الصورة…');
+      const img = await shrinkImage(f);
+      const path = base + '.jpg';
+      const up = await upReels(path, img, 'image/jpeg'); if (up.error) throw new Error('فشل الرفع: ' + up.error.message);
+      uploaded.push(path);
+      payload = { kind: 'image', storage_path: path, size: img.size, mime: 'image/jpeg' };
+    } else {
+      setMsg($('fpMsg'), 'بنعمل صورة الغلاف…');
+      const info = await videoInfo(f);
+      if (info.duration > 120) throw new Error('الفيديو أطول من دقيقتين.');
+      const ext = (f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4';
+      const poster = base + '_poster.jpg', path = base + '.' + ext;
+      let up = await upReels(poster, info.poster, 'image/jpeg'); if (up.error) throw new Error('فشل رفع الغلاف: ' + up.error.message);
+      uploaded.push(poster);
+      setMsg($('fpMsg'), 'بنرفع الفيديو… (ممكن ياخد دقيقة)');
+      up = await upReels(path, f, f.type); if (up.error) throw new Error('فشل الرفع: ' + up.error.message);
+      uploaded.push(path);
+      payload = { kind: 'video', storage_path: path, poster_path: poster, duration_s: info.duration, size: f.size, mime: f.type };
+    }
+    const { error } = await sb.rpc('mgmt_official_post_create_v2', { p: { ...payload, title, description: $('fpDesc').value.trim(), is_pinned: $('fpPin').checked } });
+    if (error) throw new Error(errText(error));
+    $('fpFile').value = ''; $('fpFile').onchange(); $('fpTitle').value = ''; $('fpDesc').value = ''; $('fpPin').checked = false;
+    setMsg($('fpMsg'), 'اتنشر ✓ هيظهر في الفيد عند اليوزرز.', 'ok'); loadOfficial();
+  } catch (e) {
+    if (uploaded.length) await sb.storage.from('Reels').remove(uploaded);
+    setMsg($('fpMsg'), e.message || String(e), 'err');
+  } finally { $('fpSave').disabled = false; }
+};
+
+/* ─── ستوريز BDGR ─── */
+let stData = [];
+$('stFile').onchange = () => { const f = $('stFile').files[0]; $('stPick').textContent = f ? (/^image\//.test(f.type) ? '🖼️ ' : '🎬 ') + f.name + ' · ' + (f.size / MB).toFixed(1) + ' MB' : '🖼️ / 🎬 اختار صورة أو فيديو'; };
+async function loadOfficialStories() {
+  const { data, error } = await sb.rpc('mgmt_official_stories');
+  if (error) { $('stList').innerHTML = `<div class="msg err">${errText(error)}</div>`; return; }
+  stData = data || [];
+  const urls = await signed(stData.filter(s => s.kind === 'image').map(s => s.storage_path));
+  $('stList').innerHTML = stData.map(s => `
+    <div class="fp">
+      ${urls[s.storage_path] ? `<img src="${esc(urls[s.storage_path])}" alt="" style="width:54px;height:80px;object-fit:cover;border-radius:8px;flex:none">` : '<div style="width:54px;height:80px;border-radius:8px;background:#000;flex:none;display:flex;align-items:center;justify-content:center">🎬</div>'}
+      <div class="b">
+        <b>${esc(s.caption || (s.kind === 'image' ? 'صورة' : 'فيديو'))}</b>
+        <small>${s.active ? '🟢 ظاهرة' : '⚪ انتهت'} · ${fmtDT(s.created_at)}${s.expires_at ? ' · بتنتهي ' + fmtDT(s.expires_at) : ' · لحد ما تتمسح'}</small>
+        <div class="acts"><button class="btn" style="color:var(--red)" onclick="stDelete('${esc(s.id)}')">مسح</button></div>
+      </div>
+    </div>`).join('') || '<p class="hint">مفيش ستوريز.</p>';
+}
+async function stDelete(id) {
+  const s = stData.find(x => x.id === id); if (!s) return;
+  if (!confirm('تمسح الستوري دي؟')) return;
+  const rm = await sb.storage.from('Reels').remove([s.storage_path]);
+  if (rm.error) return alert('مقدرناش نمسح الملف: ' + rm.error.message);
+  const { error } = await sb.rpc('mgmt_official_story_delete', { p_id: id });
+  if (error) return alert(errText(error)); loadOfficialStories();
+}
+$('stSave').onclick = async () => {
+  const f = $('stFile').files[0];
+  if (!f) return setMsg($('stMsg'), 'اختار صورة أو فيديو.', 'err');
+  const isImg = /^image\//.test(f.type), isVid = /^video\//.test(f.type);
+  if (!isImg && !isVid) return setMsg($('stMsg'), 'لازم صورة أو فيديو.', 'err');
+  if (isVid && f.size > 15 * MB) return setMsg($('stMsg'), 'الفيديو أكبر من 15 ميجا.', 'err');
+  if (!ofData || !ofData.user_id) return setMsg($('stMsg'), 'حساب BDGR مش متحمّل.', 'err');
+  const base = `Users_reels/${ofData.user_id}/stories/${Date.now()}`;
+  $('stSave').disabled = true;
+  let path = null;
+  try {
+    let body = f, type = f.type;
+    if (isImg) { setMsg($('stMsg'), 'بنجهّز الصورة…'); body = await shrinkImage(f, 1600); type = 'image/jpeg'; path = base + '.jpg'; }
+    else {
+      const info = await videoInfo(f);
+      if (info.duration > 30) throw new Error('فيديو الستوري لازم 30 ثانية أو أقل.');
+      path = base + '.' + ((f.name.split('.').pop() || 'mp4').toLowerCase().replace(/[^a-z0-9]/g, '') || 'mp4');
+    }
+    setMsg($('stMsg'), 'بنرفع…');
+    const up = await upReels(path, body, type); if (up.error) { path = null; throw new Error('فشل الرفع: ' + up.error.message); }
+    const { error } = await sb.rpc('mgmt_official_story_create', { p: { kind: isImg ? 'image' : 'video', storage_path: path, caption: $('stCap').value.trim(), hours: $('stHours').value } });
+    if (error) throw new Error(errText(error));
+    path = null;
+    $('stFile').value = ''; $('stFile').onchange(); $('stCap').value = '';
+    setMsg($('stMsg'), 'الستوري نزلت ✓', 'ok'); loadOfficialStories();
+  } catch (e) {
+    if (path) await sb.storage.from('Reels').remove([path]);
+    setMsg($('stMsg'), e.message || String(e), 'err');
+  } finally { $('stSave').disabled = false; }
 };
 function renderOfficial() {
   const d = ofData || {};
