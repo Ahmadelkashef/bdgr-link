@@ -307,6 +307,21 @@
   .fl2{display:block;color:var(--muted);font-size:12.5px;margin:12px 2px 5px;font-weight:700}
   textarea.in{resize:vertical;min-height:76px;line-height:1.6}
   .of-log{margin-top:6px;font-size:12px;color:var(--muted);line-height:1.9}
+  /* الدعم */
+  .sp-item{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:12px;margin-top:8px;cursor:pointer}
+  .sp-item.new{border-color:var(--gold)}
+  .sp-item .top{display:flex;align-items:center;gap:8px}
+  .sp-item .top b{flex:1;min-width:0;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sp-item .meta{color:var(--muted);font-size:11.5px;margin-top:4px}
+  .sp-item .last{color:#cfcfd6;font-size:12.5px;margin-top:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .sp-st{font-size:11px;font-weight:800;padding:2px 8px;border-radius:20px;border:1px solid var(--line)}
+  .sp-st.open{color:var(--gold);border-color:var(--gold)} .sp-st.seen{color:var(--blue);border-color:var(--blue)} .sp-st.resolved{color:var(--green);border-color:var(--green)}
+  .sp-msgs{display:flex;flex-direction:column;gap:8px;margin:10px 0;max-height:52vh;overflow-y:auto}
+  .sp-msg{max-width:85%;padding:9px 11px;border-radius:12px;font-size:13.5px;line-height:1.6;white-space:pre-wrap;word-break:break-word}
+  .sp-msg.user{align-self:flex-start;background:var(--card2);border:1px solid var(--line)}
+  .sp-msg.bdgr{align-self:flex-end;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.45)}
+  .sp-msg small{display:block;color:var(--muted);font-size:10.5px;margin-top:4px}
+  .sp-info{font-size:12px;color:var(--muted);line-height:1.8}
 </style>
 </head>
 <body>
@@ -485,6 +500,17 @@
     <div class="card"><b style="font-size:13px">آخر تعديلات باسم BDGR</b><div class="of-log" id="ofLog">—</div></div>
   </section>
 
+  <!-- ═══ الدعم (كنترول) ═══ -->
+  <section id="t-support" class="hidden">
+    <div class="aw-head">
+      <div class="seg" id="spSeg"><button data-x="active" class="on">المفتوحة</button><button data-x="resolved">اتحلت</button><button data-x="all">الكل</button></div>
+      <button class="btn" style="margin-inline-start:auto;padding:8px 12px;font-size:12.5px" onclick="loadSupport()">↻ تحديث</button>
+    </div>
+    <p class="aw-sum" id="spSum"></p>
+    <div id="spList"></div>
+    <p class="hint">ردك بيوصل لليوزر جوه التطبيق باسم BDGR بالعلامة الدهبي، في "المساعدة والدعم ← طلباتي".</p>
+  </section>
+
   <!-- ═══ الجولات: تجهيز الجاي + إنهاء الحالية ═══ -->
   <section id="t-rounds" class="hidden">
     <div class="aw-head">
@@ -507,6 +533,25 @@
     <input type="file" id="awFile" accept="image/jpeg,image/png,image/webp" class="hidden">
   </section>
 </main>
+
+<!-- محادثة دعم -->
+<div id="supportSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="spTitle"></h2><button class="icon-btn" onclick="closeSheet('supportSheet')">✕</button></div>
+    <div class="sp-info" id="spInfo"></div>
+    <div class="sp-msgs" id="spMsgs"></div>
+    <textarea id="spReply" class="in" maxlength="2000" placeholder="اكتب ردك باسم BDGR…"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" style="flex:1" id="spSend">ابعت</button>
+      <button class="btn primary" style="flex:1;margin-top:0;font-size:14px" id="spSendClose">ابعت واقفلها ✓</button>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button class="btn" style="flex:1;font-size:12.5px" id="spClose">اقفلها من غير رد</button>
+      <button class="btn" style="flex:1;font-size:12.5px" id="spReopen">افتحها تاني</button>
+    </div>
+    <div id="spMsg" class="msg"></div>
+  </div>
+</div>
 
 <!-- تفاصيل عنصر من الملخص -->
 <div id="itemSheet" class="overlay hidden">
@@ -667,9 +712,10 @@ const NAV = {
     { k: 'comp', ar: '🏆 المسابقات', soon: true }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
+    { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','official','admins'];
+const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','support','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -713,6 +759,7 @@ function go(t) {
   if (t === 'fnum') loadFn();
   if (t === 'prices') loadPricesTab();
   if (t === 'official') loadOfficial();
+  if (t === 'support') loadSupport();
   if (t === 'admins') { setRole('ADMIN'); renderPerms(['dashboard']); $('aEmail').value = ''; setMsg($('adminMsg'), ''); openAdmins(); }
 }
 document.querySelectorAll('#chartSeg button').forEach(b => b.onclick = () => {
@@ -1513,6 +1560,60 @@ $('msSave').onclick = async () => {
   setMsg($('msMsg'), `اتحفظت ✅ ${h} - ${a}`, 'ok');
   setTimeout(() => { closeSheet('matchSheet'); loadResults(); }, 500);
 };
+
+/* ─── الدعم ─── */
+let spFilter = 'active', spCur = null;
+const SP_CAT = { account: 'الحساب', fantasy: 'الفانتازي', competitions: 'المسابقات', profile: 'البروفايل', technical: 'حاجة مش شغالة', other: 'حاجة تانية' };
+const SP_ST = { open: 'جديدة', seen: 'بنشوفها', resolved: 'اتحلت' };
+document.querySelectorAll('#spSeg button').forEach(b => b.onclick = () => {
+  spFilter = b.dataset.x; document.querySelectorAll('#spSeg button').forEach(x => x.classList.toggle('on', x === b)); loadSupport(); });
+async function loadSupport() {
+  $('spSum').textContent = '…';
+  const { data, error } = await sb.rpc('mgmt_support_list', { p_status: spFilter });
+  if (error) { $('spSum').textContent = errText(error); $('spList').innerHTML = ''; return; }
+  const c = data.counts || {};
+  $('spSum').textContent = `جديدة ${fmt(c.open)} · بنشوفها ${fmt(c.seen)} · اتحلت ${fmt(c.resolved)}`;
+  $('spList').innerHTML = (data.items || []).map(t => `
+    <div class="sp-item ${t.status === 'open' ? 'new' : ''}" onclick="openSupport(${Number(t.id)})">
+      <div class="top"><span>${t.kind === 'problem' ? '🐞' : '💬'}</span><b>${esc(t.subject)}</b><span class="sp-st ${esc(t.status)}">${SP_ST[t.status] || esc(t.status)}</span></div>
+      <div class="meta">${esc(t.display_name || '—')} <bdi dir="ltr">@${esc(t.username || '')}</bdi> · ${SP_CAT[t.category] || esc(t.category)} · ${fmtDT(t.updated_at)}</div>
+      <div class="last">${t.last_from_bdgr ? '↩︎ BDGR: ' : ''}${esc(t.last_body || '')}</div>
+    </div>`).join('') || '<p class="hint">مفيش رسايل هنا.</p>';
+}
+async function openSupport(id) {
+  spCur = id; setMsg($('spMsg'), ''); $('spReply').value = '';
+  $('spTitle').textContent = '…'; $('spMsgs').innerHTML = ''; $('spInfo').innerHTML = '';
+  $('supportSheet').classList.remove('hidden');
+  const { data, error } = await sb.rpc('mgmt_support_thread', { p_ticket_id: id });
+  if (error || !data) return setMsg($('spMsg'), error ? errText(error) : 'مش موجودة.', 'err');
+  const t = data.ticket;
+  $('spTitle').textContent = (t.kind === 'problem' ? '🐞 ' : '💬 ') + t.subject;
+  $('spInfo').innerHTML = `${esc(t.display_name || '—')} <bdi dir="ltr">@${esc(t.username || '')}</bdi>${t.phone ? ` · <bdi dir="ltr">${esc(t.phone)}</bdi>` : ''}${t.governorate ? ' · ' + esc(lbl('governorate', t.governorate)) : ''}<br>
+    ${SP_CAT[t.category] || esc(t.category)} · <bdi dir="ltr">${esc(t.app_id || '')} ${esc(t.app_version || '')}</bdi>${t.device ? ` · <bdi dir="ltr">${esc(t.device)}</bdi>` : ''} · ${SP_ST[t.status] || ''}`;
+  $('spMsgs').innerHTML = (data.messages || []).map(m => `<div class="sp-msg ${m.from_bdgr ? 'bdgr' : 'user'}">${esc(m.body)}<small>${m.from_bdgr ? 'BDGR · ' + esc(m.admin_email || '') + ' · ' : ''}${fmtDT(m.created_at)}</small></div>`).join('');
+  $('spMsgs').scrollTop = $('spMsgs').scrollHeight;
+  $('spReopen').classList.toggle('hidden', t.status !== 'resolved');
+  $('spClose').classList.toggle('hidden', t.status === 'resolved');
+  if (t.status === 'open') loadSupport();
+}
+async function sendSupport(resolve) {
+  const body = $('spReply').value.trim();
+  if (!body) return setMsg($('spMsg'), 'اكتب الرد الأول.', 'err');
+  $('spSend').disabled = $('spSendClose').disabled = true;
+  const { error } = await sb.rpc('mgmt_support_reply', { p_ticket_id: spCur, p_body: body, p_resolve: resolve });
+  $('spSend').disabled = $('spSendClose').disabled = false;
+  if (error) return setMsg($('spMsg'), errText(error), 'err');
+  await openSupport(spCur); setMsg($('spMsg'), 'الرد اتبعت ✓', 'ok'); loadSupport();
+}
+async function setSupportStatus(st) {
+  const { error } = await sb.rpc('mgmt_support_set_status', { p_ticket_id: spCur, p_status: st });
+  if (error) return setMsg($('spMsg'), errText(error), 'err');
+  await openSupport(spCur); loadSupport();
+}
+$('spSend').onclick = () => sendSupport(false);
+$('spSendClose').onclick = () => sendSupport(true);
+$('spClose').onclick = () => setSupportStatus('resolved');
+$('spReopen').onclick = () => setSupportStatus('seen');
 
 /* ─── حساب BDGR الرسمي ─── */
 let ofData = null, ofImgKind = null;
