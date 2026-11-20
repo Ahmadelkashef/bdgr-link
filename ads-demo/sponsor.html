@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="robots" content="noindex">
+  <title>إعلان تجريبي · BDGR</title>
+  <style>
+    :root { color-scheme: dark; }
+    body { margin: 0; min-height: 100vh; display: flex; align-items: center; justify-content: center;
+           background: #0B0B0F; color: #eee; font-family: system-ui, -apple-system, "Segoe UI", Tahoma, sans-serif; }
+    main { width: min(420px, calc(100% - 32px)); text-align: center; }
+    .logo { width: 96px; height: 96px; border-radius: 24px; object-fit: contain; background: #16171C;
+            border: 1px solid #2a2b31; padding: 12px; box-sizing: border-box; }
+    h1 { font-size: 26px; margin: 18px 0 6px; letter-spacing: .5px; }
+    .tag { display: inline-block; font-size: 12px; color: #bbb; border: 1px solid #333; border-radius: 20px; padding: 3px 10px; }
+    p { color: #a9acb6; line-height: 1.7; font-size: 15px; }
+    .card { background: #14151B; border: 1px solid #23242b; border-radius: 18px; padding: 16px; margin-top: 18px; }
+    small { color: #6f727c; display: block; margin-top: 18px; }
+  </style>
+</head>
+<body>
+<main>
+  <img id="logo" class="logo" alt="">
+  <h1 id="name">إعلان تجريبي</h1>
+  <span class="tag">إعلان · تجريبي — Demo ad</span>
+  <div class="card">
+    <p id="line"></p>
+    <p>ده إعلان تجريبي علشان نجرّب أماكن الإعلانات في BDGR. الشركة دي مش حقيقية ومفيش منتج بيتباع هنا.</p>
+    <p dir="ltr">This is a demo ad used to test ad placements in BDGR. The brand is fictional.</p>
+  </div>
+  <small>لما يبقى فيه إعلان حقيقي، الزرار ده هيفتح موقع الراعي أو صفحته.</small>
+</main>
+<script>
+  var S = {
+    nile:  { name: 'NILE ACTIVE',  logo: 'logo_nile.png',  line: 'Train smarter. Play harder.' },
+    delta: { name: 'DELTA WATER',  logo: 'logo_delta.png', line: 'Stay hydrated on and off the pitch.' },
+    pyramid: { name: 'PYRAMID PADEL', logo: 'logo_pyramid.png', line: 'Padel nights every Thursday.' }
+  };
+  var s = S[new URLSearchParams(location.search).get('s')] || null;
+  if (s) {
+    document.getElementById('name').textContent = s.name;
+    document.getElementById('logo').src = s.logo;
+    document.getElementById('line').textContent = s.line;
+  } else {
+    document.getElementById('logo').style.display = 'none';
+  }
+</script>
+</body>
+</html>
