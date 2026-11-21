@@ -802,10 +802,38 @@
     <div class="poolbox" id="rfPool"></div>
     <label class="fl">البادجت (مليون)</label>
     <input type="number" id="rfBudget" class="in" min="1" step="0.5">
-    <label class="fl">جوايز الجولة (الأول / التاني / التالت)</label>
-    <div class="grid3"><input class="in" id="rfP1" placeholder="1000 جنيه"><input class="in" id="rfP2" placeholder="500 جنيه"><input class="in" id="rfP3" placeholder="250 جنيه"></div>
+    <p class="hint">🏆 الجوايز (كاش، تيشيرتات، فاوتشرز…) بتتحط من زرار <b>🏆 الجوايز</b> على كارت الجولة بعد الحفظ.</p>
     <button class="btn primary" id="rfSave" style="margin-top:14px">حفظ كجولة جاية</button>
     <div class="msg" id="rfMsg"></div>
+  </div>
+</div>
+
+<!-- جوايز الجولة: نوع + قيمة + راعي + ساحة -->
+<div id="prizeSheet" class="overlay hidden">
+  <div class="sheet">
+    <div class="sheet-head"><h2 id="pzTitle">الجوايز</h2><button class="icon-btn" onclick="closeSheet('prizeSheet')">✕</button></div>
+    <p class="hint">كل مركز: نوع الجايزة + وصفها (عربي وإنجليزي) + قيمتها بالجنيه + الراعي لو فيه. الأيقونة بتظهر للناس جنب الجايزة.</p>
+    <label class="fl">الجوايز دي لـ</label>
+    <select id="pzArena" class="in">
+      <option value="ALL">الساحتين (محلي + عالمي)</option>
+      <option value="LOCAL">المحلي بس</option>
+      <option value="WORLD">العالمي بس</option>
+    </select>
+    <p class="hint" id="pzArenaHint"></p>
+    <div id="pzRows"></div>
+    <button class="btn" id="pzAdd" style="width:100%">+ مركز</button>
+    <button class="btn primary" id="pzSave" style="margin-top:14px">حفظ الجوايز</button>
+    <div class="msg" id="pzMsg"></div>
+    <details style="margin-top:16px">
+      <summary class="hint" style="cursor:pointer">➕ نوع جايزة جديد (مش موجود في القايمة)</summary>
+      <div class="grid3" style="margin-top:8px">
+        <input class="in" id="pcNameAr" placeholder="الاسم بالعربي">
+        <input class="in" id="pcNameEn" placeholder="Name in English">
+        <input class="in" id="pcIcon" placeholder="أيقونة 🎽" maxlength="4">
+      </div>
+      <button class="btn" id="pcAddCat" style="width:100%;margin-top:6px">ضيف النوع</button>
+      <div class="msg" id="pcCatMsg"></div>
+    </details>
   </div>
 </div>
 
@@ -1242,6 +1270,7 @@ async function loadRounds() {
       acts.push(`<button class="btn warn" onclick="deleteRound('${r.event_id}', ${r.round_no})">🗑 مسح</button>`);
     }
     if (r.state === 'live') acts.push(`<button class="btn gold" onclick="go('results')">📝 النتايج والإنهاء</button>`);
+    acts.push(`<button class="btn" onclick="openPrizes(${r.round_no})">🏆 الجوايز</button>`);
     html += `<div class="rd ${r.state === 'upcoming' ? 'up' : ''}">
       <div class="rhead"><b>الجولة ${r.round_no}</b><span class="chip-st st-${r.state}">${ST_AR[r.state] || r.state}</span></div>
       <div class="meta">بتتفتح ${fmtDT(r.opens_at)} · التشكيل بيتقفل ${fmtDT(r.deadline)}<br>
@@ -1320,8 +1349,6 @@ async function openRoundForm(r) {
   $('rfHint').textContent = 'بتتحفظ "جاية": الناس يشوفوها معاينة ومكتوب إنها قابلة للتعديل، ومحدش يقدر يسجل فيها لحد ما تتفتح.';
   $('rfOpens').value = toLocalInput(r ? r.opens_at : (rdData.next_friday || new Date()));
   $('rfBudget').value = r ? r.budget : (rdData.last_budget || (rdType === 'LOCAL' ? 9 : 420));
-  const pz = r?.prizes || [];
-  ['rfP1','rfP2','rfP3'].forEach((id, i) => $(id).value = pz[i] || '');
   $('rfMatches').innerHTML = '';
   (r?.matches?.length ? r.matches : [{}]).forEach(m => addMatchRow(m));
   if (r) (r.pool || []).forEach(id => poolState[id] = true);
@@ -1337,16 +1364,92 @@ $('rfSave').onclick = async () => {
     at: r.querySelector('.at').value ? new Date(r.querySelector('.at').value).toISOString() : null }));
   if (!matches.length || matches.some(m => !m.home || !m.away || !m.at)) return setMsg($('rfMsg'), 'كمّل بيانات كل ماتش (الفريقين والميعاد).', 'err');
   const pool = Object.entries(poolState).filter(([, v]) => v).map(([k]) => k);
-  const prizes = ['rfP1','rfP2','rfP3'].map(id => $(id).value.trim());
   $('rfSave').disabled = true; setMsg($('rfMsg'), 'بنحفظ…');
   const { data, error } = await sb.rpc('mgmt_round_save', {
     p_type: rdType, p_opens_at: new Date($('rfOpens').value).toISOString(), p_matches: matches, p_pool: pool,
-    p_budget: Number($('rfBudget').value), p_prizes: prizes.some(Boolean) ? prizes : null,
+    p_budget: Number($('rfBudget').value), p_prizes: null,
     p_round_no: null, p_event_id: rfEditing ? rfEditing.event_id : null });
   $('rfSave').disabled = false;
   if (error) return setMsg($('rfMsg'), rdErr(error), 'err');
   setMsg($('rfMsg'), `اتحفظت ✅ الجولة ${data.round_no}`, 'ok');
   setTimeout(() => { closeSheet('roundSheet'); loadRounds(); }, 600);
+};
+
+/* ─── جوايز الجولة (نوع/قيمة/راعي/ساحة) ─── */
+let pz = null;
+async function openPrizes(no) {
+  pz = { no, data: null };
+  $('pzTitle').textContent = `🏆 جوايز الجولة ${no}`;
+  $('pzRows').innerHTML = '<p class="hint">بنحمّل…</p>'; setMsg($('pzMsg'), ''); setMsg($('pcCatMsg'), '');
+  $('prizeSheet').classList.remove('hidden');
+  const { data, error } = await sb.rpc('mgmt_prizes_get', { p: { scope: 'round', round_no: no } });
+  if (error) { $('pzRows').innerHTML = `<p class="hint">${esc(errText(error))}</p>`; return; }
+  pz.data = data;
+  const arenas = new Set((data.prizes || []).map(x => x.arena));
+  $('pzArena').value = arenas.has(rdType) ? rdType : (arenas.has('ALL') || !arenas.size ? 'ALL' : [...arenas][0]);
+  renderPzRows();
+}
+function pzArenaHint() {
+  const a = $('pzArena').value, has = new Set((pz.data?.prizes || []).map(x => x.arena));
+  if (a === 'ALL') return has.has('LOCAL') || has.has('WORLD')
+    ? '⚠️ فيه ساحة ليها جوايز لوحدها، ودي بتغلب على جوايز الساحتين في الساحة دي.' : 'نفس الجوايز هتظهر في المحلي والعالمي.';
+  return `الجوايز دي هتظهر في ${a === 'LOCAL' ? 'المحلي' : 'العالمي'} بس، بدل جوايز الساحتين.`;
+}
+function renderPzRows() {
+  const a = $('pzArena').value;
+  const rows = (pz.data?.prizes || []).filter(x => x.arena === a).sort((x, y) => x.rank - y.rank);
+  $('pzRows').innerHTML = '';
+  (rows.length ? rows : [{ rank: 1 }, { rank: 2 }, { rank: 3 }]).forEach(r => addPzRow(r));
+  $('pzArenaHint').textContent = pzArenaHint();
+}
+function pzRenumber() { [...document.querySelectorAll('#pzRows .mrow')].forEach((d, i) => d.querySelector('.rk').textContent = `المركز ${i + 1}`); }
+function addPzRow(r = {}) {
+  const cats = (pz.data?.categories || []).filter(c => c.active || c.key === r.category);
+  const sps = pz.data?.sponsors || [];
+  const d = document.createElement('div'); d.className = 'mrow';
+  d.innerHTML = `<button class="x" title="شيل">×</button>
+    <div class="full"><b class="rk"></b></div>
+    <select class="cat"><option value="">النوع</option>${cats.map(c => `<option value="${esc(c.key)}" ${c.key === r.category ? 'selected' : ''}>${esc(c.icon)} ${esc(c.name_ar)}</option>`).join('')}</select>
+    <input type="number" class="val" min="0" step="1" placeholder="القيمة بالجنيه" value="${r.value_egp ?? ''}">
+    <input class="ar" maxlength="120" placeholder="الجايزة بالعربي (مثلاً: 1000 جنيه)" value="${esc(r.prize_ar || '')}">
+    <input class="en" maxlength="120" placeholder="In English (e.g. 1,000 EGP)" value="${esc(r.prize_en || '')}">
+    <div class="full"><select class="sp"><option value="">بدون راعي</option>${sps.map(x => `<option value="${x.id}" ${x.id === r.sponsor_id ? 'selected' : ''}>مقدّمة من ${esc(x.name)}</option>`).join('')}</select></div>`;
+  d.querySelector('.x').onclick = () => { d.remove(); pzRenumber(); };
+  $('pzRows').appendChild(d); pzRenumber();
+}
+$('pzArena').onchange = () => renderPzRows();
+$('pzAdd').onclick = () => addPzRow({});
+$('pzSave').onclick = async () => {
+  const items = [...document.querySelectorAll('#pzRows .mrow')].map((d, i) => ({
+    rank: i + 1, category: d.querySelector('.cat').value || null,
+    prize_ar: d.querySelector('.ar').value.trim(), prize_en: d.querySelector('.en').value.trim(),
+    value_egp: d.querySelector('.val').value === '' ? null : Number(d.querySelector('.val').value),
+    sponsor_id: d.querySelector('.sp').value || null })).filter(x => x.prize_ar);
+  if (items.some(x => !x.category)) return setMsg($('pzMsg'), 'اختار نوع كل جايزة.', 'err');
+  $('pzSave').disabled = true; setMsg($('pzMsg'), 'بنحفظ…');
+  const { error } = await sb.rpc('mgmt_prizes_save', { p: { scope: 'round', round_no: pz.no, arena: $('pzArena').value, items } });
+  $('pzSave').disabled = false;
+  if (error) return setMsg($('pzMsg'), errText(error), 'err');
+  setMsg($('pzMsg'), items.length ? 'اتحفظت ✅' : 'الجوايز اتشالت ✅', 'ok');
+  const { data } = await sb.rpc('mgmt_prizes_get', { p: { scope: 'round', round_no: pz.no } });
+  if (data) { pz.data = data; $('pzArenaHint').textContent = pzArenaHint(); }
+  loadRounds();
+};
+$('pcAddCat').onclick = async () => {
+  const ar = $('pcNameAr').value.trim(), en = $('pcNameEn').value.trim(), icon = $('pcIcon').value.trim();
+  const key = en.toLowerCase().replace(/[^a-z]+/g, '_').replace(/^_|_$/g, '').slice(0, 30);
+  if (!ar || !en || !icon || key.length < 2) return setMsg($('pcCatMsg'), 'اكتب الاسم بالعربي والإنجليزي والأيقونة.', 'err');
+  const { error } = await sb.rpc('mgmt_prize_category_save', { p: { key, name_ar: ar, name_en: en, icon, sort: 200 } });
+  if (error) return setMsg($('pcCatMsg'), errText(error), 'err');
+  setMsg($('pcCatMsg'), `اتضاف ${icon} ${ar} ✅`, 'ok');
+  ['pcNameAr', 'pcNameEn', 'pcIcon'].forEach(id => $(id).value = '');
+  const { data } = await sb.rpc('mgmt_prizes_get', { p: { scope: 'round', round_no: pz.no } });
+  if (data) pz.data.categories = data.categories;
+  document.querySelectorAll('#pzRows .mrow .cat').forEach(sel => {
+    const v = sel.value;
+    sel.innerHTML = '<option value="">النوع</option>' + pz.data.categories.filter(c => c.active).map(c => `<option value="${esc(c.key)}">${esc(c.icon)} ${esc(c.name_ar)}</option>`).join('');
+    sel.value = v;
+  });
 };
 
 /* ─── الأسعار والميزانية (كنترول) ─── */
