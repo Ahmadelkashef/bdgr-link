@@ -608,6 +608,16 @@
 
   <!-- ═══ الدعم (كنترول) ═══ -->
   <!-- ═══ 🚩 البلاغات (محتوى اليوزرز) ═══ -->
+  <section id="t-teams" class="hidden">
+    <div class="aw-head">
+      <b>⚽ فرق الكورة</b>
+      <button class="btn" style="margin-inline-start:auto;padding:8px 12px;font-size:12.5px" onclick="loadTeams()">↻ تحديث</button>
+    </div>
+    <p class="aw-sum" id="tmSum"></p>
+    <div id="tmBody"></div>
+    <p class="hint">"جاهز" = وصل للحد الأدنى من اللاعيبة وكل اللاعيبة كمّلوا بياناتهم (GPS + الميلاد + النوع). المحافظة = اللي الكابتن اختارها. الفئة: تحت 18 = كل اللاعيبة أقل من 18، فوق 35 = كلهم 35+، غير كده عام.</p>
+  </section>
+
   <section id="t-reports" class="hidden">
     <div class="aw-head">
       <div class="seg" id="rpSeg"><button data-x="open" class="on">مفتوحة</button><button data-x="handled">اتعاملنا معاها</button></div>
@@ -958,7 +968,7 @@ const NAV = {
   num: [
     { k: 'users', ar: '👥 اليوزرز', ok: () => has('dashboard'), subs: [['overview', 'نظرة عامة'], ['summary', 'الملخص'], ['details', 'التفاصيل']] },
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
-    { k: 'comp', ar: '🏆 المسابقات', soon: true }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
+    { k: 'comp', ar: '🏆 المسابقات', ok: () => has('dashboard'), subs: [['teams', 'الفرق']] }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
@@ -967,7 +977,7 @@ const NAV = {
     { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','ads','adslots','official','admins'];
+const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -1013,6 +1023,7 @@ function go(t) {
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
   if (t === 'reports') loadReports();
+  if (t === 'teams') loadTeams();
   if (t === 'ads') loadAds();
   if (t === 'adslots') loadAdSlots();
   if (t === 'push') loadPush();
@@ -2082,6 +2093,37 @@ async function rpBan(userId, on) {
 /* ─── حساب BDGR الرسمي ─── */
 let ofData = null, ofImgKind = null;
 const OF_FIELDS = { ofName: 'display_name', ofUser: 'username', ofBio: 'bio', ofIg: 'instagram_url', ofTt: 'tiktok_url', ofFb: 'facebook_url', ofYt: 'youtube_url', ofX: 'x_url' };
+/* ─── المسابقات: الفرق ─── */
+async function loadTeams() {
+  $('tmSum').textContent = '…'; $('tmBody').innerHTML = '';
+  const { data, error } = await sb.rpc('mgmt_team_stats');
+  if (error) { $('tmSum').textContent = 'حصلت مشكلة: ' + (error.message || ''); return; }
+  const d = data || {}, f = d.by_format || [], g = d.by_governorate || [], a = d.by_age || {}, u = d.areas_unknown || [];
+  const tot = f.reduce((s, x) => s + (x.teams || 0), 0), rdy = f.reduce((s, x) => s + (x.ready || 0), 0);
+  $('tmSum').textContent = `${tot} فريق · ${rdy} جاهز · ${d.athletes || 0} لاعب كمّل بياناته`;
+  const table = (title, rows) => `<h4 style="margin:16px 0 6px">${title}</h4><div class="card" style="padding:4px 12px">${rows.length ? rows.join('') : '<p class="hint">لسه مفيش.</p>'}</div>`;
+  const row = (k, n, r) => `<div class="mrow" style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)"><span>${esc(k)}</span><span><b>${n}</b> فريق · <b style="color:#00FF87">${r}</b> جاهز</span></div>`;
+  const ageAr = { u18: 'تحت 18', open: 'عام', o35: 'فوق 35' };
+  $('tmBody').innerHTML =
+    table('حسب الشكل', f.map(x => row(x.label, x.teams, x.ready))) +
+    table('حسب المحافظة', g.map(x => row(x.governorate_ar || x.governorate, x.teams, x.ready))) +
+    table('حسب السن', ['u18', 'open', 'o35'].filter(k => a[k]).map(k => row(ageAr[k], a[k].teams, a[k].ready))) +
+    `<h4 style="margin:16px 0 6px">مناطق مكتوبة بإيد اليوزرز (مش في القايمة)</h4><div class="card" style="padding:4px 12px">${u.length ? u.map((x, i) =>
+      `<div class="mrow" style="display:flex;gap:8px;align-items:center;padding:8px 0;border-bottom:1px solid rgba(255,255,255,.06)">
+        <span style="flex:1">${esc(x.governorate)} · ${esc(x.city)}${x.district ? ' · ' + esc(x.district) : ''} <small style="color:var(--muted)">(${x.n})</small></span>
+        <button class="btn" style="padding:6px 10px;font-size:12px" onclick="addTeamArea(${i})">➕ ضيفها</button></div>`).join('') : '<p class="hint">مفيش.</p>'}</div>`;
+  window._tmUnknown = u;
+}
+async function addTeamArea(i) {
+  const x = (window._tmUnknown || [])[i]; if (!x) return;
+  const cityAr = prompt('اسم المدينة بالعربي: ' + x.city, x.city); if (cityAr === null) return;
+  let distAr = null;
+  if (x.district) { distAr = prompt('اسم الحي بالعربي: ' + x.district, x.district); if (distAr === null) return; }
+  const { error } = await sb.rpc('mgmt_team_area_add', { p: { governorate: x.governorate, city_en: x.city, city_ar: cityAr, district_en: x.district || null, district_ar: distAr } });
+  if (error) { alert('حصلت مشكلة: ' + (error.message || '')); return; }
+  loadTeams();
+}
+
 const esc = t => String(t ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c]);
 async function loadOfficial() {
   setMsg($('ofMsg'), '');

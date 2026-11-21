@@ -67,7 +67,23 @@
   // بوست يوزر: ?u=<id>
   var ugc = (params.get('u') || '').toLowerCase();
   var isUgc = !valid && !isLeague && !isPost && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/.test(ugc);
-  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : (isUgc ? 'ugc/' + ugc : '')));
+  // دعوة فريق (المسابقات): ?t=CODE
+  var team = (params.get('t') || '').toUpperCase();
+  var isTeam = !valid && !isLeague && !isPost && !isUgc && /^[A-Z0-9]{4,12}$/.test(team);
+  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : (isUgc ? 'ugc/' + ugc : (isTeam ? 'team/' + team : ''))));
+  if (isTeam) {
+    document.getElementById('title').textContent = 'اتعزمت على فريق كورة في BDGR ⚽';
+    document.getElementById('sub').innerHTML = 'افتح التطبيق وابعت طلب انضمام للكابتن.<br>كود الفريق: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + team + '</b>';
+    document.getElementById('open').textContent = 'انضم للفريق في BDGR';
+    var copyT = document.getElementById('copy');
+    copyT.classList.remove('hidden');
+    copyT.addEventListener('click', function () {
+      var done = function () { copyT.textContent = '✅ الكود اتنسخ: ' + team; };
+      if (navigator.clipboard) navigator.clipboard.writeText(team).then(done, done); else done();
+    });
+    document.getElementById('soon').textContent = 'بعد ما تنزّل التطبيق وتعمل لوجن: المسابقات ← اختار الكورة ← فريقي ← انضم لفريق، والزق الكود.';
+    document.getElementById('soon').classList.remove('hidden');
+  }
   if (isUgc) {
     document.getElementById('title').textContent = 'بوست على BDGR 🦡';
     document.getElementById('open').textContent = 'شوفه في BDGR';
@@ -96,7 +112,7 @@
 
   var appLink = PKG + '://' + path;
   // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
-  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : (isUgc ? '&u=' + ugc : ''))));
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : (isUgc ? '&u=' + ugc : (isTeam ? '&t=' + team : '')))));
   var intentLink = 'intent://' + path +
     '#Intent;scheme=' + PKG + ';package=' + PKG +
     ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
@@ -110,7 +126,7 @@
   });
 
   // نسخة الويب (آيفون / كمبيوتر): نفس اللينك بيفتح البوست / الليج جوه الموقع
-  var webQuery = valid ? '?m=' + id : (isLeague ? '?l=' + code : (isPost ? '?p=' + post : (isUgc ? '?u=' + ugc : '')));
+  var webQuery = valid ? '?m=' + id : (isLeague ? '?l=' + code : (isPost ? '?p=' + post : (isUgc ? '?u=' + ugc : (isTeam ? '?t=' + team : ''))));
   var webUrl = 'app/' + webQuery;
   document.getElementById('web').href = webUrl;
 
