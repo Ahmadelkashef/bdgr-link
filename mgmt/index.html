@@ -731,6 +731,8 @@
       <label class="fl2">مدة الظهور (ثواني، 2–15)</label><input id="crDur" type="number" min="2" max="15" class="in" value="3">
       <div id="crDetBox"><label class="fl2">صفحة التفاصيل (بريميوم)</label><textarea id="crDetails" class="in" maxlength="1500" placeholder="تفاصيل العرض اللي هتظهر في صفحة جوه التطبيق"></textarea></div>
     </div>
+    <div id="crBoardBox" class="hidden"><label class="fl2">⏱️ ثواني على لوحة الملعب (LED حوالين ملعب الفانتازي، 3–600، فاضي = 8)</label>
+      <input id="crBoard" type="number" min="3" max="600" class="in" placeholder="8"></div>
     <label class="fl2">العنوان</label><input id="crTitleIn" class="in" maxlength="80">
     <label class="fl2">الكلام</label><textarea id="crBody" class="in" maxlength="300"></textarea>
     <label class="fl2">الصورة / الفيديو (فيديو ≤ 15 ثانية، أقل من 5 ميجا)</label>
@@ -2491,7 +2493,7 @@ const AD_PUB = 'https://xjorftvsuztxapdnceao.supabase.co/storage/v1/object/publi
 const adUrl = k => !k ? '' : /^https?:\/\//i.test(k) ? k : AD_PUB + k;
 const AD_ST = { draft: ['مسودة', ''], live: ['🟢 شغالة', ''], paused: ['⏸ واقفة', 'off'], ended: ['⚪ خلصت', 'off'] };
 const AD_TPL = { title: 'برعاية', logo: 'لوجو', text: 'سطر', banner: 'بانر', native: 'كارت', video: 'فيديو', story: 'ستوري', fullscreen: 'شاشة كاملة', takeover: 'Takeover' };
-const AD_ROUND_SLOTS = ['fantasy_round_title', 'fantasy_prize', 'fantasy_lobby_banner', 'fantasy_squad_saved'];
+const AD_ROUND_SLOTS = ['fantasy_round_title', 'fantasy_prize', 'fantasy_lobby_banner', 'fantasy_squad_saved', 'fantasy_pitch_board'];
 const AD_SPORT_SLOTS = ['home_sports', 'competitions_sport', 'badger_card'];
 const adPl = k => (adOv?.placements || []).find(p => p.key === k);
 const adPlName = k => esc(adPl(k)?.notes || k);
@@ -2663,12 +2665,14 @@ function adCrOpen(campId, crId) {
   $('crDel').classList.toggle('hidden', !adEditCr);
   $('crToPkg').value = (r.close_after_s || 0) > 0 || r.details ? 'prem' : 'std';
   $('crDur').value = r.duration_s || 3; $('crDetails').value = r.details || '';
+  $('crBoard').value = r.board_s || '';
   adCrToUI();
   setMsg($('crMsg'), ''); $('adCrSheet').classList.remove('hidden'); adCrPreview();
 }
 function adCrToUI() {
   $('crTo').classList.toggle('hidden', $('crTpl').value !== 'takeover');
   $('crDetBox').classList.toggle('hidden', $('crToPkg').value !== 'prem');
+  $('crBoardBox').classList.toggle('hidden', !['banner', 'logo'].includes($('crTpl').value));
 }
 ['crTpl', 'crToPkg'].forEach(id => $(id).addEventListener('change', adCrToUI));
 ['crTpl', 'crLang', 'crTitleIn', 'crBody', 'crCta', 'crMediaUrl', 'crFile', 'crBg', 'crFg', 'crLinkType'].forEach(id => $(id).addEventListener('input', adCrPreview));
@@ -2701,6 +2705,11 @@ $('crSave').onclick = async () => {
     const p = { id: adEditCr?.id || '', campaign_id: adCrCamp.id, template: $('crTpl').value, lang: $('crLang').value, title: $('crTitleIn').value.trim(),
       body: $('crBody').value.trim(), cta_text: $('crCta').value.trim(), link_type: lt, link: lt === 'none' ? '' : link,
       bg_color: $('crBg').value.trim(), text_color: $('crFg').value.trim(), active: $('crActive').checked };
+    if (['banner', 'logo'].includes(p.template)) {
+      const b = $('crBoard').value.trim();
+      if (b && (!(Number(b) >= 3) || Number(b) > 600)) throw new Error('ثواني اللوحة من 3 لـ 600');
+      p.board_s = b ? String(Math.round(Number(b))) : '';
+    }
     if (p.template === 'takeover') {
       const prem = $('crToPkg').value === 'prem';
       p.duration_s = String(Math.min(15, Math.max(2, Number($('crDur').value) || 3)));
