@@ -358,6 +358,18 @@
   .ph-slot button.save{border-color:var(--gold);color:var(--gold)}
   .ph-slot .st{width:100%;font-size:11.5px;color:var(--muted);padding-inline-start:80px}
   .ph-slot .st.ok{color:var(--green)} .ph-slot .st.err{color:var(--red)}
+  /* 🛡️ شعارات الفرق */
+  .tl-crest{width:38px;height:38px;border-radius:10px;background:var(--card2);flex:none;display:flex;align-items:center;justify-content:center;overflow:hidden}
+  .tl-crest img{width:100%;height:100%;object-fit:contain}
+  .tl-ini{width:34px;height:38px;display:flex;align-items:center;justify-content:center;font-size:10.5px;font-weight:900;letter-spacing:.5px;color:#fff;
+    background:linear-gradient(160deg,#3a3a46,#22222a);clip-path:polygon(50% 0,100% 14%,100% 58%,50% 100%,0 58%,0 14%)}
+  .tl-match{display:flex;align-items:center;gap:8px;background:var(--card);border:1px solid var(--line);border-radius:16px;padding:10px 12px;margin-top:8px}
+  .tl-side{flex:1;display:flex;align-items:center;gap:8px;min-width:0}
+  .tl-side.away{flex-direction:row-reverse;text-align:end}
+  .tl-side b{font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tl-side button{border:1px dashed var(--gold);color:var(--gold);background:transparent;border-radius:8px;font-size:11px;font-weight:800;padding:3px 6px;cursor:pointer;flex:none}
+  .tl-mid{flex:none;text-align:center;font-size:12px;color:var(--muted);font-weight:800;min-width:64px}
+  .tl-mid b{display:block;color:var(--text);font-size:15px}
 </style>
 </head>
 <body>
@@ -498,6 +510,23 @@
     <button class="btn hidden" id="phMore" style="width:100%;margin-top:10px" onclick="loadPPhotoList(true)">اعرض أكتر</button>
     <p class="hint">كل خانة: الصق لينك يبدأ بـ https ودوس "حفظ"، أو دوس "📁 رفع" ترفع ملف على الستورج. الصور بتتصغّر قبل الرفع. 🗑️ بتفضّي الخانة. لو اللعيب ملوش صورة، الأبلكيشن بيعرض التيشيرت.</p>
     <input type="file" id="phFile" class="hidden">
+  </section>
+
+  <!-- ═══ 🛡️ شعارات الفرق (perm fantasy) ═══ -->
+  <section id="t-tlogos" class="hidden">
+    <div class="aw-head"><select id="tlView" class="aw-sel" style="min-width:0;flex:1"></select></div>
+    <div id="tlAllF" class="hidden">
+      <div class="aw-head">
+        <select id="tlCountry" class="aw-sel" style="min-width:0;flex:1"></select>
+        <select id="tlMissing" class="aw-sel" style="min-width:0;flex:1"><option value="">كل الفرق</option><option value="1">اللي من غير شعار بس</option></select>
+      </div>
+      <div class="aw-head"><input id="tlQ" class="in" placeholder="🔍 دور باسم الفريق" style="padding:11px 12px"></div>
+    </div>
+    <p class="aw-sum" id="tlSum"></p>
+    <div id="tlList"></div>
+    <button class="btn hidden" id="tlMore" style="width:100%;margin-top:10px" onclick="loadTLogoList(true)">اعرض أكتر</button>
+    <p class="hint">الفريق اللي ملوش شعار بيظهر في الأبلكيشن كدرع فيه أول حروف اسمه (زي اللي هنا). الشعار: الصق لينك https ودوس "حفظ"، أو "📁 رفع" (SVG بيترفع زي ما هو، والصور بتتصغّر لـ 256).</p>
+    <input type="file" id="tlFile" class="hidden" accept="image/svg+xml,image/png,image/webp,image/jpeg">
   </section>
 
   <!-- ═══ الأدمنز (كنترول، سوبر أدمن بس) ═══ -->
@@ -1007,14 +1036,14 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
     { k: 'comp', ar: '🏆 المسابقات', ok: () => has('dashboard'), subs: [['teams', 'الفرق']] }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
-    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['pphotos', 'صور اللعيبة'], ['awards', 'صور الكسبانين']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['pphotos', 'صور اللعيبة'], ['tlogos', 'شعارات الفرق'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
     { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','pphotos','awards','push','support','reports','ads','adslots','official','admins'];
+const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','pphotos','tlogos','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -1058,6 +1087,7 @@ function go(t) {
   if (t === 'fnum') loadFn();
   if (t === 'prices') loadPricesTab();
   if (t === 'pphotos') loadPPhotos();
+  if (t === 'tlogos') loadTLogos();
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
   if (t === 'reports') loadReports();
@@ -1404,6 +1434,111 @@ $('phFile').onchange = async () => {
   const up = await sb.storage.from('Assets').upload(path, body, { contentType: type, upsert: false, cacheControl: '31536000' });
   if (up.error) return phStatus(id, k, 'فشل الرفع: ' + up.error.message, 'err');
   if (await phSet(id, k, path)) phStatus(id, k, '✅ اترفع واتحفظ', 'ok');
+  else await sb.storage.from('Assets').remove([path]);
+};
+
+/* ─── 🛡️ شعارات الفرق: لينك https أو ملف في Assets/football/teams/<id>/ ─── */
+const TL = { f: null, items: [], off: 0, teams: {}, target: null, timer: null };
+const TL_ERR = { bad_link: 'اللينك لازم يبدأ بـ https://', file_not_found: 'الملف مش موجود في الستورج', team_not_found: 'الفريق مش موجود', forbidden: 'مش معاك صلاحية' };
+// نفس الحروف اللي الأبلكيشن بيرسمها: أول حرف من كل كلمة (لحد 3)، أو أول 3 حروف لو كلمة واحدة
+function tlInitials(n) {
+  const w = String(n || '').replace(/[^A-Za-z0-9À-ɏ ]/g, ' ').split(/\s+/).filter(x => x && !/^(fc|sc|cf|ac|afc|cd|ud|sv|al|el|the)$/i.test(x));
+  if (!w.length) return '?';
+  return (w.length === 1 ? w[0].slice(0, 3) : w.slice(0, 3).map(x => x[0]).join('')).toUpperCase();
+}
+const tlCrest = t => `<span class="tl-crest">${t.url ? `<img src="${esc(t.url)}" alt="" loading="lazy">` : `<span class="tl-ini">${esc(tlInitials(t.name_en))}</span>`}</span>`;
+async function loadTLogos() {
+  if (!TL.f) {
+    const { data, error } = await sb.rpc('mgmt_team_logo_filters');
+    if (error) { $('tlList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+    TL.f = data;
+    const ev = (data.events || []).map(e => `<option value="${e.id}">⚽ ماتشات الجولة ${e.round_no} · ${e.type === 'LOCAL' ? '🇪🇬 محلي' : '🌍 عالمي'}${e.status === 'FINISHED' ? ' (خلصت)' : ''}</option>`).join('');
+    $('tlView').innerHTML = ev + '<option value="all">🛡️ كل الفرق</option>';
+    $('tlCountry').innerHTML = '<option value="">كل البلاد</option>' + (data.countries || []).map(c => `<option>${esc(c)}</option>`).join('');
+    $('tlView').onchange = () => loadTLogoList();
+    $('tlCountry').onchange = () => loadTLogoList();
+    $('tlMissing').onchange = () => loadTLogoList();
+    $('tlQ').oninput = () => { clearTimeout(TL.timer); TL.timer = setTimeout(() => loadTLogoList(), 400); };
+  }
+  loadTLogoList();
+}
+async function loadTLogoList(more) {
+  const v = $('tlView').value, all = v === 'all';
+  $('tlAllF').classList.toggle('hidden', !all);
+  if (!more) { TL.off = 0; TL.items = []; $('tlList').innerHTML = '<p class="hint">بنحمّل…</p>'; }
+  const p = all ? { country: $('tlCountry').value, missing: $('tlMissing').value === '1', q: $('tlQ').value, offset: TL.off, limit: 40 } : { event_id: v };
+  const { data, error } = await sb.rpc('mgmt_team_logos', { p });
+  if (error) { $('tlList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  if (!all) {
+    const ms = data.matches || [];
+    ms.forEach(m => { TL.teams[m.home.id] = m.home; TL.teams[m.away.id] = m.away; });
+    const miss = new Set(ms.flatMap(m => [m.home, m.away]).filter(t => !t.url).map(t => t.id)).size;
+    $('tlSum').textContent = `${ms.length} ماتش · ${miss ? miss + ' فريق من غير شعار' : 'كل الفرق ليها شعار ✓'}`;
+    $('tlMore').classList.add('hidden');
+    const side = (t, cls) => `<div class="tl-side ${cls}">${tlCrest(t)}<b>${esc(t.name_ar || t.name_en)}</b>${t.url ? '' : `<button onclick="tlEdit('${t.id}')">➕ شعار</button>`}</div>`;
+    $('tlList').innerHTML = ms.map(m => `<div class="tl-match">${side(m.home, 'home')}
+      <div class="tl-mid">${m.home_score != null ? `<b>${m.home_score} - ${m.away_score}</b>` : `<b>${new Date(m.at).toLocaleTimeString('ar-EG', { hour: 'numeric', minute: '2-digit' })}</b>`}${new Date(m.at).toLocaleDateString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short' })}</div>
+      ${side(m.away, 'away')}</div><div id="tle-${m.home.id}"></div><div id="tle-${m.away.id}"></div>`).join('') || '<p class="hint">مفيش ماتشات في الجولة دي.</p>';
+    return;
+  }
+  (data.items || []).forEach(t => TL.teams[t.id] = t);
+  TL.items = TL.items.concat(data.items || []); TL.off = TL.items.length;
+  $('tlSum').textContent = `${data.total} فريق`;
+  $('tlMore').classList.toggle('hidden', !data.has_more);
+  $('tlList').innerHTML = TL.items.map(t => `<div class="ph-card" id="tlc-${t.id}">${tlCard(t)}</div>`).join('') || '<p class="hint">مفيش فرق بالفلتر ده.</p>';
+}
+function tlCard(t) {
+  const ext = /^https:\/\//.test(t.path || '');
+  const st = !t.path ? 'من غير شعار: بيظهر درع بالحروف' : ext ? '🔗 لينك من بره' : '📦 ملف في الستورج: ' + esc(String(t.path).split('/').pop());
+  return `<div class="ph-top">${tlCrest(t)}<div><b>${esc(t.name_ar || t.name_en)}</b><small><bdi dir="ltr">${esc(t.name_en)}</bdi> · ${esc(t.country || '—')} · ${t.players ? t.players + ' لعيب' : 'من غير لعيبة'}</small></div></div>
+    <div class="ph-slot"><span class="lb">الشعار</span>
+      <input id="tli-${t.id}" value="${ext ? esc(t.path) : ''}" placeholder="https://…">
+      <button class="save" onclick="tlSaveLink('${t.id}')">حفظ</button>
+      <button onclick="tlPick('${t.id}')">📁 رفع</button>
+      ${t.path ? `<button title="شيل الشعار" onclick="tlClear('${t.id}')">🗑️</button>` : ''}
+      <div class="st" id="tls-${t.id}">${st}</div></div>`;
+}
+// في عرض الماتشات: "➕ شعار" بيفتح نفس الخانة تحت الماتش
+function tlEdit(id) {
+  const box = $('tle-' + id); if (!box) return;
+  if (box.innerHTML) { box.innerHTML = ''; return; }
+  box.innerHTML = `<div class="ph-card" id="tlc-${id}">${tlCard(TL.teams[id])}</div>`;
+}
+function tlStatus(id, t, cls) { const e = $('tls-' + id); if (e) { e.textContent = t; e.className = 'st ' + (cls || ''); } }
+async function tlSet(id, value) {
+  const { data, error } = await sb.rpc('mgmt_team_logo_set', { p: { team_id: id, value } });
+  if (error) { const m = error.message || ''; tlStatus(id, TL_ERR[Object.keys(TL_ERR).find(x => m.includes(x))] || errText(error), 'err'); return false; }
+  if (data?.old_path) await sb.storage.from('Assets').remove([data.old_path]);   // الشعار القديم بتاع الفريق ده بس
+  return true;
+}
+async function tlDone(id, msg) {
+  await loadTLogoList();
+  if ($('tlView').value !== 'all' && !TL.teams[id]?.url) tlEdit(id);
+  tlStatus(id, msg, 'ok');
+}
+async function tlSaveLink(id) {
+  const v = ($('tli-' + id).value || '').trim();
+  if (!/^https:\/\/\S+$/.test(v)) return tlStatus(id, TL_ERR.bad_link, 'err');
+  tlStatus(id, 'بنحفظ…');
+  if (await tlSet(id, v)) tlDone(id, '✅ اتحفظ');
+}
+async function tlClear(id) {
+  if (!confirm('تشيل شعار الفريق ده؟ هيظهر مكانه الدرع بالحروف.')) return;
+  if (await tlSet(id, null)) tlDone(id, '✅ اتشال');
+}
+function tlPick(id) { TL.target = id; $('tlFile').value = ''; $('tlFile').click(); }
+$('tlFile').onchange = async () => {
+  const f = $('tlFile').files[0], id = TL.target; if (!f || !id) return; TL.target = null;
+  let body = f, type = f.type, ext = 'svg';
+  try {
+    if (f.type === 'image/svg+xml') { if (f.size > 300 * 1024) return tlStatus(id, 'الـ SVG أكبر من 300 KB.', 'err'); }
+    else { tlStatus(id, 'بنصغّر الصورة…'); const r = await phShrink(f, 256); body = r.blob; type = r.type; ext = r.ext; }
+  } catch (e) { return tlStatus(id, e.message || 'مقدرناش نقرا الملف', 'err'); }
+  const path = `football/teams/${id}/logo_${Date.now()}.${ext}`;   // اسم جديد كل مرة → الموبايلات تنزّل الجديد
+  tlStatus(id, `بنرفع… (${Math.round(body.size / 1024)} KB)`);
+  const up = await sb.storage.from('Assets').upload(path, body, { contentType: type, upsert: false, cacheControl: '31536000' });
+  if (up.error) return tlStatus(id, 'فشل الرفع: ' + up.error.message, 'err');
+  if (await tlSet(id, path)) tlDone(id, '✅ اترفع واتحفظ');
   else await sb.storage.from('Assets').remove([path]);
 };
 
