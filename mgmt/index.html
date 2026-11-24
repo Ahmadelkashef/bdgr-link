@@ -343,6 +343,21 @@
   .sp-msg.bdgr{align-self:flex-end;background:rgba(212,175,55,.12);border:1px solid rgba(212,175,55,.45)}
   .sp-msg small{display:block;color:var(--muted);font-size:10.5px;margin-top:4px}
   .sp-info{font-size:12px;color:var(--muted);line-height:1.8}
+  /* 🧑 صور اللعيبة */
+  .ph-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:8px}
+  .ph-top{display:flex;align-items:center;gap:10px}
+  .ph-top .av{width:44px;height:44px;border-radius:50%;background:var(--card2);object-fit:cover;flex:none;display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden}
+  .ph-top .av img{width:100%;height:100%;object-fit:cover}
+  .ph-top b{font-size:15px} .ph-top small{display:block;color:var(--muted);font-size:12px;margin-top:2px}
+  .ph-slot{display:flex;align-items:center;gap:6px;margin-top:8px;flex-wrap:wrap}
+  .ph-slot .lb{width:74px;flex:none;font-size:12px;font-weight:800;color:var(--muted)}
+  .ph-slot .pv{width:38px;height:38px;border-radius:9px;background:var(--card2);flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--muted)}
+  .ph-slot .pv img{width:100%;height:100%;object-fit:cover}
+  .ph-slot input{flex:1;min-width:140px;padding:9px 10px;border-radius:10px;border:1px solid var(--line);background:var(--bg);color:var(--text);font-size:12.5px;direction:ltr}
+  .ph-slot button{padding:8px 10px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-weight:800;font-size:12px;cursor:pointer;flex:none}
+  .ph-slot button.save{border-color:var(--gold);color:var(--gold)}
+  .ph-slot .st{width:100%;font-size:11.5px;color:var(--muted);padding-inline-start:80px}
+  .ph-slot .st.ok{color:var(--green)} .ph-slot .st.err{color:var(--red)}
 </style>
 </head>
 <body>
@@ -463,6 +478,26 @@
     </div>
     <p class="aw-sum" id="prSum"></p>
     <div class="card plist" id="prList" style="padding:4px 8px"></div>
+  </section>
+
+  <!-- ═══ 🧑 صور اللعيبة (perm fantasy) ═══ -->
+  <section id="t-pphotos" class="hidden">
+    <div class="aw-head">
+      <select id="phCountry" class="aw-sel" style="min-width:0;flex:1"></select>
+      <select id="phTeam" class="aw-sel" style="min-width:0;flex:1"></select>
+    </div>
+    <div class="aw-head">
+      <select id="phPos" class="aw-sel" style="min-width:0;flex:1">
+        <option value="">كل المراكز</option><option value="GK">حراس</option><option value="DEF">دفاع</option><option value="MID">وسط</option><option value="FWD">هجوم</option></select>
+      <select id="phMissing" class="aw-sel" style="min-width:0;flex:1">
+        <option value="">كل اللعيبة</option><option value="1">اللي ناقصهم صور بس</option></select>
+    </div>
+    <div class="aw-head"><input id="phQ" class="in" placeholder="🔍 دور بالاسم" style="padding:11px 12px"></div>
+    <p class="aw-sum" id="phSum"></p>
+    <div id="phList"></div>
+    <button class="btn hidden" id="phMore" style="width:100%;margin-top:10px" onclick="loadPPhotoList(true)">اعرض أكتر</button>
+    <p class="hint">كل خانة: الصق لينك يبدأ بـ https ودوس "حفظ"، أو دوس "📁 رفع" ترفع ملف على الستورج. الصور بتتصغّر قبل الرفع. 🗑️ بتفضّي الخانة. لو اللعيب ملوش صورة، الأبلكيشن بيعرض التيشيرت.</p>
+    <input type="file" id="phFile" class="hidden">
   </section>
 
   <!-- ═══ الأدمنز (كنترول، سوبر أدمن بس) ═══ -->
@@ -972,14 +1007,14 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
     { k: 'comp', ar: '🏆 المسابقات', ok: () => has('dashboard'), subs: [['teams', 'الفرق']] }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
-    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['awards', 'صور الكسبانين']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['pphotos', 'صور اللعيبة'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
     { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','awards','push','support','reports','ads','adslots','official','admins'];
+const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','pphotos','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -1022,6 +1057,7 @@ function go(t) {
   if (t === 'results') loadResults();
   if (t === 'fnum') loadFn();
   if (t === 'prices') loadPricesTab();
+  if (t === 'pphotos') loadPPhotos();
   if (t === 'official') loadOfficial();
   if (t === 'support') loadSupport();
   if (t === 'reports') loadReports();
@@ -1243,6 +1279,132 @@ $('awFile').onchange = async () => {
   const { error } = await sb.rpc('mgmt_save_highlight', { p_type: awType, p_period: awTarget.period, p_key: String(awTarget.key), p_user_id: awTarget.user_id, p_photo_path: path });
   if (error) { $('awSum').textContent = 'اترفعت بس ما اتربطتش: ' + errText(error); return; }
   awTarget = null; await loadAwardPeriods(); refreshAwardBadge();
+};
+
+/* ─── 🧑 صور اللعيبة: headshot / صورة كاملة / فيديو = لينك https أو ملف في Assets ─── */
+const PH = { filters: null, items: [], off: 0, target: null, timer: null };
+const PH_KINDS = [['headshot', 'صورة الوش', 400], ['image', 'صورة كاملة', 900], ['video', 'فيديو', 0]];
+const PH_POS = { GK: 'حارس', DEF: 'دفاع', MID: 'وسط', FWD: 'هجوم' };
+const PH_ERR = { bad_link: 'اللينك لازم يبدأ بـ https://', file_not_found: 'الملف مش موجود في الستورج', player_not_found: 'اللعيب مش موجود', forbidden: 'مش معاك صلاحية' };
+async function loadPPhotos() {
+  if (!PH.filters) {
+    const { data, error } = await sb.rpc('mgmt_player_assets_filters');
+    if (error) { $('phList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+    PH.filters = data || [];
+    const keep = store.get('ph_country', '');
+    $('phCountry').innerHTML = '<option value="">كل البلاد</option>' + PH.filters.map(c => `<option ${c.country === keep ? 'selected' : ''}>${esc(c.country)}</option>`).join('');
+    phFillTeams();
+    $('phCountry').onchange = () => { store.set('ph_country', $('phCountry').value); phFillTeams(); loadPPhotoList(); };
+    $('phTeam').onchange = () => loadPPhotoList();
+    $('phPos').onchange = () => loadPPhotoList();
+    $('phMissing').onchange = () => loadPPhotoList();
+    $('phQ').oninput = () => { clearTimeout(PH.timer); PH.timer = setTimeout(() => loadPPhotoList(), 400); };
+  }
+  loadPPhotoList();
+}
+function phFillTeams() {
+  const c = $('phCountry').value;
+  const teams = PH.filters.filter(x => !c || x.country === c).flatMap(x => x.teams).sort((a, b) => (a.name_en || '').localeCompare(b.name_en || ''));
+  $('phTeam').innerHTML = '<option value="">كل الأندية</option>' + teams.map(t => `<option value="${t.id}">${esc(t.name_ar || t.name_en)} (${t.players})</option>`).join('');
+}
+async function loadPPhotoList(more) {
+  if (!more) { PH.off = 0; PH.items = []; $('phList').innerHTML = '<p class="hint">بنحمّل…</p>'; }
+  const p = { country: $('phCountry').value, team_id: $('phTeam').value, position: $('phPos').value,
+    q: $('phQ').value, missing: $('phMissing').value === '1', offset: PH.off, limit: 30 };
+  const { data, error } = await sb.rpc('mgmt_player_assets_list', { p });
+  if (error) { $('phList').innerHTML = `<p class="hint">${errText(error)}</p>`; return; }
+  PH.items = PH.items.concat(data.items || []); PH.off = PH.items.length;
+  $('phSum').textContent = `${data.total} لاعب`;
+  $('phMore').classList.toggle('hidden', !data.has_more);
+  $('phList').innerHTML = PH.items.map(phCard).join('') || '<p class="hint">مفيش لاعيبة بالفلتر ده.</p>';
+}
+function phCard(p) {
+  const hs = p.headshot?.url || p.image?.url;
+  return `<div class="ph-card" id="ph-${p.id}">
+    <div class="ph-top"><div class="av">${hs ? `<img src="${esc(hs)}" alt="" loading="lazy">` : '👤'}</div>
+      <div><b>${esc(p.name_ar || p.name_en)}</b><small><bdi dir="ltr">${esc(p.name_en)}</bdi> · ${esc(p.team?.name_ar || p.team?.name_en || '')} · ${PH_POS[p.position] || p.position || ''}</small></div></div>
+    ${PH_KINDS.map(([k, lb]) => phSlot(p, k, lb)).join('')}</div>`;
+}
+function phSlot(p, k, lb) {
+  const v = p[k] || {}, path = v.path || '', url = v.url || '', ext = /^https:\/\//.test(path);
+  const pv = !url ? '—' : k === 'video' ? `<a href="${esc(url)}" target="_blank" rel="noopener">▶</a>` : `<img src="${esc(url)}" alt="" loading="lazy">`;
+  const st = !path ? 'فاضية' : ext ? '🔗 لينك من بره' : '📦 ملف في الستورج: ' + esc(path.split('/').pop());
+  return `<div class="ph-slot" data-k="${k}">
+    <span class="lb">${lb}</span><span class="pv">${pv}</span>
+    <input id="phi-${p.id}-${k}" value="${ext ? esc(path) : ''}" placeholder="https://…">
+    <button class="save" onclick="phSaveLink('${p.id}','${k}')">حفظ</button>
+    <button onclick="phPick('${p.id}','${k}')">📁 رفع</button>
+    ${path ? `<button title="فضّي الخانة" onclick="phClear('${p.id}','${k}')">🗑️</button>` : ''}
+    <div class="st" id="phs-${p.id}-${k}">${st}</div></div>`;
+}
+function phStatus(id, k, t, cls) { const e = $(`phs-${id}-${k}`); if (e) { e.textContent = t; e.className = 'st ' + (cls || ''); } }
+async function phSet(id, k, value) {
+  const { data, error } = await sb.rpc('mgmt_player_asset_set', { p: { player_id: id, kind: k, value } });
+  if (error) { const m = (error.message || ''); phStatus(id, k, PH_ERR[Object.keys(PH_ERR).find(x => m.includes(x))] || errText(error), 'err'); return false; }
+  if (data?.old_path) await sb.storage.from('Assets').remove([data.old_path]);   // الملف القديم بتاع اللعيب ده بس
+  await phRefresh(id);
+  return true;
+}
+async function phRefresh(id) {
+  const it = PH.items.find(x => x.id === id); if (!it) return;
+  const { data } = await sb.rpc('mgmt_player_assets_list', { p: { q: it.name_en, team_id: it.team?.id, limit: 100 } });
+  const fresh = (data?.items || []).find(x => x.id === id); if (!fresh) return;
+  Object.assign(it, fresh);
+  const el = $('ph-' + id); if (el) el.outerHTML = phCard(it);
+}
+async function phSaveLink(id, k) {
+  const v = ($(`phi-${id}-${k}`).value || '').trim();
+  if (!v) return phStatus(id, k, 'الصق لينك الأول، أو استخدم 🗑️ لو عايز تفضّيها.', 'err');
+  if (!/^https:\/\/\S+$/.test(v)) return phStatus(id, k, PH_ERR.bad_link, 'err');
+  phStatus(id, k, 'بنحفظ…');
+  if (await phSet(id, k, v)) phStatus(id, k, '✅ اتحفظ', 'ok');
+}
+async function phClear(id, k) {
+  if (!confirm('تفضّي الخانة دي؟ لو فيها ملف في الستورج هيتمسح.')) return;
+  phStatus(id, k, 'بنفضّي…');
+  if (await phSet(id, k, null)) phStatus(id, k, '✅ اتفضّت', 'ok');
+}
+function phPick(id, k) {
+  PH.target = { id, k };
+  $('phFile').accept = k === 'video' ? 'video/mp4' : 'image/jpeg,image/png,image/webp';
+  $('phFile').value = ''; $('phFile').click();
+}
+// صورة شفافة (png/webp) تفضل شفافة → webp، غير كده jpeg
+function phShrink(file, maxSide) {
+  return new Promise((ok, bad) => {
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const s = Math.min(1, maxSide / Math.max(img.naturalWidth, img.naturalHeight));
+      const c = document.createElement('canvas');
+      c.width = Math.round(img.naturalWidth * s); c.height = Math.round(img.naturalHeight * s);
+      c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+      URL.revokeObjectURL(url);
+      const alpha = /png|webp/.test(file.type), type = alpha ? 'image/webp' : 'image/jpeg';
+      c.toBlob(b => b ? ok({ blob: b, type, ext: alpha ? 'webp' : 'jpg' }) : bad(new Error('image')), type, 0.86);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); bad(new Error('مقدرناش نقرا الصورة')); };
+    img.src = url;
+  });
+}
+$('phFile').onchange = async () => {
+  const f = $('phFile').files[0], t = PH.target; if (!f || !t) return;
+  const { id, k } = t; PH.target = null;
+  let body = f, type = f.type, ext = 'mp4';
+  try {
+    if (k === 'video') {
+      if (f.type !== 'video/mp4') return phStatus(id, k, 'الفيديو لازم يبقى mp4.', 'err');
+      if (f.size > 20 * 1024 * 1024) return phStatus(id, k, 'الفيديو أكبر من 20 ميجا.', 'err');
+    } else {
+      phStatus(id, k, 'بنصغّر الصورة…');
+      const r = await phShrink(f, PH_KINDS.find(x => x[0] === k)[2]); body = r.blob; type = r.type; ext = r.ext;
+    }
+  } catch (e) { return phStatus(id, k, e.message || 'مقدرناش نقرا الملف', 'err'); }
+  const path = `football/players/${id}/${k}_${Date.now()}.${ext}`;   // اسم جديد كل مرة → الموبايلات تنزّل الجديد
+  phStatus(id, k, `بنرفع… (${Math.round(body.size / 1024)} KB)`);
+  const up = await sb.storage.from('Assets').upload(path, body, { contentType: type, upsert: false, cacheControl: '31536000' });
+  if (up.error) return phStatus(id, k, 'فشل الرفع: ' + up.error.message, 'err');
+  if (await phSet(id, k, path)) phStatus(id, k, '✅ اترفع واتحفظ', 'ok');
+  else await sb.storage.from('Assets').remove([path]);
 };
 
 /* ─── الجولات ─── */
