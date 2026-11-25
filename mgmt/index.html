@@ -370,6 +370,23 @@
   .tl-side button{border:1px dashed var(--gold);color:var(--gold);background:transparent;border-radius:8px;font-size:11px;font-weight:800;padding:3px 6px;cursor:pointer;flex:none}
   .tl-mid{flex:none;text-align:center;font-size:12px;color:var(--muted);font-weight:800;min-width:64px}
   .tl-mid b{display:block;color:var(--text);font-size:15px}
+  /* ✅ لعيبة الجولة */
+  .pk-mode{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-top:8px;font-size:13px;line-height:1.6}
+  .pk-mode.on{border-color:var(--gold)} .pk-mode b{display:block;font-size:14px}
+  .pk-mode button{flex:none;padding:8px 12px;border-radius:10px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:800;font-size:12.5px;cursor:pointer}
+  .pk-team{display:flex;align-items:center;gap:8px;margin:14px 2px 4px;font-weight:900;font-size:14px}
+  .pk-team small{color:var(--muted);font-weight:700;font-size:12px}
+  .pk-team button{margin-inline-start:auto;padding:5px 9px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-weight:800;font-size:11.5px;cursor:pointer}
+  .pk-row{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin-top:6px;cursor:pointer;user-select:none}
+  .pk-row.on{border-color:rgba(212,175,55,.7);background:rgba(212,175,55,.08)}
+  .pk-row .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
+  .pk-row.on .ck{background:var(--gold);border-color:var(--gold)}
+  .pk-row .av{width:34px;height:34px;border-radius:50%;background:var(--card2);flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px}
+  .pk-row .av img{width:100%;height:100%;object-fit:cover}
+  .pk-row .nm{flex:1;min-width:0} .pk-row .nm b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .pk-row .nm small{color:var(--muted);font-size:11.5px}
+  .pk-row .ps{flex:none;font-size:11px;font-weight:900;padding:3px 7px;border-radius:7px;background:var(--card2);direction:ltr}
+  .pk-row .mv{flex:none;font-size:12px;font-weight:800;color:var(--muted);direction:ltr;min-width:48px;text-align:end}
 </style>
 </head>
 <body>
@@ -510,6 +527,30 @@
     <button class="btn hidden" id="phMore" style="width:100%;margin-top:10px" onclick="loadPPhotoList(true)">اعرض أكتر</button>
     <p class="hint">كل خانة: الصق لينك يبدأ بـ https ودوس "حفظ"، أو دوس "📁 رفع" ترفع ملف على الستورج. الصور بتتصغّر قبل الرفع. 🗑️ بتفضّي الخانة. لو اللعيب ملوش صورة، الأبلكيشن بيعرض التيشيرت.</p>
     <input type="file" id="phFile" class="hidden">
+  </section>
+
+  <!-- ═══ ✅ لعيبة الجولة (perm fantasy) ═══ -->
+  <section id="t-ppicks" class="hidden">
+    <div class="aw-head">
+      <select id="pkRound" class="aw-sel" style="min-width:0;flex:1"></select>
+      <select id="pkType" class="aw-sel" style="min-width:0;flex:1"><option value="LOCAL">🇪🇬 محلي</option><option value="WORLD">🌍 عالمي</option></select>
+    </div>
+    <div id="pkMode"></div>
+    <div class="aw-head">
+      <select id="pkCountry" class="aw-sel" style="min-width:0;flex:1"></select>
+      <select id="pkTeam" class="aw-sel" style="min-width:0;flex:1"></select>
+    </div>
+    <div class="aw-head">
+      <select id="pkPos" class="aw-sel" style="min-width:0;flex:1">
+        <option value="">كل المراكز</option><option value="GK">حراس</option><option value="DEF">دفاع (كله)</option><option value="CB">قلب دفاع</option><option value="RB">باك يمين</option><option value="LB">باك شمال</option>
+        <option value="MID">وسط (كله)</option><option value="DM">ارتكاز</option><option value="CM">وسط</option><option value="AM">وسط مهاجم</option><option value="RW">جناح يمين</option><option value="LW">جناح شمال</option><option value="RM">وسط يمين</option><option value="LM">وسط شمال</option>
+        <option value="FWD">هجوم (كله)</option><option value="CF">رأس حربة</option><option value="SS">مهاجم ثاني</option></select>
+      <select id="pkPicked" class="aw-sel" style="min-width:0;flex:1"><option value="">الكل</option><option value="1">المتعلّم عليهم بس</option><option value="0">اللي مش متعلّم عليهم</option></select>
+    </div>
+    <div class="aw-head"><input id="pkQ" class="in" placeholder="🔍 دور بالاسم" style="padding:11px 12px"></div>
+    <p class="aw-sum" id="pkSum"></p>
+    <div id="pkList"></div>
+    <p class="hint">دوس على اللعيب تعلّم عليه أو تشيل العلامة. "علّم الكل" و"شيل الكل" جنب كل نادي بيشتغلوا على اللي ظاهر بالفلتر. العلامات بتتحفظ على طول، بس اليوزرز مش بيشوفوا الفرق غير لما تشغّل "المتعلّم عليهم بس". التشكيلات المحفوظة قبل كده بتفضل زي ما هي.</p>
   </section>
 
   <!-- ═══ 🛡️ شعارات الفرق (perm fantasy) ═══ -->
@@ -1036,14 +1077,14 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
     { k: 'comp', ar: '🏆 المسابقات', ok: () => has('dashboard'), subs: [['teams', 'الفرق']] }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
-    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['pphotos', 'صور اللعيبة'], ['tlogos', 'شعارات الفرق'], ['awards', 'صور الكسبانين']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['ppicks', 'لعيبة الجولة'], ['pphotos', 'صور اللعيبة'], ['tlogos', 'شعارات الفرق'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
     { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','pphotos','tlogos','awards','push','support','reports','ads','adslots','official','admins'];
+const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','ppicks','pphotos','tlogos','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -1086,6 +1127,7 @@ function go(t) {
   if (t === 'results') loadResults();
   if (t === 'fnum') loadFn();
   if (t === 'prices') loadPricesTab();
+  if (t === 'ppicks') loadPPicks();
   if (t === 'pphotos') loadPPhotos();
   if (t === 'tlogos') loadTLogos();
   if (t === 'official') loadOfficial();
@@ -1310,6 +1352,113 @@ $('awFile').onchange = async () => {
   if (error) { $('awSum').textContent = 'اترفعت بس ما اتربطتش: ' + errText(error); return; }
   awTarget = null; await loadAwardPeriods(); refreshAwardBadge();
 };
+
+/* ─── ✅ لعيبة الجولة: الأدمن يختار مين يظهر لليوزرز من لعيبة أندية الجولة ─── */
+const PK = { evs: null, ev: null, data: null, timer: null, busy: false };
+const PK_POS = { GK: 'حارس', CB: 'قلب دفاع', RB: 'باك يمين', LB: 'باك شمال', DM: 'ارتكاز', CM: 'وسط', AM: 'وسط مهاجم', RM: 'وسط يمين', LM: 'وسط شمال', RW: 'جناح يمين', LW: 'جناح شمال', SS: 'مهاجم ثاني', CF: 'رأس حربة', DEF: 'دفاع', MID: 'وسط', FWD: 'هجوم' };
+const PK_ERR = { event_closed: 'الجولة دي خلصت، مينفعش تتعدّل', forbidden: 'مش معاك صلاحية', event_not_found: 'الجولة مش موجودة' };
+const pkErr = e => { const m = e?.message || ''; return PK_ERR[Object.keys(PK_ERR).find(x => m.includes(x))] || errText(e); };
+const pkMv = v => !v ? '—' : v >= 1e6 ? '€' + (+(v / 1e6).toFixed(1)) + 'M' : '€' + Math.round(v / 1e3) + 'K';
+async function loadPPicks() {
+  if (!PK.evs) {
+    const { data, error } = await sb.rpc('mgmt_pool_events');
+    if (error) { $('pkList').innerHTML = `<p class="hint">${pkErr(error)}</p>`; return; }
+    PK.evs = data || [];
+    const rounds = [...new Set(PK.evs.map(e => e.round_no))].sort((a, b) => b - a);
+    const open = PK.evs.find(e => e.status !== 'FINISHED');
+    $('pkRound').innerHTML = rounds.map(n => {
+      const st = PK.evs.filter(e => e.round_no === n).every(e => e.status === 'FINISHED') ? ' (خلصت)' : ' (مفتوحة)';
+      return `<option value="${n}" ${open && open.round_no === n ? 'selected' : ''}>الجولة ${n}${st}</option>`; }).join('');
+    $('pkType').value = store.get('pk_type', 'WORLD');
+    $('pkRound').onchange = () => pkPickEvent();
+    $('pkType').onchange = () => { store.set('pk_type', $('pkType').value); pkPickEvent(); };
+    $('pkCountry').onchange = () => { pkFillTeams(); loadPPickList(); };
+    ['pkTeam', 'pkPos', 'pkPicked'].forEach(id => $(id).onchange = () => loadPPickList());
+    $('pkQ').oninput = () => { clearTimeout(PK.timer); PK.timer = setTimeout(() => loadPPickList(), 400); };
+  }
+  pkPickEvent();
+}
+function pkPickEvent() {
+  const n = +$('pkRound').value, t = $('pkType').value;
+  PK.ev = PK.evs.find(e => e.round_no === n && e.type === t) || null;
+  $('pkCountry').innerHTML = '<option value="">كل البلاد</option>'; $('pkTeam').innerHTML = '<option value="">كل الأندية</option>';
+  PK.data = null;
+  if (!PK.ev) { $('pkMode').innerHTML = ''; $('pkSum').textContent = ''; $('pkList').innerHTML = '<p class="hint">مفيش جولة ' + (t === 'LOCAL' ? 'محلي' : 'عالمي') + ' بالرقم ده.</p>'; return; }
+  loadPPickList(true);
+}
+function pkFillTeams() {
+  const c = $('pkCountry').value, keep = $('pkTeam').value;
+  const ts = (PK.data?.teams || []).filter(x => !c || x.country === c);
+  $('pkTeam').innerHTML = '<option value="">كل الأندية</option>' + ts.map(x => `<option value="${x.id}" ${x.id === keep ? 'selected' : ''}>${esc(x.name_ar || x.name_en)} (${x.picked}/${x.players})</option>`).join('');
+}
+async function loadPPickList(first) {
+  if (!PK.ev) return;
+  if (first) $('pkList').innerHTML = '<p class="hint">بنحمّل…</p>';
+  const p = { event_id: PK.ev.id, country: $('pkCountry').value, team_id: $('pkTeam').value, position: $('pkPos').value, q: $('pkQ').value, picked: $('pkPicked').value };
+  const { data, error } = await sb.rpc('mgmt_pool_players', { p });
+  if (error) { $('pkList').innerHTML = `<p class="hint">${pkErr(error)}</p>`; return; }
+  PK.data = data;
+  if (first) {
+    const cs = [...new Set((data.teams || []).map(x => x.country))];
+    $('pkCountry').innerHTML = '<option value="">كل البلاد</option>' + cs.map(c => `<option>${esc(c)}</option>`).join('');
+  }
+  pkFillTeams(); pkRender();
+}
+function pkRender() {
+  const d = PK.data, ev = d.event, on = ev.pick_on, done = ev.status === 'FINISHED';
+  $('pkMode').innerHTML = `<div class="pk-mode ${on ? 'on' : ''}"><div style="flex:1">
+      <b>${on ? '✅ اليوزرز بيشوفوا المتعلّم عليهم بس' : '🌐 اليوزرز بيشوفوا كل لعيبة الأندية'}</b>
+      ${on ? `ظاهر دلوقتي ${d.picked_total} من ${d.pool_total} لعيب.` : `العلامات (${d.picked_total}) محفوظة بس مش شغالة لحد ما تشغّلها.`}</div>
+      ${done ? '' : `<button onclick="pkMode(${!on})">${on ? 'رجّع الكل' : 'شغّل المتعلّم عليهم بس'}</button>`}</div>`;
+  $('pkSum').textContent = `${d.total} لعيب بالفلتر ده · متعلّم على ${d.picked_total} من ${d.pool_total}`;
+  const groups = {};
+  (d.items || []).forEach(it => (groups[it.team_id] = groups[it.team_id] || []).push(it));
+  $('pkList').innerHTML = Object.values(groups).map(g => {
+    const k = g.filter(x => x.picked).length;
+    return `<div class="pk-team">${esc(g[0].team_ar || g[0].team_en)} <small>${k}/${g.length}</small>
+      ${done ? '' : `<button onclick="pkTeamSet('${g[0].team_id}',true)">علّم الكل</button><button style="margin-inline-start:0" onclick="pkTeamSet('${g[0].team_id}',false)">شيل الكل</button>`}</div>`
+      + g.map(pkRow).join('');
+  }).join('') || '<p class="hint">مفيش لعيبة بالفلتر ده.</p>';
+}
+function pkRow(it) {
+  const sq = it.real_squads ? ` · في ${it.real_squads} تشكيلة` : '';
+  return `<div class="pk-row ${it.picked ? 'on' : ''}" id="pk-${it.id}" onclick="pkToggle('${it.id}')">
+    <span class="ck">${it.picked ? '✓' : ''}</span>
+    <span class="av">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy">` : '👤'}</span>
+    <span class="nm"><b>${esc(it.name_ar || it.name_en)}</b><small><bdi dir="ltr">${esc(it.name_en)}</bdi>${sq}</small></span>
+    <span class="ps" title="${esc(PK_POS[it.exact_position] || '')}">${esc(it.exact_position || it.position)}</span>
+    <span class="mv">${pkMv(it.mv)}</span></div>`;
+}
+async function pkSet(ids, on) {
+  if (PK.busy || !ids.length) return; PK.busy = true;
+  const { error } = await sb.rpc('mgmt_pool_pick_set', { p: { event_id: PK.ev.id, player_ids: ids, on } });
+  PK.busy = false;
+  if (error) return alert(pkErr(error));
+  await loadPPickList();
+}
+function pkToggle(id) {
+  if (PK.data.event.status === 'FINISHED') return;
+  const it = PK.data.items.find(x => x.id === id); if (!it) return;
+  if (it.picked && PK.data.event.pick_on && it.real_squads && !confirm(`اللعيب ده في ${it.real_squads} تشكيلة حقيقية. هيختفي من الاختيار، بس تشكيلاتهم هتفضل زي ما هي. تكمّل؟`)) return;
+  pkSet([id], !it.picked);
+}
+function pkTeamSet(team, on) {
+  const ids = PK.data.items.filter(x => x.team_id === team && x.picked !== on).map(x => x.id);
+  if (!ids.length) return;
+  const hit = on ? 0 : PK.data.items.filter(x => ids.includes(x.id)).reduce((a, x) => a + x.real_squads, 0);
+  if (!on && PK.data.event.pick_on && hit && !confirm(`فيه لعيبة من دول في تشكيلات حقيقية (${hit}). هيختفوا من الاختيار، بس التشكيلات هتفضل زي ما هي. تكمّل؟`)) return;
+  pkSet(ids, on);
+}
+async function pkMode(on) {
+  const d = PK.data;
+  if (on && !confirm(d.picked_total ? `اليوزرز هيشوفوا ${d.picked_total} لعيب بس في الجولة دي. تشغّل؟` : 'مفيش ولا لعيب متعلّم عليه، يعني اليوزرز مش هيلاقوا حد. متأكد؟')) return;
+  if (!on && !confirm('ترجّع كل لعيبة الأندية تظهر لليوزرز؟ العلامات هتفضل محفوظة.')) return;
+  const { data, error } = await sb.rpc('mgmt_pool_mode_set', { p_event_id: PK.ev.id, p_on: on });
+  if (error) return alert(pkErr(error));
+  PK.ev.pick_on = on;
+  if (on && data?.real_squads_hit) alert(`تنبيه: ${data.real_squads_hit} تشكيلة حقيقية فيها لعيب مش متعلّم عليه. التشكيلات دي هتفضل زي ما هي.`);
+  await loadPPickList();
+}
 
 /* ─── 🧑 صور اللعيبة: headshot / صورة كاملة / فيديو = لينك https أو ملف في Assets ─── */
 const PH = { filters: null, items: [], off: 0, target: null, timer: null };
