@@ -370,6 +370,19 @@
   .tl-side button{border:1px dashed var(--gold);color:var(--gold);background:transparent;border-radius:8px;font-size:11px;font-weight:800;padding:3px 6px;cursor:pointer;flex:none}
   .tl-mid{flex:none;text-align:center;font-size:12px;color:var(--muted);font-weight:800;min-width:64px}
   .tl-mid b{display:block;color:var(--text);font-size:15px}
+  /* 🏆 كاس بادجر */
+  .bc-card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:12px;margin-top:10px}
+  .bc-card.run{border-color:var(--gold)}
+  .bc-card h3{margin:0;font-size:15px;display:flex;align-items:center;gap:8px}
+  .bc-card h3 small{color:var(--muted);font-weight:700;font-size:12px}
+  .bc-card h3 button{margin-inline-start:auto;padding:6px 10px;border-radius:9px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-weight:800;font-size:12px;cursor:pointer}
+  .bc-stages{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-top:10px}
+  .bc-st{background:var(--card2);border:1px solid var(--line);border-radius:10px;padding:7px 6px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.5}
+  .bc-st b{display:block;color:var(--text);font-size:13px}
+  .bc-st.now{border-color:var(--gold)} .bc-st.done b{color:var(--green)}
+  .bc-form label{display:block;font-size:12px;color:var(--muted);margin:10px 2px 4px;font-weight:800}
+  .bc-form .in,.bc-form select{width:100%;box-sizing:border-box}
+  .bc-btn{padding:10px 14px;border-radius:12px;border:1px solid var(--gold);background:transparent;color:var(--gold);font-weight:900;font-size:13px;cursor:pointer}
   /* ✅ لعيبة الجولة */
   .pk-mode{display:flex;align-items:center;gap:10px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:11px 12px;margin-top:8px;font-size:13px;line-height:1.6}
   .pk-mode.on{border-color:var(--gold)} .pk-mode b{display:block;font-size:14px}
@@ -529,6 +542,17 @@
     <button class="btn hidden" id="phMore" style="width:100%;margin-top:10px" onclick="loadPPhotoList(true)">اعرض أكتر</button>
     <p class="hint">كل خانة: الصق لينك يبدأ بـ https ودوس "حفظ"، أو دوس "📁 رفع" ترفع ملف على الستورج. الصور بتتصغّر قبل الرفع. 🗑️ بتفضّي الخانة. لو اللعيب ملوش صورة، الأبلكيشن بيعرض التيشيرت.</p>
     <input type="file" id="phFile" class="hidden">
+  </section>
+
+  <!-- ═══ 🏆 كاس بادجر (perm fantasy) ═══ -->
+  <section id="t-bcup" class="hidden">
+    <div class="aw-head" style="gap:8px">
+      <button class="bc-btn" onclick="bcEdit(null)">➕ كاس جديد</button>
+      <button class="bc-btn" style="border-color:var(--line);color:var(--text)" onclick="bcTick()">🔄 شغّل دلوقتي</button>
+    </div>
+    <div id="bcForm"></div>
+    <div id="bcList"></div>
+    <p class="hint">كاس بادجر = خروج المغلوب بالمجموعات على تشكيلة الدرافت. القرعة بتتعمل لوحدها أول ما ديدلاين أول جولة يعدّي، وبعد كل جولة الأول في كل مجموعة يكمل والقرعة الجاية تتعمل لوحدها (كل 10 دقايق). "شغّل دلوقتي" بيعمل نفس الحاجة فورًا. اختار جولات من نفس الساحة والدرافت مفتوح فيها. الجولات الجاية ممكن تضيفها بعدين، بس الجولة اللي اتعملها قرعة ماينفعش تتغيّر.</p>
   </section>
 
   <!-- ═══ ✅ لعيبة الجولة (perm fantasy) ═══ -->
@@ -1079,14 +1103,14 @@ const NAV = {
     { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('dashboard') || has('fantasy'), subs: [['fnum', 'الأرقام']] },
     { k: 'comp', ar: '🏆 المسابقات', ok: () => has('dashboard'), subs: [['teams', 'الفرق']] }, { k: 'feed', ar: '📰 الفيد', soon: true } ],
   ctl: [
-    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['ppicks', 'لعيبة الجولة'], ['pphotos', 'صور اللعيبة'], ['tlogos', 'شعارات الفرق'], ['awards', 'صور الكسبانين']] },
+    { k: 'fantasy', ar: '⚽ الفانتازي', ok: () => has('fantasy'), subs: [['results', 'النتايج'], ['rounds', 'الجولات'], ['prices', 'الأسعار'], ['ppicks', 'لعيبة الجولة'], ['bcup', 'كاس بادجر'], ['pphotos', 'صور اللعيبة'], ['tlogos', 'شعارات الفرق'], ['awards', 'صور الكسبانين']] },
     { k: 'push', ar: '🔔 الإشعارات', ok: () => has('notifications'), subs: [['push', 'ابعت إشعار']] },
     { k: 'support', ar: '🎧 الدعم', ok: () => has('support'), subs: [['support', 'الرسايل']] },
     { k: 'reports', ar: '🚩 البلاغات', ok: () => has('content'), subs: [['reports', 'محتوى اليوزرز']] },
     { k: 'ads', ar: '📣 الإعلانات', ok: () => has('ads'), subs: [['ads', 'الحملات'], ['adslots', 'الأماكن']] },
     { k: 'official', ar: '🦡 حساب BDGR', ok: () => has('official'), subs: [['official', 'البروفايل']] },
     { k: 'admins', ar: '👥 الأدمنز', ok: () => me.role === 'SUPER_ADMIN', subs: [['admins', 'الأدمنز والصلاحيات']] } ] };
-const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','ppicks','pphotos','tlogos','awards','push','support','reports','ads','adslots','official','admins'];
+const SECTIONS = ['teams','overview','summary','details','fnum','results','rounds','prices','ppicks','bcup','pphotos','tlogos','awards','push','support','reports','ads','adslots','official','admins'];
 let space = store.get('mgmt_space', 'num'), prod = null, riskCount = 0, awMissing = 0;
 const has = p => (me?.permissions || []).includes(p) || me?.role === 'SUPER_ADMIN';
 const canCtl = () => navItems('ctl').length > 0;
@@ -1130,6 +1154,7 @@ function go(t) {
   if (t === 'fnum') loadFn();
   if (t === 'prices') loadPricesTab();
   if (t === 'ppicks') loadPPicks();
+  if (t === 'bcup') loadBCup();
   if (t === 'pphotos') loadPPhotos();
   if (t === 'tlogos') loadTLogos();
   if (t === 'official') loadOfficial();
@@ -1495,6 +1520,64 @@ async function pkMode(on) {
   PK.ev.pick_on = on;
   if (on && data?.real_squads_hit) alert(`تنبيه: ${data.real_squads_hit} تشكيلة حقيقية فيها لعيب مش متعلّم عليه. التشكيلات دي هتفضل زي ما هي.`);
   await loadPPickList();
+}
+
+/* ─── 🏆 كاس بادجر: خروج المغلوب بالمجموعات على الدرافت ─── */
+const BC = { data: null };
+const BC_ERR = { not_allowed: 'مش معاك صلاحية', bad_arena: 'اختار الساحة', name_required: 'اكتب الاسم عربي وإنجليزي', first_round_required: 'لازم تختار الجولة الأولى',
+  round_not_in_arena: 'فيه جولة مش من نفس الساحة', duplicate_round: 'نفس الجولة متكررة', stage_already_drawn: 'الجولة دي اتعملها قرعة خلاص، مينفعش تتغيّر', cup_started: 'الكاس بدأ، مينفعش تغيّر الساحة' };
+const bcErr = e => { const m = e?.message || ''; return BC_ERR[Object.keys(BC_ERR).find(x => m.includes(x))] || errText(e); };
+const bcDate = d => d ? new Date(d).toLocaleString('ar-EG', { timeZone: 'Africa/Cairo', weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' }) : '';
+async function loadBCup() {
+  $('bcList').innerHTML = '<p class="hint">بيحمّل…</p>';
+  const { data, error } = await sb.rpc('mgmt_cup_list');
+  if (error) { $('bcList').innerHTML = `<p class="hint">${bcErr(error)}</p>`; return; }
+  BC.data = data;
+  const evName = id => { const e = data.events.find(x => x.id === id); return e ? esc(e.name_ar || e.name_en) : '—'; };
+  $('bcList').innerHTML = data.cups.length ? data.cups.map(c => `
+    <div class="bc-card ${c.status === 'running' ? 'run' : ''}">
+      <h3>🏆 ${esc(c.name_ar)} <small>${c.arena === 'LOCAL' ? '🇪🇬 محلي' : '🌍 عالمي'} · ${c.status === 'scheduled' ? 'مستني القرعة' : c.status === 'running' ? 'شغّال' : 'خلص'}</small>
+        <button onclick="bcEdit('${c.id}')">✏️ تعديل</button></h3>
+      ${c.prize_ar ? `<p class="hint" style="margin:6px 0 0">🎁 ${esc(c.prize_ar)}</p>` : ''}
+      <div class="bc-stages">${c.stages.map((st, i) => `
+        <div class="bc-st ${c.stage === st.stage && c.status === 'running' ? 'now' : ''} ${st.settled ? 'done' : ''}">
+          <b>${st.stage === 4 ? 'النهائي' : 'دور ' + st.stage}</b>${evName(c.events[i])}<br>
+          ${st.players ? `${st.players} لاعيب · ${st.groups} مجموعة${st.settled ? ' ✓' : ''}` : '—'}</div>`).join('')}</div>
+      ${c.champion ? `<p style="margin:10px 2px 0;font-weight:900">🏆 البطل: ${esc(c.champion.name || '')} <small style="color:var(--muted)">@${esc(c.champion.username || '')}</small></p>` : ''}
+    </div>`).join('') : '<p class="hint">مفيش كاسات لسه.</p>';
+}
+function bcEdit(id) {
+  const c = id ? BC.data.cups.find(x => x.id === id) : { name_ar: 'كاس بادجر', name_en: 'Badger Cup', arena: 'LOCAL', events: [null, null, null, null], prize_ar: '', prize_en: '', stage: 0 };
+  const opts = (arena, sel, locked) => '<option value="">—</option>' + BC.data.events.filter(e => e.arena === arena).map(e =>
+    `<option value="${e.id}" ${e.id === sel ? 'selected' : ''}>${esc(e.name_ar || e.name_en)} · ${bcDate(e.deadline_at)}${e.draft_on ? '' : ' (الدرافت مقفول)'}${e.status === 'FINISHED' ? ' (خلصت)' : ''}</option>`).join('');
+  const draw = () => { const a = $('bcArena').value; [0, 1, 2, 3].forEach(i => { const el = $('bcEv' + i); const v = el.value || c.events[i]; el.innerHTML = opts(a, v); el.disabled = !!id && i < c.stage; }); };
+  $('bcForm').innerHTML = `<div class="bc-card bc-form">
+    <h3>${id ? '✏️ تعديل الكاس' : '➕ كاس جديد'}</h3>
+    <label>الاسم عربي</label><input id="bcNameAr" class="in" value="${esc(c.name_ar)}">
+    <label>الاسم إنجليزي</label><input id="bcNameEn" class="in" value="${esc(c.name_en)}" style="direction:ltr">
+    <label>الساحة</label><select id="bcArena" class="aw-sel" ${id && c.stage > 0 ? 'disabled' : ''}><option value="LOCAL">🇪🇬 محلي</option><option value="WORLD">🌍 عالمي</option></select>
+    ${[0, 1, 2, 3].map(i => `<label>${i === 3 ? 'النهائي' : 'الدور ' + (i + 1)}</label><select id="bcEv${i}" class="aw-sel"></select>`).join('')}
+    <label>الجايزة (عربي)</label><input id="bcPrizeAr" class="in" value="${esc(c.prize_ar || '')}" placeholder="مثلًا: 2000 جنيه">
+    <label>الجايزة (إنجليزي)</label><input id="bcPrizeEn" class="in" value="${esc(c.prize_en || '')}" style="direction:ltr" placeholder="e.g. 2,000 EGP">
+    <div class="aw-head" style="gap:8px;margin-top:12px"><button class="bc-btn" onclick="bcSave(${id ? `'${id}'` : 'null'})">حفظ</button>
+      <button class="bc-btn" style="border-color:var(--line);color:var(--text)" onclick="$('bcForm').innerHTML=''">إلغاء</button></div>
+  </div>`;
+  $('bcArena').value = c.arena; $('bcArena').onchange = draw; draw();
+  $('bcForm').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+async function bcSave(id) {
+  const p = { id, name_ar: $('bcNameAr').value, name_en: $('bcNameEn').value, arena: $('bcArena').value,
+    events: [0, 1, 2, 3].map(i => $('bcEv' + i).value || null), prize_ar: $('bcPrizeAr').value, prize_en: $('bcPrizeEn').value };
+  const { error } = await sb.rpc('mgmt_cup_save', { p });
+  if (error) return alert(bcErr(error));
+  $('bcForm').innerHTML = '';
+  loadBCup();
+}
+async function bcTick() {
+  const { data, error } = await sb.rpc('mgmt_cup_tick');
+  if (error) return alert(bcErr(error));
+  alert(data && data.length ? data.map(x => x.draw ? `اتعملت قرعة الدور ${x.draw}: ${x.players} لاعيب` : `اتقفل الدور ${x.settle}: ${x.groups} مجموعة، والقرعة الجاية اتعملت`).join('\n') : 'مفيش حاجة جديدة دلوقتي.');
+  loadBCup();
 }
 
 /* ─── 🧑 صور اللعيبة: headshot / صورة كاملة / فيديو = لينك https أو ملف في Assets ─── */
