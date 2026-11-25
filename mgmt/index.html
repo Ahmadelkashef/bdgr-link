@@ -1416,7 +1416,14 @@ function pkRender() {
       <b>${ev.draft_on ? '🎯 الدرافت مفتوح في الجولة دي' : '🎯 الدرافت مقفول في الجولة دي'}</b>
       الدرافت تشكيلة تانية جنب النورمال (النورمال مش بيتلمس): 7 لعيبة (حارس، ظهير، قلب دفاع، نص ملعب، جناح يمين، جناح شمال، مهاجم)، من غير كابتن، و"مفاجأة" = النقط × 2، وأقصى 4 من نفس النادي.
       ${ev.draft_squads ? `<br><small>${ev.draft_squads} تشكيلة درافت محفوظة.</small>` : ''}</div>
-      ${done ? '' : `<button onclick="pkDraft(${!ev.draft_on})">${ev.draft_on ? 'اقفل الدرافت' : 'افتح الدرافت'}</button>`}</div>`;
+      ${done ? '' : `<button onclick="pkDraft(${!ev.draft_on})">${ev.draft_on ? 'اقفل الدرافت' : 'افتح الدرافت'}</button>`}</div>`
+    + (ev.draft_on ? `<div class="pk-mode ${(ev.draft_predict || []).length ? 'on' : ''}" style="display:block">
+      <b>⚖️ ماتشات توقّع النتيجة (لفك التعادل في الدرافت بس، من غير نقط)</b><br>
+      <small>اختار ماتش أو اتنين. اليوزر بيتوقع نتيجتهم بعد التشكيلة. التعادل: نتايج مظبوطة أكتر ← فايز/تعادل صح أكتر ← اللي حفظ الأول.</small>
+      <div style="margin-top:6px">${(ev.matches || []).map(m => `<label style="display:block;margin:4px 0">
+        <input type="checkbox" class="pkPred" value="${m.id}" ${(ev.draft_predict || []).includes(m.id) ? 'checked' : ''} ${done ? 'disabled' : ''}>
+        ${esc(m.home || '?')} × ${esc(m.away || '?')} <small>${new Date(m.at).toLocaleString('ar-EG', { weekday: 'short', day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' })}</small></label>`).join('')}</div>
+      ${done ? '' : `<button onclick="pkPredSave()">حفظ الماتشات</button>`}</div>` : '');
   $('pkSum').textContent = `${d.total} لعيب بالفلتر ده · متعلّم على ${d.picked_total} من ${d.pool_total}`;
   const groups = {};
   (d.items || []).forEach(it => (groups[it.team_id] = groups[it.team_id] || []).push(it));
@@ -1470,6 +1477,13 @@ async function pkDraft(on) {
   if (!confirm(on ? 'تفتح الدرافت في الجولة دي؟ اليوزرز هيقدروا يعملوا تشكيلة درافت جنب النورمال.' : 'تقفل الدرافت؟ التشكيلات المحفوظة هتفضل، بس محدش هيقدر يحفظ درافت جديد.')) return;
   const { error } = await sb.rpc('mgmt_event_draft_set', { p_event_id: PK.ev.id, p_on: on });
   if (error) return alert(pkErr(error));
+  await loadPPickList();
+}
+async function pkPredSave() {
+  const ids = [...document.querySelectorAll('.pkPred:checked')].map(x => x.value);
+  if (ids.length > 2) return alert('اختار ماتشين بالكتير.');
+  const { error } = await sb.rpc('mgmt_event_draft_predict_set', { p_event_id: PK.ev.id, p_match_ids: ids });
+  if (error) return alert(error.message.includes('deadline_passed') ? 'الديدلاين عدّى، مينفعش تغيّر الماتشات.' : pkErr(error));
   await loadPPickList();
 }
 async function pkMode(on) {
