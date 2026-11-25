@@ -381,6 +381,8 @@
   .pk-row.on{border-color:rgba(212,175,55,.7);background:rgba(212,175,55,.08)}
   .pk-row .ck{width:24px;height:24px;border-radius:7px;border:2px solid var(--line);flex:none;display:flex;align-items:center;justify-content:center;font-weight:900;color:#000}
   .pk-row.on .ck{background:var(--gold);border-color:var(--gold)}
+  .pk-row .sp{flex:none;padding:4px 8px;border-radius:8px;border:1px solid var(--line);background:var(--card2);color:var(--muted);font-weight:800;font-size:11px;cursor:pointer;white-space:nowrap}
+  .pk-row .sp.on{border-color:#ff5c5c;background:rgba(255,60,60,.14);color:#ff8a8a}
   .pk-row .av{width:34px;height:34px;border-radius:50%;background:var(--card2);flex:none;overflow:hidden;display:flex;align-items:center;justify-content:center;font-size:14px}
   .pk-row .av img{width:100%;height:100%;object-fit:cover}
   .pk-row .nm{flex:1;min-width:0} .pk-row .nm b{display:block;font-size:13.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1409,7 +1411,12 @@ function pkRender() {
   $('pkMode').innerHTML = `<div class="pk-mode ${on ? 'on' : ''}"><div style="flex:1">
       <b>${on ? '✅ اليوزرز بيشوفوا المتعلّم عليهم بس' : '🌐 اليوزرز بيشوفوا كل لعيبة الأندية'}</b>
       ${on ? `ظاهر دلوقتي ${d.picked_total} من ${d.pool_total} لعيب.` : `العلامات (${d.picked_total}) محفوظة بس مش شغالة لحد ما تشغّلها.`}</div>
-      ${done ? '' : `<button onclick="pkMode(${!on})">${on ? 'رجّع الكل' : 'شغّل المتعلّم عليهم بس'}</button>`}</div>`;
+      ${done ? '' : `<button onclick="pkMode(${!on})">${on ? 'رجّع الكل' : 'شغّل المتعلّم عليهم بس'}</button>`}</div>`
+    + `<div class="pk-mode ${ev.mode === 'draft7' ? 'on' : ''}"><div style="flex:1">
+      <b>${ev.mode === 'draft7' ? '🎯 نظام الجولة: درافت 7' : '⚽ نظام الجولة: 11 لاعب (العادي)'}</b>
+      ${ev.mode === 'draft7' ? 'حارس · ظهير · قلب دفاع · نص ملعب · جناح يمين · جناح شمال · مهاجم. من غير كابتن، و"مفاجأة" = النقط × 2. أقصى 4 من نفس النادي.'
+        : 'التشكيلة العادية بالكابتن.'}${ev.squads ? `<br><small>فيه ${ev.squads} تشكيلة محفوظة، فالنظام مش هيتغير غير لما تتمسح.</small>` : ''}</div>
+      ${done || ev.squads ? '' : `<button onclick="pkDraft('${ev.mode === 'draft7' ? 'classic' : 'draft7'}')">${ev.mode === 'draft7' ? 'رجّعها عادي' : 'حوّلها درافت 7'}</button>`}</div>`;
   $('pkSum').textContent = `${d.total} لعيب بالفلتر ده · متعلّم على ${d.picked_total} من ${d.pool_total}`;
   const groups = {};
   (d.items || []).forEach(it => (groups[it.team_id] = groups[it.team_id] || []).push(it));
@@ -1427,7 +1434,8 @@ function pkRow(it) {
     <span class="av">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy">` : '👤'}</span>
     <span class="nm"><b>${esc(it.name_ar || it.name_en)}</b><small><bdi dir="ltr">${esc(it.name_en)}</bdi>${sq}</small></span>
     <span class="ps" title="${esc(PK_POS[it.exact_position] || '')}">${esc(it.exact_position || it.position)}</span>
-    <span class="mv">${pkMv(it.mv)}</span></div>`;
+    <span class="mv">${pkMv(it.mv)}</span>
+    <button class="sp ${it.surprise ? 'on' : ''}" title="مفاجأة = النقط × 2 في جولات الدرافت" onclick="event.stopPropagation();pkSurprise('${it.id}',${!it.surprise})">${it.surprise ? '🎲 مفاجأة ×2' : '⭐ نجم'}</button></div>`;
 }
 async function pkSet(ids, on) {
   if (PK.busy || !ids.length) return; PK.busy = true;
@@ -1448,6 +1456,21 @@ function pkTeamSet(team, on) {
   const hit = on ? 0 : PK.data.items.filter(x => ids.includes(x.id)).reduce((a, x) => a + x.real_squads, 0);
   if (!on && PK.data.event.pick_on && hit && !confirm(`فيه لعيبة من دول في تشكيلات حقيقية (${hit}). هيختفوا من الاختيار، بس التشكيلات هتفضل زي ما هي. تكمّل؟`)) return;
   pkSet(ids, on);
+}
+// نجم / مفاجأة: علامة على اللعيب نفسه (بتفضل معاه في كل الجولات)، والتشكيلات المحفوظة مش بتتغير
+async function pkSurprise(id, on) {
+  if (PK.busy) return; PK.busy = true;
+  const { error } = await sb.rpc('mgmt_player_surprise_set', { p: { player_ids: [id], on } });
+  PK.busy = false;
+  if (error) return alert(pkErr(error));
+  const it = PK.data.items.find(x => x.id === id); if (it) it.surprise = on;
+  pkRender();
+}
+async function pkDraft(mode) {
+  if (!confirm(mode === 'draft7' ? 'تحوّل الجولة دي لنظام درافت 7 (7 لعيبة، من غير كابتن، المفاجأة × 2، أقصى 4 من نادي)؟' : 'ترجّع الجولة دي للنظام العادي (11 لاعب)؟')) return;
+  const { error } = await sb.rpc('mgmt_event_mode_set', { p_event_id: PK.ev.id, p_mode: mode });
+  if (error) return alert((error.message || '').includes('squads_exist') ? 'فيه تشكيلات محفوظة في الجولة دي، لازم تتمسح الأول.' : pkErr(error));
+  await loadPPickList();
 }
 async function pkMode(on) {
   const d = PK.data;
