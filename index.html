@@ -70,7 +70,20 @@
   // دعوة فريق (المسابقات): ?t=CODE
   var team = (params.get('t') || '').toUpperCase();
   var isTeam = !valid && !isLeague && !isPost && !isUgc && /^[A-Z0-9]{4,12}$/.test(team);
-  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : (isUgc ? 'ugc/' + ugc : (isTeam ? 'team/' + team : ''))));
+  // دعوة فريق دوري بادجر (الفانتازي): ?b=CODE
+  var bl = (params.get('b') || '').toUpperCase();
+  var isBl = !valid && !isLeague && !isPost && !isUgc && !isTeam && /^[A-Z2-9]{6}$/.test(bl);
+  var path = valid ? 'moment/' + id : (isLeague ? 'league/' + code : (isPost ? 'post/' + post : (isUgc ? 'ugc/' + ugc : (isTeam ? 'team/' + team : (isBl ? 'bleague/' + bl : '')))));
+  if (isBl) {
+    document.getElementById('title').textContent = 'اتعزمت على فريق في دوري بادجر 🥇';
+    document.getElementById('sub').innerHTML = 'افتح التطبيق وانضم لفريق صاحبك في الفانتازي.<br>كود الفريق: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + bl + '</b>';
+    document.getElementById('open').textContent = 'انضم للفريق في BDGR';
+    var copyB = document.getElementById('copy');
+    copyB.classList.remove('hidden');
+    copyB.addEventListener('click', function () {
+      try { navigator.clipboard.writeText(bl); copyB.textContent = 'اتنسخ ✓'; } catch (e) {}
+    });
+  }
   if (isTeam) {
     document.getElementById('title').textContent = 'اتعزمت على فريق كورة في BDGR ⚽';
     document.getElementById('sub').innerHTML = 'افتح التطبيق وابعت طلب انضمام للكابتن.<br>كود الفريق: <b dir="ltr" style="color:#fff;letter-spacing:3px">' + team + '</b>';
@@ -112,7 +125,7 @@
 
   var appLink = PKG + '://' + path;
   // أندرويد: لو التطبيق مش موجود بيرجع للصفحة دي نفسها (nf=1 علشان ما يلفش)
-  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : (isUgc ? '&u=' + ugc : (isTeam ? '&t=' + team : '')))));
+  var back = location.origin + location.pathname + '?nf=1' + (valid ? '&m=' + id : (isLeague ? '&l=' + code : (isPost ? '&p=' + post : (isUgc ? '&u=' + ugc : (isTeam ? '&t=' + team : (isBl ? '&b=' + bl : ''))))));
   var intentLink = 'intent://' + path +
     '#Intent;scheme=' + PKG + ';package=' + PKG +
     ';S.browser_fallback_url=' + encodeURIComponent(back) + ';end';
@@ -126,7 +139,7 @@
   });
 
   // نسخة الويب (آيفون / كمبيوتر): نفس اللينك بيفتح البوست / الليج جوه الموقع
-  var webQuery = valid ? '?m=' + id : (isLeague ? '?l=' + code : (isPost ? '?p=' + post : (isUgc ? '?u=' + ugc : (isTeam ? '?t=' + team : ''))));
+  var webQuery = valid ? '?m=' + id : (isLeague ? '?l=' + code : (isPost ? '?p=' + post : (isUgc ? '?u=' + ugc : (isTeam ? '?t=' + team : (isBl ? '?b=' + bl : '')))));
   var webUrl = 'app/' + webQuery;
   document.getElementById('web').href = webUrl;
 
