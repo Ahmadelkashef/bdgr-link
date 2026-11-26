@@ -1480,6 +1480,8 @@ function pkRender() {
       <div style="margin-top:6px">عدد اللعيبة في الجولة دي:
         <select id="pkSize" ${done || ev.draft_squads ? 'disabled' : ''} onchange="pkSizeSave(this.value)">${[4, 5, 6, 7].map(n => opt(n, nd, n + ' لعيبة')).join('')}</select>
         <br><small>${esc(SZ[nd] || '')}${ev.draft_squads ? ' · اتقفل لأن فيه تشكيلات محفوظة' : ''}</small></div>
+      <div style="margin-top:6px"><label><input type="checkbox" ${ev.draft_subs ? 'checked' : ''} ${done ? 'disabled' : ''} onchange="pkSubs(this.checked)">
+        🔁 احتياطي (حارس + لحد 3: مدافع/وسط/مهاجم بالترتيب، اختياري لليوزر)</label></div>
       ${ev.draft_squads ? `<small>${ev.draft_squads} تشكيلة درافت محفوظة.</small>` : ''}</div>
       ${done ? '' : `<button onclick="pkDraft(${!ev.draft_on})">${ev.draft_on ? 'اقفل الدرافت' : 'افتح الدرافت'}</button>`}</div>`
     + (ev.draft_on ? `<div class="pk-mode ${(ev.draft_predict || []).length ? 'on' : ''}" style="display:block">
@@ -1539,6 +1541,11 @@ async function pkSwSave() {
   const { data, error } = await sb.rpc('mgmt_fantasy_switches_set', { p });
   if (error) return alert(pkErr(error));
   PK.sw = data; pkRender(); alert('اتحفظت ✓');
+}
+async function pkSubs(on) {
+  const { error } = await sb.rpc('mgmt_event_draft_subs_set', { p_event_id: PK.ev.id, p_on: on });
+  if (error) return alert(pkErr(error));
+  await loadPPickList();
 }
 async function pkSizeSave(n) {
   const { error } = await sb.rpc('mgmt_event_draft_size_set', { p_event_id: PK.ev.id, p_size: +n });
