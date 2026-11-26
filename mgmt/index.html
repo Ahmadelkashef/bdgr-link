@@ -1380,7 +1380,7 @@ async function loadWinners() {
       <div class="ph">${w.photo_url ? `<img src="${w.photo_url}?v=${encodeURIComponent(w.updated_at || '')}" alt="">` : '📷'}</div>
       <div class="info">
         <b>${w.name || '—'}</b>
-        <small><bdi dir="ltr">@${w.username || ''}</bdi> · ${fmt(w.points)} نقطة · ${w.prize || ''}${w.is_mock ? ' · وهمي' : ''}</small>
+        <small><bdi dir="ltr">@${w.username || ''}</bdi> · ${fmt(w.points)} نقطة · ${w.prize || ''}${w.is_mock ? ' · وهمي' : ''}${w.mode ? (w.mode === 'draft' ? ' · 🎯 درافت' : ' · ⚽ نورمال') : ''}</small>
         <div class="st ${w.photo_url ? 'ok' : 'no'}">${w.photo_url ? '✅ عنده صورة' : '⚠️ مالوش صورة'}</div>
       </div>
       <button class="btn ${w.photo_url ? '' : 'up'}" onclick='pickAwardPhoto(${JSON.stringify({ period, key, rank: w.rank, user_id: w.user_id, username: w.username || "user" })})'>
@@ -1443,6 +1443,7 @@ function pkFillTeams() {
 }
 async function loadPPickList(first) {
   if (!PK.ev) return;
+  if (first || !PK.sw) await pkSwLoad();
   if (first) $('pkList').innerHTML = '<p class="hint">بنحمّل…</p>';
   const p = { event_id: PK.ev.id, country: $('pkCountry').value, team_id: $('pkTeam').value, position: $('pkPos').value, q: $('pkQ').value, picked: $('pkPicked').value };
   const { data, error } = await sb.rpc('mgmt_pool_players', { p });
@@ -1456,14 +1457,30 @@ async function loadPPickList(first) {
 }
 function pkRender() {
   const d = PK.data, ev = d.event, on = ev.pick_on, done = ev.status === 'FINISHED';
-  $('pkMode').innerHTML = `<div class="pk-mode ${on ? 'on' : ''}"><div style="flex:1">
+  const sw = PK.sw || {}, nd = ev.draft_size || 7;
+  const opt = (v, cur, label) => `<option value="${v}" ${v === cur ? 'selected' : ''}>${label}</option>`;
+  const SZ = { 4: 'حارس · مدافع · وسط · مهاجم', 5: 'حارس · مدافع · 2 وسط · مهاجم', 6: 'حارس · 2 مدافعين · 2 وسط · مهاجم',
+               7: 'حارس · ظهير · قلب دفاع · نص ملعب · جناح يمين · جناح شمال · مهاجم' };
+  $('pkMode').innerHTML = `<div class="pk-mode on" style="display:block">
+      <b>⚙️ أوضاع الفانتازي (لكل الجولات، من غير بيلد)</b><br>
+      <small>الأبلكيشن بيقرا ده لما يتفتح. الجناح في 4/5/6 بيتحسب مهاجم.</small>
+      <div style="display:grid;grid-template-columns:auto 1fr;gap:6px 8px;align-items:center;margin-top:8px">
+        <span>التشكيلات المتاحة</span><select id="swModes">${opt('draft', sw.modes, '🎯 الدرافت بس')}${opt('normal', sw.modes, '⚽ النورمال 11 بس')}${opt('both', sw.modes, 'الاتنين')}</select>
+        <span>الجوايز على</span><select id="swPrizes">${opt('draft', sw.prizes_mode, '🎯 ترتيب الدرافت')}${opt('normal', sw.prizes_mode, '⚽ ترتيب النورمال')}${opt('both', sw.prizes_mode, 'الاتنين (كل واحد جوايزه)')}</select>
+        <span>كاس بادجر</span><select id="swCup">${opt('off', sw.cup_on, 'مقفول (مفيش قرعة ولا إشعارات)')}${opt('on', sw.cup_on, 'شغال')}</select>
+      </div>
+      <button style="margin-top:8px" onclick="pkSwSave()">حفظ الأوضاع</button></div>`
+    + `<div class="pk-mode ${on ? 'on' : ''}"><div style="flex:1">
       <b>${on ? '✅ اليوزرز بيشوفوا المتعلّم عليهم بس' : '🌐 اليوزرز بيشوفوا كل لعيبة الأندية'}</b>
       ${on ? `ظاهر دلوقتي ${d.picked_total} من ${d.pool_total} لعيب.` : `العلامات (${d.picked_total}) محفوظة بس مش شغالة لحد ما تشغّلها.`}</div>
       ${done ? '' : `<button onclick="pkMode(${!on})">${on ? 'رجّع الكل' : 'شغّل المتعلّم عليهم بس'}</button>`}</div>`
     + `<div class="pk-mode ${ev.draft_on ? 'on' : ''}"><div style="flex:1">
       <b>${ev.draft_on ? '🎯 الدرافت مفتوح في الجولة دي' : '🎯 الدرافت مقفول في الجولة دي'}</b>
-      الدرافت تشكيلة تانية جنب النورمال (النورمال مش بيتلمس): 7 لعيبة (حارس، ظهير، قلب دفاع، نص ملعب، جناح يمين، جناح شمال، مهاجم)، من غير كابتن، و"مفاجأة" = النقط × 2، وأقصى 4 من نفس النادي.
-      ${ev.draft_squads ? `<br><small>${ev.draft_squads} تشكيلة درافت محفوظة.</small>` : ''}</div>
+      الدرافت تشكيلة تانية جنب النورمال (النورمال مش بيتلمس)، من غير كابتن، وأقصى 4 من نفس النادي.
+      <div style="margin-top:6px">عدد اللعيبة في الجولة دي:
+        <select id="pkSize" ${done || ev.draft_squads ? 'disabled' : ''} onchange="pkSizeSave(this.value)">${[4, 5, 6, 7].map(n => opt(n, nd, n + ' لعيبة')).join('')}</select>
+        <br><small>${esc(SZ[nd] || '')}${ev.draft_squads ? ' · اتقفل لأن فيه تشكيلات محفوظة' : ''}</small></div>
+      ${ev.draft_squads ? `<small>${ev.draft_squads} تشكيلة درافت محفوظة.</small>` : ''}</div>
       ${done ? '' : `<button onclick="pkDraft(${!ev.draft_on})">${ev.draft_on ? 'اقفل الدرافت' : 'افتح الدرافت'}</button>`}</div>`
     + (ev.draft_on ? `<div class="pk-mode ${(ev.draft_predict || []).length ? 'on' : ''}" style="display:block">
       <b>⚖️ ماتشات توقّع النتيجة (لفك التعادل في الدرافت بس، من غير نقط)</b><br>
@@ -1489,8 +1506,7 @@ function pkRow(it) {
     <span class="av">${it.img ? `<img src="${esc(it.img)}" alt="" loading="lazy">` : '👤'}</span>
     <span class="nm"><b>${esc(it.name_ar || it.name_en)}</b><small><bdi dir="ltr">${esc(it.name_en)}</bdi>${sq}</small></span>
     <span class="ps" title="${esc(PK_POS[it.exact_position] || '')}">${esc(it.exact_position || it.position)}</span>
-    <span class="mv">${pkMv(it.mv)}</span>
-    <button class="sp ${it.surprise ? 'on' : ''}" title="مفاجأة = النقط × 2 في جولات الدرافت" onclick="event.stopPropagation();pkSurprise('${it.id}',${!it.surprise})">${it.surprise ? '🎲 مفاجأة ×2' : '⭐ نجم'}</button></div>`;
+    <span class="mv">${pkMv(it.mv)}</span></div>`;
 }
 async function pkSet(ids, on) {
   if (PK.busy || !ids.length) return; PK.busy = true;
@@ -1512,14 +1528,22 @@ function pkTeamSet(team, on) {
   if (!on && PK.data.event.pick_on && hit && !confirm(`فيه لعيبة من دول في تشكيلات حقيقية (${hit}). هيختفوا من الاختيار، بس التشكيلات هتفضل زي ما هي. تكمّل؟`)) return;
   pkSet(ids, on);
 }
-// نجم / مفاجأة: علامة على اللعيب نفسه (بتفضل معاه في كل الجولات)، والتشكيلات المحفوظة مش بتتغير
-async function pkSurprise(id, on) {
-  if (PK.busy) return; PK.busy = true;
-  const { error } = await sb.rpc('mgmt_player_surprise_set', { p: { player_ids: [id], on } });
-  PK.busy = false;
+// النجم / المفاجأة اتشالوا (owner 26 Nov). أوضاع الفانتازي + عدد لعيبة الدرافت
+async function pkSwLoad() {
+  const { data, error } = await sb.rpc('mgmt_fantasy_switches_get');
+  if (!error) PK.sw = data;
+}
+async function pkSwSave() {
+  const p = { modes: $('swModes').value, prizes_mode: $('swPrizes').value, cup_on: $('swCup').value };
+  if (!confirm('تحفظ الأوضاع دي؟ الأبلكيشن هيقراها أول ما اليوزر يفتحه.')) return;
+  const { data, error } = await sb.rpc('mgmt_fantasy_switches_set', { p });
   if (error) return alert(pkErr(error));
-  const it = PK.data.items.find(x => x.id === id); if (it) it.surprise = on;
-  pkRender();
+  PK.sw = data; pkRender(); alert('اتحفظت ✓');
+}
+async function pkSizeSave(n) {
+  const { error } = await sb.rpc('mgmt_event_draft_size_set', { p_event_id: PK.ev.id, p_size: +n });
+  if (error) return alert(error.message.includes('has_squads') ? 'فيه تشكيلات محفوظة، مينفعش تغيّر العدد.' : error.message.includes('deadline_passed') ? 'الديدلاين عدّى.' : pkErr(error));
+  await loadPPickList();
 }
 async function pkDraft(on) {
   if (!confirm(on ? 'تفتح الدرافت في الجولة دي؟ اليوزرز هيقدروا يعملوا تشكيلة درافت جنب النورمال.' : 'تقفل الدرافت؟ التشكيلات المحفوظة هتفضل، بس محدش هيقدر يحفظ درافت جديد.')) return;
